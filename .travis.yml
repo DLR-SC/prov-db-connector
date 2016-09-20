@@ -9,7 +9,7 @@ services:
 
 before_install:
   - docker-compose build
-  - docker-compose up -d -t
+  - docker-compose up -d
 
 # Install packages
 install:
