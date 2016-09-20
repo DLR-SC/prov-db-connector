@@ -1,2 +1,2 @@
-from .BaseConnector import BaseConnector
-from .neo4j.Neo4jConnector import Neo4jConnector
+from provdbconnector.databases.neo4j.neo4jconnector import Neo4jConnector
+from provdbconnector.databases.arangodb.arangodbconnector import ArangoDBConnector
