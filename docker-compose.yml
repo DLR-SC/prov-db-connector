@@ -1,0 +1,10 @@
+version: '2'
+services:
+  app:
+    build: .
+    depends_on:
+     - neo4j-server
+  neo4j-server:
+    image: neo4j:latest
+    ports:
+     - "7474:7474"
