@@ -1,5 +1,5 @@
 import unittest
-
+from provdbconnector.databases import Neo4jConnector
 
 class Neo4jConnectorTests(unittest.TestCase):
 
