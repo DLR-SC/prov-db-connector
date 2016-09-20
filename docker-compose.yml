@@ -8,3 +8,5 @@ services:
     image: neo4j:latest
     ports:
      - "7474:7474"
+     - "7373:7373"
+     - "7687:7687"
