@@ -8,4 +8,5 @@ before_install:
 
 script:
   - echo "Start docker"
-  - docker-compose -d up
+  - ls -l
+  - docker-compose up
