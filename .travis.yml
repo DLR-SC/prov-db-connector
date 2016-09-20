@@ -9,4 +9,7 @@ before_install:
 script:
   - echo "Start docker"
   - ls -l
-  - docker-compose up
+  - docker-compose up -t 120
+
+after_success:
+  - docker-compose down

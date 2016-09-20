@@ -1,0 +1,4 @@
+
+
+class Validator(object):
+    pass

@@ -1,7 +1,10 @@
 decorator==4.0.10
+future==0.15.2
 lxml==3.6.4
 neo4j-driver==1.0.2
 networkx==1.11
 prov==1.4.0
+pyArango==1.2.7
 python-dateutil==2.5.3
+requests==2.11.1
 six==1.10.0
