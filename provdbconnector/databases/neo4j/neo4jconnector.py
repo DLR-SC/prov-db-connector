@@ -1,4 +1,4 @@
-from provdbconnector.databases import BaseConnector
+from provdbconnector.databases.baseconnector import BaseConnector
 
 class Neo4jConnector(BaseConnector):
     def __init__(self,*args, kwargs):

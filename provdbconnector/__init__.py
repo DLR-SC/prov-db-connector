@@ -1,1 +1,1 @@
-from provdbconnector.Connection import Connection
+from provdbconnector.provapi import ProvApi

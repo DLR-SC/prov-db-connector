@@ -1,6 +1,10 @@
 import unittest
 
-class ConnectorTests(unittest.TestCase):
 
-    def test_connect(self):
+class ConverterTests(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
         pass
