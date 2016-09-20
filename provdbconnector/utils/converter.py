@@ -1,0 +1,2 @@
+class Converter(object):
+    pass
