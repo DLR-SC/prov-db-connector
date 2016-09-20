@@ -13,7 +13,7 @@ setup(
     author_email='opensource@dlr.de, sb@conts.de, martin.stoffers@studserv.uni-leipzig.de',
     url='https://github.com/DLR-SC/prov-db-connector',
     packages=[
-        '',
+        'provdbconnector',
     ],
     install_requires=[
         "prov==1.4.0",
@@ -24,7 +24,7 @@ setup(
         "six==1.10.0"
     ],
     license="MIT",
-    test_suite='provdbconnector.tests',
+    test_suite='tests',
     classifiers=[
         'Development Status :: 1 - Alpha',
         'Topic :: Software Development :: Libraries :: Python Modules',
