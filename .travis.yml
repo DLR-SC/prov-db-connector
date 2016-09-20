@@ -1,15 +1,26 @@
+language: python
 sudo: required
+
+python:
+  - 3.4
 
 services:
   - docker
 
 before_install:
   - docker-compose build
+  - docker-compose up -d -t
 
+# Install packages
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+
+# Run test
 script:
-  - echo "Start docker"
-  - ls -l
-  - docker-compose up -t 120
+  - docker ps | grep -q 'provdbconnector_neo4j_1'
+  - coverage run --source=provdbconnector setup.py test
 
 after_success:
+  - coveralls
   - docker-compose down
