@@ -1,5 +1,16 @@
 from abc import ABC, abstractmethod
 
+class ConnectorException (Exception):
+    pass
+
+class InvalidOptionsException(ConnectorException):
+    pass
+
+class AuthException(ConnectorException):
+    pass
+
+class DatabaseException(ConnectorException):
+    pass
 
 class BaseConnector(ABC):
 
@@ -8,5 +19,5 @@ class BaseConnector(ABC):
         pass
 
     @abstractmethod
-    def connect(self):
+    def connect(self, authentication_info):
         pass
