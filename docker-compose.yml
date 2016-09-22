@@ -1,10 +1,10 @@
 version: '2'
 services:
-  app:
-    build: .
-    depends_on:
-     - neo4j-server
-  neo4j-server:
+  neo4j:
     image: neo4j:latest
+    environment:
+      - NEO4J_AUTH=none
     ports:
      - "7474:7474"
+     - "7373:7373"
+     - "7687:7687"
