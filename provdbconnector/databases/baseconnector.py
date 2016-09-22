@@ -21,3 +21,16 @@ class BaseConnector(ABC):
     @abstractmethod
     def connect(self, authentication_info):
         pass
+
+    @abstractmethod
+    def create_document(self):
+        pass
+
+    @abstractmethod
+    def create_bundle(self, document_id,attributes, metadata):
+        pass
+
+
+    @abstractmethod
+    def create_record(self, bundle_id, attributes, metadata):
+        pass

@@ -6,6 +6,7 @@ from neo4j.v1 import GraphDatabase, basic_auth
 
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
+
 class Neo4jConnector(BaseConnector):
     def __init__(self,*args):
         super(Neo4jConnector, self).__init__()
@@ -49,3 +50,11 @@ class Neo4jConnector(BaseConnector):
             raise DatabaseException("Could not get a valid ID result back")
 
         return str(id+1)
+
+    def create_bundle(self, document_id, attributes, metadata):
+
+        return self.create_record(document_id,attributes,metadata)
+
+
+    def create_record(self,bundle_id,attributes,metadata):
+        pass
