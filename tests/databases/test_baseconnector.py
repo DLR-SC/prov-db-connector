@@ -77,27 +77,27 @@ class ConnectorTestTemplate(unittest.TestCase):
         self.assertEqual(prov_record, args.prov_record)
 
     def test_get_bundle(self):
-        NotImplementedError()
+        raise NotImplementedError()
 
     def test_get_record(self):
-        NotImplementedError()
+        raise NotImplementedError()
 
     def test_get_relation(self):
-        NotImplementedError()
+        raise NotImplementedError()
 
 
     ###Delete section ###
     def test_delete_document(self):
-        NotImplementedError()
+        raise NotImplementedError()
 
     def test_delete_bundle(self):
-        NotImplementedError()
+        raise NotImplementedError()
 
     def test_delete_record(self):
-        NotImplementedError()
+        raise NotImplementedError()
 
     def test_delete_relation(self):
-        NotImplementedError()
+        raise NotImplementedError()
 
 
 class BaseConnectorTests(unittest.TestCase):
