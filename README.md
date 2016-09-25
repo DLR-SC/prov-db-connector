@@ -16,6 +16,16 @@ pip install prov-db-connector
 
 You can view [prov-db-connector on PyPi's package index](https://pypi.python.org/pypi/prov-db-connector/)
 
+# Current status
+
+## Todos / Next steps
+* Verify Coverage tests 
+* [Implement Tests: baseconnector and neo4jconnector class](https://github.com/DLR-SC/prov-db-connector/issues/9) 
+* [Implement Tests: validator and validator class](https://github.com/DLR-SC/prov-db-connector/issues/1)
+* [Implement Tests: convert and converter class](https://github.com/DLR-SC/prov-db-connector/issues/2)
+* Define / Implement provAPI methods 
+
+
 
 ## Contribute
 
