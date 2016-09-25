@@ -57,4 +57,31 @@ class Neo4jConnector(BaseConnector):
 
 
     def create_record(self,bundle_id,attributes,metadata):
-        pass
+
+        prefixed_metadata = dict()
+        prefixed_metadata["meta:{}".format("bundle_id")] = bundle_id
+
+        for key, value in metadata.items():
+            prefixed_metadata["meta:{}".format(key)] = value
+
+        db_attributes  = attributes.copy()
+        db_attributes.update(prefixed_metadata)
+
+        for key,value in db_attributes.items():
+            db_attributes[key] = str(value)
+
+        provType = "Entry"
+
+        def createPropertyString(key):
+            return "\"%s\": {%s}"%(key,key)
+
+        db_attributes_labels = map(createPropertyString,list(db_attributes.keys()))
+
+        str_val = ",".join(db_attributes_labels)
+        chypher_command = "CREATE (node:%s { %s})" % (provType,str_val)
+
+        session = self._create_session()
+
+        session.run(chypher_command,db_attributes)
+
+
