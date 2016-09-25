@@ -6,7 +6,7 @@ from neo4j.v1 import GraphDatabase, basic_auth
 
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
-
+NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
 class Neo4jConnector(BaseConnector):
     def __init__(self,*args):
         super(Neo4jConnector, self).__init__()
@@ -45,6 +45,8 @@ class Neo4jConnector(BaseConnector):
         id = None
         for record in result:
             id = record["ID"]
+
+        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"id":id})
 
         if id is None:
             raise DatabaseException("Could not get a valid ID result back")
