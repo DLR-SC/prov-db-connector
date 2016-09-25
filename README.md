@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/DLR-SC/prov-db-connector.svg?branch=master)](https://travis-ci.org/DLR-SC/prov-db-connector) [![Coverage Status](https://coveralls.io/repos/github/DLR-SC/prov-db-connector/badge.svg?branch=master)](https://coveralls.io/github/DLR-SC/prov-db-connector?branch=master)
 
+
+
 This python module provide a general interface to save [W3C-Prov](https://www.w3.org/TR/prov-overview/)-Documents into a database. 
 Currently we support the [Neo4j](https://neo4j.com/)-Graph database.  
 
@@ -19,11 +21,10 @@ You can view [prov-db-connector on PyPi's package index](https://pypi.python.org
 # Current status
 
 ## Todos / Next steps
-* Verify Coverage tests 
 * [Implement Tests: baseconnector and neo4jconnector class](https://github.com/DLR-SC/prov-db-connector/issues/9) 
 * [Implement Tests: validator and validator class](https://github.com/DLR-SC/prov-db-connector/issues/1)
 * [Implement Tests: convert and converter class](https://github.com/DLR-SC/prov-db-connector/issues/2)
-* Define / Implement provAPI methods 
+* Define / Implement ProvAPI class methods 
 
 
 
