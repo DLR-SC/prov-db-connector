@@ -45,7 +45,7 @@ class ConnectorTestTemplate(unittest.TestCase):
         args = base_connector_record_parameter_example()
 
         doc_id = self.instance.create_document()
-        record_id  = self.instance.create_record(doc_id, args.attributes, args.metadata)
+        record_id  = self.instance.create_record(doc_id, args["attributes"], args["metadata"])
         self.assertIsNotNone(record_id)
         self.assertIs(type(record_id), str, "id should be a string ")
 
@@ -62,7 +62,7 @@ class ConnectorTestTemplate(unittest.TestCase):
         args = base_connector_record_parameter_example()
 
         doc_id = self.instance.create_document()
-        record_id = self.instance.create_record(doc_id, args.attributes, args.metadata)
+        record_id = self.instance.create_record(doc_id, args["attributes"], args["metadata"])
 
         prov_doc = self.instance.get_document(doc_id)
 
