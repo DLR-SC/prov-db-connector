@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateNodeException
+from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateNodeException,METADATA_KEY_PROV_TYPE
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
@@ -75,7 +75,7 @@ class Neo4jConnector(BaseConnector):
         db_attributes.update(prefixed_metadata)
 
 
-        provType = "Entry"
+        provType = metadata[METADATA_KEY_PROV_TYPE]
 
         # transform values
         for key, value in db_attributes.items():
@@ -91,7 +91,7 @@ class Neo4jConnector(BaseConnector):
 
         session = self._create_session()
 
-        result = session.run(NEO4J_CREATE_NODE_RETURN_ID % (provType,str_val),dict(db_attributes))
+        result = session.run(NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart,str_val),dict(db_attributes))
 
         id = None
         for record in result:

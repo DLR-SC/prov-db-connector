@@ -8,8 +8,10 @@ from prov.tests.examples import primer_example,\
     long_literals,\
     datatypes
 import datetime
-
+from prov.model import ProvDocument, QualifiedName
+from provdbconnector.databases.baseconnector import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_LABEL
 def base_connector_bundle_parameter_example():
+    doc = ProvDocument()
     attributes = dict()
 
     namespaces = dict()
@@ -21,10 +23,10 @@ def base_connector_bundle_parameter_example():
 
     metadata = dict()
 
-    metadata.update({"type": "prov:Bundle"})
-    metadata.update({"label": "label for the node"})
-    metadata.update({"type_map": type_map})
-    metadata.update({"namespaces": namespaces})
+    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Bundle")})
+    metadata.update({METADATA_KEY_LABEL: "label for the node"})
+    metadata.update({METADATA_KEY_TYPE_MAP: type_map})
+    metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
     return_data = dict()
     return_data.update({"attributes": attributes})
@@ -33,7 +35,7 @@ def base_connector_bundle_parameter_example():
 
 
 def base_connector_record_parameter_example():
-
+    doc = ProvDocument()
     attributes = dict()
     attributes.update({"individual attribute": "Some value"})
     attributes.update({"int value": 99})
@@ -52,10 +54,10 @@ def base_connector_record_parameter_example():
 
     metadata  = dict()
 
-    metadata.update({"type": "prov:Activity"})
-    metadata.update({"label": "label for the node"})
-    metadata.update({"type_map": type_map})
-    metadata.update({"namespaces": namespaces})
+    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Activity")})
+    metadata.update({METADATA_KEY_LABEL: "label for the node"})
+    metadata.update({METADATA_KEY_TYPE_MAP: type_map})
+    metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
 
     return_data = dict()
@@ -67,7 +69,7 @@ def base_connector_record_parameter_example():
 
 
 def base_connector_relation_parameter_example():
-
+    doc = ProvDocument()
     attributes = dict()
     attributes.update({"individual attribute": "Some value"})
     attributes.update({"int value": 99})
@@ -86,10 +88,10 @@ def base_connector_relation_parameter_example():
 
     metadata  = dict()
 
-    metadata.update({"type": "mentionOf"})
-    metadata.update({"label": "label for the node"})
-    metadata.update({"type_map": type_map})
-    metadata.update({"namespaces": namespaces})
+    metadata.update({METADATA_KEY_PROV_TYPE: "mentionOf"})
+    metadata.update({METADATA_KEY_LABEL: "label for the node"})
+    metadata.update({METADATA_KEY_TYPE_MAP: type_map})
+    metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
 
     return_data = dict()

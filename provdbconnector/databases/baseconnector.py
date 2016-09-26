@@ -16,6 +16,12 @@ class CreateNodeException(DatabaseException):
     pass
 
 
+METADATA_KEY_BUNDLE_ID  = "bundle_id"
+METADATA_KEY_PROV_TYPE  = "prov_type"
+METADATA_KEY_LABEL      = "label"
+METADATA_KEY_NAMESPACES = "namespaces"
+METADATA_KEY_TYPE_MAP   = "type_map"
+
 class BaseConnector(ABC):
 
     @abstractmethod
