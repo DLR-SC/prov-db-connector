@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateNodeException,METADATA_KEY_PROV_TYPE
+from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,METADATA_KEY_PROV_TYPE
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
@@ -97,6 +97,6 @@ class Neo4jConnector(BaseConnector):
             id = record["ID"]
 
         if id is None:
-            raise CreateNodeException("No ID property returned by database for the command {}".format(command))
+            raise CreateRecordException("No ID property returned by database for the command {}".format(command))
 
         return str(id)
