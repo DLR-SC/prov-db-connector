@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseadapter import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_PROV_TYPE, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_PROV_TYPE, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
