@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 
-class ConnectorException (Exception):
+class AdapterException (Exception):
     pass
 
-class InvalidOptionsException(ConnectorException):
+class InvalidOptionsException(AdapterException):
     pass
 
-class AuthException(ConnectorException):
+class AuthException(AdapterException):
     pass
 
-class DatabaseException(ConnectorException):
+class DatabaseException(AdapterException):
     pass
 
 class CreateRecordException(DatabaseException):
@@ -25,7 +25,7 @@ METADATA_KEY_LABEL      = "label"
 METADATA_KEY_NAMESPACES = "namespaces"
 METADATA_KEY_TYPE_MAP   = "type_map"
 
-class BaseConnector(ABC):
+class BaseAdapter(ABC):
 
     @abstractmethod
     def __init__(self, *args, **kwargs):

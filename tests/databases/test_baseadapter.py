@@ -1,11 +1,12 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.databases.baseconnector import BaseConnector,METADATA_KEY_LABEL
+from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 
 from tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
-class ConnectorTestTemplate(unittest.TestCase):
+
+class AdapterTestTemplate(unittest.TestCase):
 
 
     def __init__(self, *args, **kwargs):
@@ -17,13 +18,13 @@ class ConnectorTestTemplate(unittest.TestCase):
         :param args:
         :param kwargs:
         """
-        super(ConnectorTestTemplate, self).__init__(*args, **kwargs)
+        super(AdapterTestTemplate, self).__init__(*args, **kwargs)
         self.helper = None
         # Kludge alert: We want this class to carry test cases without being run
         # by the unit test framework, so the `run' method is overridden to do
         # nothing.  But in order for sub-classes to be able to do something when
         # run is invoked, the constructor will rebind `run' from TestCase.
-        if self.__class__ != ConnectorTestTemplate:
+        if self.__class__ != AdapterTestTemplate:
             # Rebind `run' from the parent class.
             self.run = unittest.TestCase.run.__get__(self, self.__class__)
         else:
@@ -135,5 +136,5 @@ class BaseConnectorTests(unittest.TestCase):
     def test_instance_abstract_class(self):
 
         with self.assertRaises(TypeError):
-            instance = BaseConnector()
+            instance = BaseAdapter()
 

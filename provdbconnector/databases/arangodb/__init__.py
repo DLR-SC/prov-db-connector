@@ -1,0 +1,1 @@
+from provdbconnector.databases.arangodb.arangodbadapter import ArangoDBAdapter

@@ -1,16 +1,18 @@
-from prov.tests.examples import primer_example,\
-    primer_example_alternate,\
-    w3c_publication_1,\
-    w3c_publication_2,\
-    bundles1,\
-    bundles2,\
-    collections,\
-    long_literals,\
-    datatypes
+#from prov.tests.examples import primer_example,\
+#    primer_example_alternate,\
+#    w3c_publication_1,\
+#    w3c_publication_2,\
+#    bundles1,\
+#    bundles2,\
+#    collections,\
+#    long_literals,\
+#    datatypes
 import datetime
 from prov.model import ProvDocument, QualifiedName
 from prov.constants import PROV_RECORD_IDS_MAP
-from provdbconnector.databases.baseconnector import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_LABEL
+from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_LABEL
+
+
 def base_connector_bundle_parameter_example():
     doc = ProvDocument()
     attributes = dict()

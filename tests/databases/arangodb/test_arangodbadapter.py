@@ -1,7 +1,7 @@
 import unittest
 
 
-class ArangoDBConnectorTests(unittest.TestCase):
+class ArangoDBAdapterTests(unittest.TestCase):
 
     def setUp(self):
         pass
