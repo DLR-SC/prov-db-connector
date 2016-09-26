@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,METADATA_KEY_PROV_TYPE
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,METADATA_KEY_PROV_TYPE
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
@@ -12,9 +12,9 @@ NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID ""
 
 #delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
-class Neo4jConnector(BaseConnector):
+class Neo4jAdapter(BaseAdapter):
     def __init__(self,*args):
-        super(Neo4jConnector, self).__init__()
+        super(Neo4jAdapter, self).__init__()
         self.driver = None
         pass
 

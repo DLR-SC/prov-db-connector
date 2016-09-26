@@ -1,16 +1,17 @@
+import os
 import unittest
-from provdbconnector.databases import Neo4jConnector
-from provdbconnector.databases.baseconnector import InvalidOptionsException,AuthException
-from tests.databases.test_baseconnector import ConnectorTestTemplate
+from provdbconnector.databases import Neo4jAdapter
+from provdbconnector.databases import InvalidOptionsException, AuthException
+from tests.databases.test_baseadapter import AdapterTestTemplate
 
-test_user_name = "neo4j"
-test_user_pass = "neo4jneo4j"
-test_host = "192.168.99.100:7687"
+test_user_name = os.environ.get('NEO4J_USERNAME', 'neo4j')
+test_user_pass = os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j') #Password
+test_host =  os.environ.get('NEO4J_HOST', 'localhost:7687')
 
-class Neo4jConnectorTests(ConnectorTestTemplate):
+class Neo4jAdapterTests(AdapterTestTemplate):
 
     def setUp(self):
-        self.instance = Neo4jConnector()
+        self.instance = Neo4jAdapter()
         authInfo = dict()
         authInfo.update({"user_name": test_user_name})
         authInfo.update({"user_password":test_user_pass})
