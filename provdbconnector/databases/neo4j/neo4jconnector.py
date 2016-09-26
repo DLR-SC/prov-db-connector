@@ -81,8 +81,6 @@ class Neo4jConnector(BaseConnector):
         for key, value in db_attributes.items():
             db_attributes[key] = encode_string_value_to_premitive(value)
 
-        def createPropertyString(key):
-            return "`%s`: {`%s`}"%(key,key)
 
         db_attributes_labels = map(lambda key:"`%s`: {`%s`}"%(key,key),list(db_attributes.keys()))
 
@@ -91,13 +89,14 @@ class Neo4jConnector(BaseConnector):
 
         session = self._create_session()
 
-        result = session.run(NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart,str_val),dict(db_attributes))
+        command = NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart,str_val)
+        result = session.run(command,dict(db_attributes))
 
         id = None
         for record in result:
             id = record["ID"]
 
         if id is None:
-            raise CreateNodeException("No ID property returned by database")
+            raise CreateNodeException("No ID property returned by database for the command {}".format(command))
 
         return str(id)
