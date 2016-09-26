@@ -1,7 +1,8 @@
-from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,METADATA_KEY_PROV_TYPE, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_PROV_TYPE, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
+from prov.constants import  PROV_N_MAP
 from provdbconnector.utils.serializer import encode_string_value_to_premitive
 
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
@@ -9,6 +10,15 @@ NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 #create
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
 NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID """ #args: provType, values
+NEO4J_CREATE_RELATION_RETURN_ID = """
+                                MATCH
+                                    (from{{`meta:bundle_id`:'{bundle_id}',`meta:label`:'{from_label}'}}),
+                                    (to{{`meta:bundle_id`:'{bundle_id}', `meta:label`:'{to_label}'}})
+                                CREATE
+                                    (from)-[r:{relation_type} {{{property_labels}}}]->(to)
+                                RETURN
+                                    ID(r) as ID
+                                """ #args: provType, values
 
 #delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
@@ -110,5 +120,37 @@ class Neo4jConnector(BaseConnector):
             raise CreateRecordException("No ID property returned by database for the command {}".format(command))
 
         return str(id)
+
+    def create_relation(self, bundle_id,from_node,to_node, attributes, metadata):
+
+        metadata = metadata.copy()
+        metadata.update({METADATA_KEY_BUNDLE_ID: bundle_id})
+
+        prefixed_metadata = self._prefix_metadata(metadata)
+
+        db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
+
+        relationType = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
+
+        label_str = self._get_attributes_labels_cypher_string(db_attributes)
+
+        session = self._create_session()
+
+        command = NEO4J_CREATE_RELATION_RETURN_ID.format(bundle_id=bundle_id,
+                                                         from_label=from_node,
+                                                         to_label=to_node,
+                                                         relation_type=relationType,
+                                                         property_labels=label_str)
+        result = session.run(command, dict(db_attributes))
+
+        id = None
+        for record in result:
+            id = record["ID"]
+
+        if id is None:
+            raise CreateRelationException("No ID property returned by database for the command {}".format(command))
+
+        return str(id)
+
 
 
