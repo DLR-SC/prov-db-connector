@@ -9,6 +9,7 @@ from prov.tests.examples import primer_example,\
     datatypes
 import datetime
 from prov.model import ProvDocument, QualifiedName
+from prov.constants import PROV_RECORD_IDS_MAP
 from provdbconnector.databases.baseconnector import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_LABEL
 def base_connector_bundle_parameter_example():
     doc = ProvDocument()
@@ -70,6 +71,9 @@ def base_connector_record_parameter_example():
 
 def base_connector_relation_parameter_example():
     doc = ProvDocument()
+    doc.add_namespace("ex", "http://example.com")
+    doc.add_namespace("custom", "http://custom.com")
+
     attributes = dict()
     attributes.update({"individual attribute": "Some value"})
     attributes.update({"int value": 99})
@@ -88,8 +92,8 @@ def base_connector_relation_parameter_example():
 
     metadata  = dict()
 
-    metadata.update({METADATA_KEY_PROV_TYPE: "mentionOf"})
-    metadata.update({METADATA_KEY_LABEL: "label for the node"})
+    metadata.update({METADATA_KEY_PROV_TYPE: PROV_RECORD_IDS_MAP["mentionOf"]})
+    metadata.update({METADATA_KEY_LABEL: "label for the relation"})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
@@ -97,6 +101,9 @@ def base_connector_relation_parameter_example():
     return_data = dict()
     return_data.update({"attributes": attributes})
     return_data.update({"metadata": metadata})
+    return_data.update({"from_node": doc.valid_qualified_name("ex:Yoda")})
+    return_data.update({"to_node": doc.valid_qualified_name("ex:Luke Skywalker")})
+    return_data.update({"doc": doc})
 
     return return_data
 

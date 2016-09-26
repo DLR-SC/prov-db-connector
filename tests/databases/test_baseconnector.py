@@ -1,6 +1,6 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.databases.baseconnector import BaseConnector
+from provdbconnector.databases.baseconnector import BaseConnector,METADATA_KEY_LABEL
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 
@@ -51,13 +51,36 @@ class ConnectorTestTemplate(unittest.TestCase):
         self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_create_relation(self):
-        args = base_connector_relation_parameter_example()
+        args_relation = base_connector_relation_parameter_example()
+        args_records = base_connector_record_parameter_example()
+        doc_id = self.instance.create_document()
+
+        from_meta = args_records["metadata"].copy()
+        from_meta.update({METADATA_KEY_LABEL: args_relation["from_node"]})
+        from_node_id  = self.instance.create_record(doc_id, args_records["attributes"], from_meta)
+
+        to_meta = args_records["metadata"].copy()
+        to_meta.update({METADATA_KEY_LABEL: args_relation["to_node"]})
+        to_node_id  = self.instance.create_record(doc_id, args_records["attributes"], to_meta)
+
+
+        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+        self.assertIsNotNone(relation_id)
+        self.assertIs(type(relation_id), str, "id should be a string ")
+
+
+    @unittest.skip("We should discuss the possibility of relations that are create automatically nodes")
+    def test_create_relation_with_unknown_records(self):
+        args_relation = base_connector_relation_parameter_example()
 
         doc_id = self.instance.create_document()
-        record_id = self.instance.create_relation(doc_id, args.attributes, args.metadata)
-        self.assertIsNotNone(record_id)
-        self.assertIs(type(record_id), str, "id should be a string ")
 
+        #Skip the part that creates the from and to node
+
+        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+
+        self.assertIsNotNone(relation_id)
+        self.assertIs(type(relation_id), str, "id should be a string ")
     ### Get section ###
     def test_get_document(self):
         args = base_connector_record_parameter_example()
