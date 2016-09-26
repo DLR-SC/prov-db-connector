@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,METADATA_KEY_PROV_TYPE
+from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,METADATA_KEY_PROV_TYPE, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
@@ -43,6 +43,27 @@ class Neo4jConnector(BaseConnector):
 
         self._create_session()
 
+    def _prefix_metadata(self, metadata):
+        prefixed_metadata = dict()
+        for key, value in metadata.items():
+            prefixed_metadata["meta:{}".format(key)] = value
+
+        return prefixed_metadata
+
+    def _parse_to_primitive_attributes(self, attributes,prefixed_metadata):
+        db_attributes = attributes.copy()
+        db_attributes.update(prefixed_metadata)
+
+        # transform values
+        for key, value in db_attributes.items():
+            db_attributes[key] = encode_string_value_to_premitive(value)
+        return db_attributes
+
+    def _get_attributes_labels_cypher_string(self, db_attributes):
+        db_attributes_labels = map(lambda key: "`%s`: {`%s`}" % (key, key), list(db_attributes.keys()))
+
+        return ",".join(db_attributes_labels)
+
 
     def create_document(self):
         session = self._create_session()
@@ -65,31 +86,20 @@ class Neo4jConnector(BaseConnector):
 
     def create_record(self,bundle_id,attributes,metadata):
 
-        prefixed_metadata = dict()
-        prefixed_metadata["meta:{}".format("bundle_id")] = bundle_id
+        metadata = metadata.copy()
+        metadata.update({METADATA_KEY_BUNDLE_ID: bundle_id})
 
-        for key, value in metadata.items():
-            prefixed_metadata["meta:{}".format(key)] = value
+        prefixed_metadata = self._prefix_metadata(metadata)
 
-        db_attributes  = attributes.copy()
-        db_attributes.update(prefixed_metadata)
-
+        db_attributes = self._parse_to_primitive_attributes(attributes,prefixed_metadata)
 
         provType = metadata[METADATA_KEY_PROV_TYPE]
 
-        # transform values
-        for key, value in db_attributes.items():
-            db_attributes[key] = encode_string_value_to_premitive(value)
-
-
-        db_attributes_labels = map(lambda key:"`%s`: {`%s`}"%(key,key),list(db_attributes.keys()))
-
-
-        str_val = ",".join(db_attributes_labels)
+        label_str= self._get_attributes_labels_cypher_string(db_attributes)
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart,str_val)
+        command = NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart,label_str)
         result = session.run(command,dict(db_attributes))
 
         id = None
@@ -100,3 +110,5 @@ class Neo4jConnector(BaseConnector):
             raise CreateRecordException("No ID property returned by database for the command {}".format(command))
 
         return str(id)
+
+
