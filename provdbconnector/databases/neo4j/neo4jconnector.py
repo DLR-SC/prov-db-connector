@@ -1,11 +1,16 @@
-from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException
+from provdbconnector.databases.baseconnector import BaseConnector, InvalidOptionsException, AuthException, DatabaseException,CreateNodeException
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
+from provdbconnector.utils.serializer import encode_string_value_to_premitive
 
-
-NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
+
+#create
+NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
+NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID """ #args: provType, values
+
+#delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
 class Neo4jConnector(BaseConnector):
     def __init__(self,*args):
@@ -69,21 +74,30 @@ class Neo4jConnector(BaseConnector):
         db_attributes  = attributes.copy()
         db_attributes.update(prefixed_metadata)
 
-        for key,value in db_attributes.items():
-            db_attributes[key] = str(value)
 
         provType = "Entry"
 
-        def createPropertyString(key):
-            return "\"%s\": {%s}"%(key,key)
+        # transform values
+        for key, value in db_attributes.items():
+            db_attributes[key] = encode_string_value_to_premitive(value)
 
-        db_attributes_labels = map(createPropertyString,list(db_attributes.keys()))
+        def createPropertyString(key):
+            return "`%s`: {`%s`}"%(key,key)
+
+        db_attributes_labels = map(lambda key:"`%s`: {`%s`}"%(key,key),list(db_attributes.keys()))
+
 
         str_val = ",".join(db_attributes_labels)
-        chypher_command = "CREATE (node:%s { %s})" % (provType,str_val)
 
         session = self._create_session()
 
-        session.run(chypher_command,db_attributes)
+        result = session.run(NEO4J_CREATE_NODE_RETURN_ID % (provType,str_val),dict(db_attributes))
 
+        id = None
+        for record in result:
+            id = record["ID"]
 
+        if id is None:
+            raise CreateNodeException("No ID property returned by database")
+
+        return str(id)

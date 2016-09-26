@@ -12,6 +12,10 @@ class AuthException(ConnectorException):
 class DatabaseException(ConnectorException):
     pass
 
+class CreateNodeException(DatabaseException):
+    pass
+
+
 class BaseConnector(ABC):
 
     @abstractmethod

@@ -55,6 +55,6 @@ class Neo4jConnectorTests(ConnectorTestTemplate):
 
     def tearDown(self):
         session = self.instance._create_session()
-        session.run("MATCH (x) DETACH DELETE x")
+        #session.run("MATCH (x) DETACH DELETE x")
         del self.instance
 

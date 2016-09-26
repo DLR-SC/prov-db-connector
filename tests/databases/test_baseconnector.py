@@ -4,7 +4,7 @@ from provdbconnector.databases.baseconnector import BaseConnector
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 
-from tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example
+from tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
 class ConnectorTestTemplate(unittest.TestCase):
 
 
@@ -37,7 +37,8 @@ class ConnectorTestTemplate(unittest.TestCase):
 
     def test_create_bundle(self):
         doc_id = self.instance.create_document()
-        id = self.instance.create_bundle(doc_id)
+        args = base_connector_bundle_parameter_example()
+        id = self.instance.create_bundle(doc_id, args["attributes"], args["metadata"] )
         self.assertIsNotNone(id)
         self.assertIs(type(id), str, "id should be a string ")
 
