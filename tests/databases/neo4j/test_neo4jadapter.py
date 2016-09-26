@@ -8,6 +8,7 @@ test_user_name = os.environ.get('NEO4J_USERNAME', 'neo4j')
 test_user_pass = os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j') #Password
 test_host =  os.environ.get('NEO4J_HOST', 'localhost:7687')
 
+
 class Neo4jAdapterTests(AdapterTestTemplate):
 
     def setUp(self):
