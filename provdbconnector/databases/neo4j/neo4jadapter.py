@@ -1,9 +1,8 @@
-from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
 from prov.constants import  PROV_N_MAP
-from prov.model import  PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive
 
@@ -24,19 +23,22 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                     ID(r) as ID
                                 """ #args: provType, values
 #get
-
+NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """MATCH (b {`meta:prov_type`:'prov:Bundle', `meta:bundle_id`: {bundle_id}}) RETURN b """
 NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
-                                MATCH (d)-[r]-(x)
-                                WHERE not((d)-[:includeIn]-(x)) and (d.`meta:bundle_id`)={bundle_id}
-                                RETURN d as from, r as rel, x as to
-                                //Get all nodes that are alone without connections to other
-                                UNION
-                                MATCH (a) WHERE (a.`meta:bundle_id`)={bundle_id} AND NOT (a)<-[]->()
-                                RETURN a as from, NULL as rel, NULL as to
-                                UNION
-                                MATCH (a)-[r:includeIn]->()
-                                WITH a,count(r) as relation_count
-                                WHERE (a.`meta:bundle_id`)={bundle_id} AND relation_count=1 RETURN a as from,NULL as rel, NULL as to
+
+                            MATCH (d)-[r]-(x)
+                            WHERE not((d)-[:includeIn]-(x)) and not(d.`meta:prov_type`='prov:Bundle' or x.`meta:prov_type`='prov:Bundle')and (d.`meta:bundle_id`) ={bundle_id}
+                            RETURN d as from, r as rel, x as to
+                            //Get all nodes that are alone without connections to other
+                            UNION
+                            MATCH (a) WHERE (a.`meta:bundle_id`)={bundle_id}  AND NOT (a)<-[]->() and not(a.`meta:prov_type`='prov:Bundle')
+                            RETURN a as from, NULL as rel, NULL as to
+                            UNION
+                            //Get all nodes that have only the includeIn connection to the bundle
+                            MATCH (a)-[r:includeIn]->()
+                            WITH a,count(r) as relation_count
+                            WHERE (a.`meta:bundle_id`)={bundle_id} and NOT(a.`meta:prov_type`='prov:Bundle') AND relation_count=1
+                            RETURN a as from,NULL as rel, NULL as to
                         """
 #delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
@@ -212,7 +214,13 @@ class Neo4jAdapter(BaseAdapter):
                 relation_record = self._split_attributes_metadata_from_node(relation)
                 records.append(relation_record)
 
+        #Get bundle node and set identifier if there is a bundle node.
+        bundle_node_result = session.run(NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE,{"bundle_id": bundle_id})
+        identifier = None
+        for bundle in bundle_node_result:
+            raw_record = self._split_attributes_metadata_from_node(bundle["b"])
+            identifier = raw_record.metadata[METADATA_KEY_LABEL]
 
         Bundle = namedtuple('Bundle', 'identifier, records')
-        return Bundle(None, records)
+        return Bundle(identifier, records)
 

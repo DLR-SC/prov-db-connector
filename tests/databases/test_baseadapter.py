@@ -136,7 +136,45 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_get_bundle(self):
-        raise NotImplementedError()
+        args = base_connector_record_parameter_example()
+        args_bundle = base_connector_bundle_parameter_example()
+
+        doc_id = self.instance.create_document()
+        bundle_id= self.instance.create_bundle(doc_id,args_bundle["attributes"],args_bundle["metadata"])
+
+        record_id = self.instance.create_record(bundle_id, args["attributes"], args["metadata"])
+
+        raw_bundle = self.instance.get_bundle(bundle_id)
+
+        # Return structure...
+        # raw_doc = {
+        #     records: []
+        #     identifer: ""
+        # }
+
+        # check bundle
+        self.assertIsNotNone(raw_bundle)
+        self.assertIsNotNone(raw_bundle.identifier)
+        self.assertEqual(raw_bundle.identifier,args_bundle["metadata"][METADATA_KEY_LABEL])
+        self.assertIsInstance(raw_bundle.records, list)
+        self.assertEqual(len(raw_bundle.records), 1)
+
+
+        attrDict = args["attributes"].copy()
+        for key, value in attrDict.items():
+            attrDict[key] = encode_string_value_to_primitive(value)
+
+        metaDict = args["metadata"].copy()
+        for key, value in metaDict.items():
+            metaDict[key] = encode_string_value_to_primitive(value)
+
+        # add bundle_id to expected meta_data
+        metaDict.update({METADATA_KEY_BUNDLE_ID: raw_bundle.records[0].metadata[METADATA_KEY_BUNDLE_ID]})
+
+        self.assertEqual(raw_bundle.records[0].attributes, attrDict)
+        self.assertEqual(raw_bundle.records[0].metadata, metaDict)
+
+        # check bundle
 
     def test_get_record(self):
         raise NotImplementedError()
