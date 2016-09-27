@@ -1,6 +1,6 @@
-from datetime import datetime
-from prov.model import QualifiedName, Identifier, Literal
 import sys
+
+from prov.model import Literal
 
 
 def encode_string_value_to_premitive(value):
