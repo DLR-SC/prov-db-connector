@@ -6,6 +6,14 @@ from prov.model import ProvRecord, ProvDocument
 
 from tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
 
+def isnamedtupleinstance(x):
+    t = type(x)
+    b = t.__bases__
+    if len(b) != 1 or b[0] != tuple: return False
+    f = getattr(t, '_fields', None)
+    if not isinstance(f, tuple): return False
+    return all(type(n)==str for n in f)
+
 class AdapterTestTemplate(unittest.TestCase):
 
 
@@ -89,17 +97,17 @@ class AdapterTestTemplate(unittest.TestCase):
         doc_id = self.instance.create_document()
         record_id = self.instance.create_record(doc_id, args["attributes"], args["metadata"])
 
-        prov_doc = self.instance.get_document(doc_id)
+        doc_records = self.instance.get_document(doc_id)
 
 
-        self.assertIsNotNone(prov_doc)
-        self.assertIsInstance(prov_doc,ProvDocument)
-        self.assertEqual(prov_doc.get_records(), 1)
+        self.assertIsNotNone(doc_records )
+        self.assertIsInstance(doc_records,list)
+        self.assertEqual(len(doc_records),1)
+        self.assertIsInstance(doc_records[0].attributes,dict)
+        self.assertIsInstance(doc_records[0].metadata,dict)
+        self.assertEqual(doc_records[0].attributes, args["attributes"])
+        self.assertEqual(doc_records[0].metadata, args["metadata"])
 
-
-        prov_record = prov_doc.get_records().pop()
-        self.assertIsInstance(prov_record,ProvRecord)
-        self.assertEqual(prov_record, args.prov_record)
 
     def test_get_bundle(self):
         raise NotImplementedError()
