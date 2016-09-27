@@ -1,5 +1,5 @@
 from prov.model import ProvDocument
-from prov.serializers.provjson import ProvJSONSerializer
+
 
 class ConverterException(Exception):
     pass
@@ -7,6 +7,7 @@ class ConverterException(Exception):
 
 class ParseException(ConverterException):
     pass
+
 
 class NoDocumentException(ConverterException):
     pass
@@ -21,7 +22,7 @@ def to_json(document=None):
 def from_json(document=None):
     if document is None:
         raise NoDocumentException()
-    return ProvDocument.deserialize(document,format='json')
+    return ProvDocument.deserialize(document, format='json')
 
 
 def to_provn(document=None):
@@ -33,7 +34,8 @@ def to_provn(document=None):
 def from_provn(document=None):
     if document is None:
         raise NoDocumentException()
-    return ProvDocument.deserialize(document,format='provn')
+    return ProvDocument.deserialize(document, format='provn')
+
 
 def to_xml(document=None):
     if document is None:
@@ -44,4 +46,4 @@ def to_xml(document=None):
 def from_xml(document=None):
     if document is None:
         raise NoDocumentException()
-    return ProvDocument.deserialize(document,format='xml')
+    return ProvDocument.deserialize(document, format='xml')

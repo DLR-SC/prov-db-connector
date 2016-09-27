@@ -1,7 +1,8 @@
 from datetime import datetime
-
-from prov.model import QualifiedName,Identifier,Literal
+from prov.model import QualifiedName, Identifier, Literal
 import sys
+
+
 def encode_string_value_to_premitive(value):
     if sys.version_info[0] < 3:
         if type(value) is unicode:
