@@ -14,6 +14,8 @@ def encode_string_value_to_primitive(value):
         return value
     elif type(value) is bool:
         return value
+    elif type(value) is list:
+        return value
     return str(value)
 
 
