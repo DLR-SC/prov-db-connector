@@ -1,7 +1,7 @@
 from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
-from neo4j.v1 import GraphDatabase, basic_auth
+from neo4j.v1 import GraphDatabase, basic_auth,Relationship
 from prov.constants import  PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive
@@ -41,6 +41,8 @@ NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
                             RETURN a as from,NULL as rel, NULL as to
                         """
 NEO4J_GET_RECORD_RETURN_NODE  = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
+NEO4J_GET_RELATION_RETURN_NODE  = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
+
 #delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
 class Neo4jAdapter(BaseAdapter):
@@ -241,4 +243,19 @@ class Neo4jAdapter(BaseAdapter):
 
         return self._split_attributes_metadata_from_node(node)
 
+    def get_relation(self, relation_id):
 
+        session = self._create_session()
+        result_set = session.run(NEO4J_GET_RELATION_RETURN_NODE,{"relation_id": int(relation_id)})
+
+        relation = None
+        for result in result_set:
+            if not isinstance(result["relation"],Relationship):
+                raise DatabaseException(" should return only relationship {}, command {}".format(relation_id, NEO4J_GET_RECORD_RETURN_NODE))
+
+            relation = result["relation"]
+
+        if relation is None:
+            raise NotFoundException("We cant find the relation with the id: {}, database command {}".format(relation_id,NEO4J_GET_RECORD_RETURN_NODE))
+
+        return self._split_attributes_metadata_from_node(relation)

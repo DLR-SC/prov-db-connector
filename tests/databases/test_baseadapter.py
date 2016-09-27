@@ -215,8 +215,8 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(relation_raw.metadata, dict)
         self.assertIsInstance(relation_raw.attributes, dict)
 
-        attributes_primitive = encode_dict_values_to_primitive(to_record_args["attributes"])
-        metadata_primitive = encode_dict_values_to_primitive(to_record_args["metadata"])
+        attributes_primitive = encode_dict_values_to_primitive(relation_args["attributes"])
+        metadata_primitive = encode_dict_values_to_primitive(relation_args["metadata"])
 
         # add bundle_id to expected meta_data
         metadata_primitive.update({METADATA_KEY_BUNDLE_ID: relation_raw.metadata[METADATA_KEY_BUNDLE_ID]})
@@ -224,7 +224,6 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(relation_raw.attributes, attributes_primitive)
         self.assertEqual(relation_raw.metadata, metadata_primitive)
 
-        self.assertIs(type(relation_raw), str, "id should be a string ")
 
 
     ###Delete section ###

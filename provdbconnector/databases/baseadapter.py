@@ -66,3 +66,7 @@ class BaseAdapter(ABC):
     def get_record(self,record_id):
         pass
 
+    @abstractmethod
+    def get_relation(self, relation_id):
+        pass
+
