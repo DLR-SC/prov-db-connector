@@ -2,8 +2,11 @@ from prov.model import Literal
 import sys
 
 def encode_dict_values_to_primitive(dict_values):
-    for key,value in dict_values:
+    dict_values = dict_values.copy()
+    for key,value in dict_values.items():
         dict_values[key] = encode_string_value_to_primitive(value)
+
+    return dict_values
 def encode_string_value_to_primitive(value):
     if sys.version_info[0] < 3:
         if type(value) is unicode:

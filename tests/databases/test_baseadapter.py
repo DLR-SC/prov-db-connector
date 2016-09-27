@@ -114,14 +114,8 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_doc.document.records[0].attributes,dict)
         self.assertIsInstance(raw_doc.document.records[0].metadata,dict)
 
-
-        attrDict = args["attributes"].copy()
-        for key,value in attrDict.items():
-            attrDict[key] = encode_string_value_to_primitive(value)
-
-        metaDict = args["metadata"].copy()
-        for key, value in metaDict .items():
-            metaDict[key] = encode_string_value_to_primitive(value)
+        attrDict = encode_dict_values_to_primitive(args["attributes"])
+        metaDict = encode_dict_values_to_primitive(args["metadata"])
 
         #add bundle_id to expected meta_data
         metaDict.update({METADATA_KEY_BUNDLE_ID: raw_doc.document.records[0].metadata[METADATA_KEY_BUNDLE_ID]})
@@ -160,13 +154,8 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(len(raw_bundle.records), 1)
 
 
-        attrDict = args["attributes"].copy()
-        for key, value in attrDict.items():
-            attrDict[key] = encode_string_value_to_primitive(value)
-
-        metaDict = args["metadata"].copy()
-        for key, value in metaDict.items():
-            metaDict[key] = encode_string_value_to_primitive(value)
+        attrDict = encode_dict_values_to_primitive(args["attributes"])
+        metaDict = encode_dict_values_to_primitive(args["metadata"])
 
         # add bundle_id to expected meta_data
         metaDict.update({METADATA_KEY_BUNDLE_ID: raw_bundle.records[0].metadata[METADATA_KEY_BUNDLE_ID]})
