@@ -1,0 +1,189 @@
+{
+  "wasAssociatedWith": {
+    "_:wAW3963": {
+      "prov:activity": "ex:illustrate",
+      "prov:agent": "ex:derek"
+    },
+    "_:wAW3962": {
+      "prov:activity": "ex:compose",
+      "prov:agent": "ex:derek"
+    }
+  },
+  "specializationOf": {
+    "_:sO11133": {
+      "prov:generalEntity": "ex:article",
+      "prov:specificEntity": "ex:articleV2"
+    },
+    "_:sO11132": {
+      "prov:generalEntity": "ex:article",
+      "prov:specificEntity": "ex:articleV1"
+    }
+  },
+  "wasAttributedTo": {
+    "_:wAT3855": {
+      "prov:agent": "ex:derek",
+      "prov:entity": "ex:chart1"
+    }
+  },
+  "wasGeneratedBy": {
+    "_:wGB7794": {
+      "prov:activity": "ex:compile2",
+      "prov:time": "2012-04-01T15:21:00.000+01:00",
+      "prov:entity": "ex:chart2"
+    },
+    "_:wGB7795": {
+      "prov:activity": "ex:correct",
+      "prov:entity": "ex:dataSet2"
+    },
+    "_:wGB7792": {
+      "prov:activity": "ex:illustrate",
+      "prov:entity": "ex:chart1"
+    },
+    "_:wGB7793": {
+      "prov:activity": "ex:compile",
+      "prov:time": "2012-03-02T10:30:00.000Z",
+      "prov:entity": "ex:chart1"
+    },
+    "_:wGB7791": {
+      "prov:activity": "ex:compose",
+      "prov:entity": "ex:composition"
+    }
+  },
+  "entity": {
+    "ex:composition": {},
+    "ex:regionList": {},
+    "ex:blogEntry": {},
+    "ex:chart1": {},
+    "ex:dataSet2": {},
+    "ex:chart2": {},
+    "ex:dataSet1": {},
+    "ex:article": {
+      "dcterms:title": {
+        "$": "Crime rises in cities",
+        "type": "xsd:string"
+      }
+    },
+    "ex:articleV2": {},
+    "ex:articleV1": {}
+  },
+  "prefix": {
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "ex": "http://example/",
+    "dcterms": "http://purl.org/dc/terms/"
+  },
+  "alternateOf": {
+    "_:aO49": {
+      "prov:alternate2": "ex:articleV2",
+      "prov:alternate1": "ex:articleV1"
+    }
+  },
+  "wasDerivedFrom": {
+    "_:wDF21119": {
+      "prov:generatedEntity": "ex:articleV2",
+      "prov:usedEntity": "ex:dataSet2"
+    },
+    "_:wDF21116": {
+      "prov:generatedEntity": "ex:chart2",
+      "prov:usedEntity": "ex:dataSet2"
+    },
+    "_:wDF21115": {
+      "prov:generatedEntity": "ex:dataSet2",
+      "prov:type": {
+        "$": "prov:Revision",
+        "type": "prov:QUALIFIED_NAME"
+      },
+      "prov:usedEntity": "ex:dataSet1"
+    },
+    "_:wDF21118": {
+      "prov:generatedEntity": "ex:articleV1",
+      "prov:usedEntity": "ex:dataSet1"
+    },
+    "_:wDF21117": {
+      "prov:generatedEntity": "ex:blogEntry",
+      "prov:type": {
+        "$": "prov:Quotation",
+        "type": "prov:QUALIFIED_NAME"
+      },
+      "prov:usedEntity": "ex:article"
+    }
+  },
+  "used": {
+    "_:u6219": {
+      "prov:activity": "ex:compose",
+      "prov:role": {
+        "$": "ex:dataToCompose",
+        "type": "prov:QUALIFIED_NAME"
+      },
+      "prov:entity": "ex:dataSet1"
+    },
+    "_:u6217": {
+      "prov:activity": "ex:compose",
+      "prov:entity": "ex:regionList"
+    },
+    "_:u6218": {
+      "prov:activity": "ex:illustrate",
+      "prov:entity": "ex:composition"
+    },
+    "_:u6216": {
+      "prov:activity": "ex:compose",
+      "prov:entity": "ex:dataSet1"
+    },
+    "_:u6221": {
+      "prov:activity": "ex:correct",
+      "prov:entity": "ex:dataSet1"
+    },
+    "_:u6220": {
+      "prov:activity": "ex:compose",
+      "prov:role": {
+        "$": "ex:regionsToAggregateBy",
+        "type": "prov:QUALIFIED_NAME"
+      },
+      "prov:entity": "ex:regionList"
+    }
+  },
+  "agent": {
+    "ex:derek": {
+      "prov:type": {
+        "$": "prov:Person",
+        "type": "prov:QUALIFIED_NAME"
+      },
+      "foaf:givenName": {
+        "$": "Derek",
+        "type": "xsd:string"
+      },
+      "foaf:mbox": {
+        "$": "\u003cmailto:derek@example.org\u003e",
+        "type": "xsd:string"
+      }
+    },
+    "ex:chartgen": {
+      "prov:type": {
+        "$": "prov:Organization",
+        "type": "prov:QUALIFIED_NAME"
+      },
+      "foaf:name": {
+        "$": "Chart Generators Inc",
+        "type": "xsd:string"
+      }
+    }
+  },
+  "actedOnBehalfOf": {
+    "_:aOBO259": {
+      "prov:activity": "ex:compose",
+      "prov:delegate": "ex:derek",
+      "prov:responsible": "ex:chartgen"
+    }
+  },
+  "activity": {
+    "ex:illustrate": {},
+    "ex:correct": {
+      "prov:startTime": "2012-03-31T09:21:00.000+01:00",
+      "prov:endTime": "2012-04-01T15:21:00.000+01:00"
+    },
+    "ex:compile2": {},
+    "ex:compile": {},
+    "ex:compose": {}
+  }
+}

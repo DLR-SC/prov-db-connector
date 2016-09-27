@@ -1,6 +1,6 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL
+from provdbconnector.databases import BaseAdapter, METADATA_KEY_LABEL
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 
