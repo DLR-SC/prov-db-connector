@@ -1,3 +1,3 @@
 from provdbconnector.utils.converter import Converter
 from provdbconnector.utils.validator import Validator
-from provdbconnector.utils.serializer import encode_string_value_to_premitive
+from provdbconnector.utils.serializer import encode_string_value_to_primitive
