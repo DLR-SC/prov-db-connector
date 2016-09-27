@@ -71,3 +71,7 @@ class BaseAdapter(ABC):
     def get_relation(self, relation_id):
         pass
 
+    @abstractmethod
+    def delete_document(self, document_id):
+        pass
+

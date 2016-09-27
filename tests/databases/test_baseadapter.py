@@ -291,16 +291,16 @@ class AdapterTestTemplate(unittest.TestCase):
         with self.assertRaises(NotFoundException):
             self.instance.get_relation("99999999")
 
-    ###Delete section ###
-    # def test_delete_document(self):
-    #     ids = insert_document_with_bundles(self.instance)
-    #     doc_id  = ids["doc_id"]
-    #     result = self.instance.delete_document(doc_id)
-    #     self.assertIsInstance(result,bool)
-    #     self.assertTrue(result)
-    #
-    #     with self.assertRaises(NotFoundException):
-    #         self.instance.get_document(doc_id)
+    ##Delete section ###
+    def test_delete_document(self):
+        ids = insert_document_with_bundles(self.instance)
+        doc_id  = ids["doc_id"]
+        result = self.instance.delete_document(doc_id)
+        self.assertIsInstance(result,bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            self.instance.get_document(doc_id)
 
     def test_delete_bundle(self):
         raise NotImplementedError()

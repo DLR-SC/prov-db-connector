@@ -264,3 +264,8 @@ class Neo4jAdapter(BaseAdapter):
             raise NotFoundException("We cant find the relation with the id: {}, database command {}".format(relation_id,NEO4J_GET_RECORD_RETURN_NODE))
 
         return self._split_attributes_metadata_from_node(relation)
+
+    def delete_document(self, document_id):
+        session = self._create_session()
+
+        result = session.run()
