@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth,Relationship
@@ -113,7 +113,7 @@ class Neo4jAdapter(BaseAdapter):
         return str(id+1)
 
     def create_bundle(self, document_id, attributes, metadata):
-
+        metadata.update({METADATA_PARENT_ID: document_id})
         return self.create_record(document_id,attributes,metadata)
 
 
@@ -220,12 +220,14 @@ class Neo4jAdapter(BaseAdapter):
         #Get bundle node and set identifier if there is a bundle node.
         bundle_node_result = session.run(NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE,{"bundle_id": bundle_id})
         identifier = None
+        raw_record = None
         for bundle in bundle_node_result:
             raw_record = self._split_attributes_metadata_from_node(bundle["b"])
             identifier = raw_record.metadata[METADATA_KEY_LABEL]
 
-        Bundle = namedtuple('Bundle', 'identifier, records')
-        return Bundle(identifier, records)
+        Bundle = namedtuple('Bundle', 'identifier, records, bundle_record')
+
+        return Bundle(identifier, records,raw_record)
 
     def get_record(self,record_id):
 
