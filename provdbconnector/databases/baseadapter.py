@@ -84,4 +84,8 @@ class BaseAdapter(ABC):
     def delete_bundle(self, bundle_id):
         pass
 
+    @abstractmethod
+    def delete_record(self, record_id):
+        pass
+
 

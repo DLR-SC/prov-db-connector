@@ -45,7 +45,7 @@ NEO4J_GET_RECORD_RETURN_NODE  = """MATCH (node) WHERE ID(node)={record_id} RETUR
 NEO4J_GET_RELATION_RETURN_NODE  = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
 
 # delete
-NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
+NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {node_id} DETACH DELETE x """
 NEO4J_DELETE_BUNDLE_BY_ID = """MATCH (d {`meta:bundle_id`:{bundle_id}}) DETACH DELETE  d"""
 
 
@@ -110,7 +110,7 @@ class Neo4jAdapter(BaseAdapter):
         for record in result:
             id = record["ID"]
 
-        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"id": id})
+        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": id})
 
         if id is None:
             raise DatabaseException("Could not get a valid ID result back")
@@ -296,3 +296,9 @@ class Neo4jAdapter(BaseAdapter):
         result_set = session.run(NEO4J_DELETE_BUNDLE_BY_ID,{"bundle_id": bundle_id})
 
         return True
+
+    def delete_record(self,record_id):
+        session = self._create_session()
+        result_set = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
+        return True
+
