@@ -1,8 +1,9 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL
+from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL,METADATA_KEY_BUNDLE_ID
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
+from provdbconnector.utils.serializer import encode_string_value_to_primitive
 
 from tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
 
@@ -90,6 +91,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
+
     ### Get section ###
     def test_get_document(self):
         args = base_connector_record_parameter_example()
@@ -97,16 +99,40 @@ class AdapterTestTemplate(unittest.TestCase):
         doc_id = self.instance.create_document()
         record_id = self.instance.create_record(doc_id, args["attributes"], args["metadata"])
 
-        doc_records = self.instance.get_document(doc_id)
+        raw_doc = self.instance.get_document(doc_id)
+
+        # Return structure...
+        # raw_doc = {
+        #     document: {identifer: "undefied if document", records: [{attributes:{},metadata: {}}]}
+        #     bundles: [{identifer: "name bundle", records: [{attributes:{},metadata: {}}]}]
+        # }
+
+        self.assertIsNotNone(raw_doc )
+        self.assertIsNotNone(raw_doc.document )
+        self.assertIsInstance(raw_doc.document.records,list)
+        self.assertEqual(len(raw_doc.document.records),1)
+        self.assertIsInstance(raw_doc.document.records[0].attributes,dict)
+        self.assertIsInstance(raw_doc.document.records[0].metadata,dict)
 
 
-        self.assertIsNotNone(doc_records )
-        self.assertIsInstance(doc_records,list)
-        self.assertEqual(len(doc_records),1)
-        self.assertIsInstance(doc_records[0].attributes,dict)
-        self.assertIsInstance(doc_records[0].metadata,dict)
-        self.assertEqual(doc_records[0].attributes, args["attributes"])
-        self.assertEqual(doc_records[0].metadata, args["metadata"])
+        attrDict = args["attributes"].copy()
+        for key,value in attrDict.items():
+            attrDict[key] = encode_string_value_to_primitive(value)
+
+        metaDict = args["metadata"].copy()
+        for key, value in metaDict .items():
+            metaDict[key] = encode_string_value_to_primitive(value)
+
+        #add bundle_id to expected meta_data
+        metaDict.update({METADATA_KEY_BUNDLE_ID: raw_doc.document.records[0].metadata[METADATA_KEY_BUNDLE_ID]})
+
+        self.assertEqual(raw_doc.document.records[0].attributes,attrDict )
+        self.assertEqual(raw_doc.document.records[0].metadata, metaDict)
+
+
+        #check bundle
+        self.assertIsInstance(raw_doc.bundles,list)
+        self.assertEqual(len(raw_doc.bundles),0)
 
 
     def test_get_bundle(self):

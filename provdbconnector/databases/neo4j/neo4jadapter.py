@@ -1,9 +1,13 @@
-from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_PROV_TYPE, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
 from prov.constants import  PROV_N_MAP
-from provdbconnector.utils.serializer import encode_string_value_to_premitive
+from prov.model import  PROV_N_MAP
+from collections import namedtuple
+from provdbconnector.utils.serializer import encode_string_value_to_primitive
+
+NEO4J_META_PREFIX = "meta:"
 
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 
@@ -19,7 +23,21 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                 RETURN
                                     ID(r) as ID
                                 """ #args: provType, values
+#get
 
+NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
+                                MATCH (d)-[r]-(x)
+                                WHERE not((d)-[:includeIn]-(x)) and (d.`meta:bundle_id`)={bundle_id}
+                                RETURN d as from, r as rel, x as to
+                                //Get all nodes that are alone without connections to other
+                                UNION
+                                MATCH (a) WHERE (a.`meta:bundle_id`)={bundle_id} AND NOT (a)<-[]->()
+                                RETURN a as from, NULL as rel, NULL as to
+                                UNION
+                                MATCH (a)-[r:includeIn]->()
+                                WITH a,count(r) as relation_count
+                                WHERE (a.`meta:bundle_id`)={bundle_id} AND relation_count=1 RETURN a as from,NULL as rel, NULL as to
+                        """
 #delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
 class Neo4jAdapter(BaseAdapter):
@@ -56,7 +74,7 @@ class Neo4jAdapter(BaseAdapter):
     def _prefix_metadata(self, metadata):
         prefixed_metadata = dict()
         for key, value in metadata.items():
-            prefixed_metadata["meta:{}".format(key)] = value
+            prefixed_metadata["{meta_prefix}{key}".format(key=key, meta_prefix=NEO4J_META_PREFIX)] = value
 
         return prefixed_metadata
 
@@ -66,7 +84,7 @@ class Neo4jAdapter(BaseAdapter):
 
         # transform values
         for key, value in db_attributes.items():
-            db_attributes[key] = encode_string_value_to_premitive(value)
+            db_attributes[key] = encode_string_value_to_primitive(value)
         return db_attributes
 
     def _get_attributes_labels_cypher_string(self, db_attributes):
@@ -152,5 +170,49 @@ class Neo4jAdapter(BaseAdapter):
 
         return str(id)
 
+    def _split_attributes_metadata_from_node(self,db_node):
+        Record = namedtuple('Record', 'attributes, metadata')
+        metadata = {k.replace(NEO4J_META_PREFIX,""): v for k, v in db_node.properties.items() if k.startswith(NEO4J_META_PREFIX, 0,len(NEO4J_META_PREFIX)) }
+        attributes = {k: v for k, v in db_node.properties.items() if not k.startswith(NEO4J_META_PREFIX,0,len(NEO4J_META_PREFIX)) }
+        record = Record(attributes,metadata)
+        return record
 
+    def decode_string_value_to_primitive(self,attributes,metadata):
+        type_map = metadata[METADATA_KEY_TYPE_MAP]
+
+
+    def get_document(self, document_id):
+
+        Document = namedtuple('Document', 'document, bundles')
+
+        document = self.get_bundle(document_id)
+        doc = Document(document,list())
+
+        return doc
+
+
+    def get_bundle(self, bundle_id):
+
+        session = self._create_session()
+        records = list()
+        result_set = session.run(NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS,{"bundle_id":bundle_id})
+        for result in result_set:
+            from_node   = result["from"]
+            to_node     = result["to"]
+            relation    = result["rel"]
+
+            if from_node is not None:
+                from_record_raw = self._split_attributes_metadata_from_node(from_node)
+                records.append(from_record_raw)
+
+            if to_node is not None:
+                to_node_record = self._split_attributes_metadata_from_node(to_node)
+                records.append(to_node_record)
+            if relation is not None:
+                relation_record = self._split_attributes_metadata_from_node(relation)
+                records.append(relation_record)
+
+
+        Bundle = namedtuple('Bundle', 'identifier, records')
+        return Bundle(None, records)
 
