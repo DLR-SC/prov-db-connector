@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL,METADATA_KEY_BUNDLE_ID
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
-from provdbconnector.utils.serializer import encode_string_value_to_primitive
+from provdbconnector.utils.serializer import encode_string_value_to_primitive,encode_dict_values_to_primitive
 
 from tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
 
@@ -177,7 +177,28 @@ class AdapterTestTemplate(unittest.TestCase):
         # check bundle
 
     def test_get_record(self):
-        raise NotImplementedError()
+        args = base_connector_record_parameter_example()
+
+        doc_id = self.instance.create_document()
+        record_id = self.instance.create_record(doc_id, args["attributes"], args["metadata"])#
+
+        record_raw = self.instance.get_record(record_id)
+
+        self.assertIsNotNone(record_raw)
+        self.assertIsNotNone(record_raw.attributes)
+        self.assertIsNotNone(record_raw.metadata)
+        self.assertIsInstance(record_raw.metadata,dict)
+        self.assertIsInstance(record_raw.attributes,dict)
+
+
+        attributes_primitive= encode_dict_values_to_primitive(args["attributes"])
+        metadata_primitive= encode_dict_values_to_primitive(args["attributes"])
+
+
+        self.assertEqual(record_raw.attributes,attributes_primitive)
+        self.assertEqual(record_raw.metadata,metadata_primitive)
+
+        self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_get_relation(self):
         raise NotImplementedError()
