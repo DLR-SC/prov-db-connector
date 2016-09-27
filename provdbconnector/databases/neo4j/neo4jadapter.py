@@ -47,6 +47,7 @@ NEO4J_GET_RELATION_RETURN_NODE  = """MATCH ()-[relation]-() WHERE ID(relation)={
 # delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {node_id} DETACH DELETE x """
 NEO4J_DELETE_BUNDLE_BY_ID = """MATCH (d {`meta:bundle_id`:{bundle_id}}) DETACH DELETE  d"""
+NEO4J_DELETE_RELATION_BY_ID = """MATCH ()-[r]-() WHERE id(r) = {relation_id} DELETE r"""
 
 
 class Neo4jAdapter(BaseAdapter):
@@ -300,5 +301,10 @@ class Neo4jAdapter(BaseAdapter):
     def delete_record(self,record_id):
         session = self._create_session()
         result_set = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
+        return True
+
+    def delete_relation(self, relation_id):
+        session = self._create_session()
+        result_set = session.run(NEO4J_DELETE_RELATION_BY_ID,{"relation_id": int(relation_id)})
         return True
 

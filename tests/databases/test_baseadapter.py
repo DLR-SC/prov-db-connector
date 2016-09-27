@@ -323,7 +323,14 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_record(from_record_id)
 
     def test_delete_relation(self):
-        raise NotImplementedError()
+        ids = insert_document_with_bundles(self.instance)
+        relation_id = ids["relation_id"]
+        result = self.instance.delete_relation(relation_id)
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            self.instance.get_relation(relation_id)
 
 
 class BaseConnectorTests(unittest.TestCase):

@@ -88,4 +88,8 @@ class BaseAdapter(ABC):
     def delete_record(self, record_id):
         pass
 
+    @abstractmethod
+    def delete_relation(self, relation_id):
+        pass
+
 
