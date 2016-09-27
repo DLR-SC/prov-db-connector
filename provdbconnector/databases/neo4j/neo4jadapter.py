@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,CreateRelationException,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth
@@ -40,6 +40,7 @@ NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
                             WHERE (a.`meta:bundle_id`)={bundle_id} and NOT(a.`meta:prov_type`='prov:Bundle') AND relation_count=1
                             RETURN a as from,NULL as rel, NULL as to
                         """
+NEO4J_GET_RECORD_RETURN_NODE  = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
 #delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
 class Neo4jAdapter(BaseAdapter):
@@ -223,4 +224,21 @@ class Neo4jAdapter(BaseAdapter):
 
         Bundle = namedtuple('Bundle', 'identifier, records')
         return Bundle(identifier, records)
+
+    def get_record(self,record_id):
+
+        session = self._create_session()
+        result_set = session.run(NEO4J_GET_RECORD_RETURN_NODE,{"record_id": int(record_id)})
+
+        node = None
+        for result in result_set:
+            if node is not None:
+                raise DatabaseException("get_record should return only one node for the id {}, command {}".format(record_id, NEO4J_GET_RECORD_RETURN_NODE))
+            node = result["node"]
+
+        if node is None:
+            raise NotFoundException("We cant find the node with the id: {}, database command {}".format(record_id,NEO4J_GET_RECORD_RETURN_NODE))
+
+        return self._split_attributes_metadata_from_node(node)
+
 

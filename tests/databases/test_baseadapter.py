@@ -181,8 +181,10 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
         attributes_primitive= encode_dict_values_to_primitive(args["attributes"])
-        metadata_primitive= encode_dict_values_to_primitive(args["attributes"])
+        metadata_primitive= encode_dict_values_to_primitive(args["metadata"])
 
+        # add bundle_id to expected meta_data
+        metadata_primitive.update({METADATA_KEY_BUNDLE_ID: record_raw.metadata[METADATA_KEY_BUNDLE_ID]})
 
         self.assertEqual(record_raw.attributes,attributes_primitive)
         self.assertEqual(record_raw.metadata,metadata_primitive)

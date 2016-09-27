@@ -18,6 +18,8 @@ class CreateRecordException(DatabaseException):
 class CreateRelationException(DatabaseException):
     pass
 
+class NotFoundException(DatabaseException):
+    pass
 
 METADATA_KEY_BUNDLE_ID  = "bundle_id"
 METADATA_KEY_PROV_TYPE  = "prov_type"
@@ -58,5 +60,9 @@ class BaseAdapter(ABC):
 
     @abstractmethod
     def get_bundle(self, bundle_id):
+        pass
+
+    @abstractmethod
+    def get_record(self,record_id):
         pass
 
