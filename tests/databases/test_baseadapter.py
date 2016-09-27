@@ -192,7 +192,39 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_get_relation(self):
-        raise NotImplementedError()
+        from_record_args = base_connector_record_parameter_example()
+        to_record_args = base_connector_record_parameter_example()
+        relation_args = base_connector_record_parameter_example()
+
+        from_label = "FROM NODE"
+        to_label = "FROM NODE"
+        from_record_args["metadata"][METADATA_KEY_LABEL] = from_label
+        to_record_args["metadata"][METADATA_KEY_LABEL] = to_label
+
+        doc_id = self.instance.create_document()
+        from_record_id = self.instance.create_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])  #
+        to_record_id = self.instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])  #
+
+        relation_id = self.instance.create_relation(doc_id,from_label,to_label,relation_args["attributes"], relation_args["metadata"])
+
+        relation_raw = self.instance.get_relation(relation_id)
+
+        self.assertIsNotNone(relation_raw)
+        self.assertIsNotNone(relation_raw.attributes)
+        self.assertIsNotNone(relation_raw.metadata)
+        self.assertIsInstance(relation_raw.metadata, dict)
+        self.assertIsInstance(relation_raw.attributes, dict)
+
+        attributes_primitive = encode_dict_values_to_primitive(to_record_args["attributes"])
+        metadata_primitive = encode_dict_values_to_primitive(to_record_args["metadata"])
+
+        # add bundle_id to expected meta_data
+        metadata_primitive.update({METADATA_KEY_BUNDLE_ID: relation_raw.metadata[METADATA_KEY_BUNDLE_ID]})
+
+        self.assertEqual(relation_raw.attributes, attributes_primitive)
+        self.assertEqual(relation_raw.metadata, metadata_primitive)
+
+        self.assertIs(type(relation_raw), str, "id should be a string ")
 
 
     ###Delete section ###
