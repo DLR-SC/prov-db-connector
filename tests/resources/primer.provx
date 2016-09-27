@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<prov:document xmlns:prov="http://www.w3.org/ns/prov#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ex="http://example/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:dcterms="http://purl.org/dc/terms/">
+    <prov:entity prov:id="ex:article">
+        <dcterms:title xsi:type="xsd:string">Crime rises in cities</dcterms:title>
+    </prov:entity>
+    <prov:entity prov:id="ex:articleV1"/>
+    <prov:entity prov:id="ex:articleV2"/>
+    <prov:entity prov:id="ex:dataSet1"/>
+    <prov:entity prov:id="ex:dataSet2"/>
+    <prov:entity prov:id="ex:regionList"/>
+    <prov:entity prov:id="ex:composition"/>
+    <prov:entity prov:id="ex:chart1"/>
+    <prov:entity prov:id="ex:chart2"/>
+    <prov:entity prov:id="ex:blogEntry"/>
+    <prov:activity prov:id="ex:compile"/>
+    <prov:activity prov:id="ex:compile2"/>
+    <prov:activity prov:id="ex:compose"/>
+    <prov:activity prov:id="ex:correct">
+        <prov:startTime>2012-03-31T09:21:00.000+01:00</prov:startTime>
+        <prov:endTime>2012-04-01T15:21:00.000+01:00</prov:endTime>
+    </prov:activity>
+    <prov:activity prov:id="ex:illustrate"/>
+    <prov:used>
+        <prov:activity prov:ref="ex:compose"/>
+        <prov:entity prov:ref="ex:dataSet1"/>
+    </prov:used>
+    <prov:used>
+        <prov:activity prov:ref="ex:compose"/>
+        <prov:entity prov:ref="ex:regionList"/>
+    </prov:used>
+    <prov:wasGeneratedBy>
+        <prov:entity prov:ref="ex:composition"/>
+        <prov:activity prov:ref="ex:compose"/>
+    </prov:wasGeneratedBy>
+    <prov:used>
+        <prov:activity prov:ref="ex:illustrate"/>
+        <prov:entity prov:ref="ex:composition"/>
+    </prov:used>
+    <prov:wasGeneratedBy>
+        <prov:entity prov:ref="ex:chart1"/>
+        <prov:activity prov:ref="ex:illustrate"/>
+    </prov:wasGeneratedBy>
+    <prov:wasGeneratedBy>
+        <prov:entity prov:ref="ex:chart1"/>
+        <prov:activity prov:ref="ex:compile"/>
+        <prov:time>2012-03-02T10:30:00.000Z</prov:time>
+    </prov:wasGeneratedBy>
+    <prov:wasGeneratedBy>
+        <prov:entity prov:ref="ex:chart2"/>
+        <prov:activity prov:ref="ex:compile2"/>
+        <prov:time>2012-04-01T15:21:00.000+01:00</prov:time>
+    </prov:wasGeneratedBy>
+    <prov:agent prov:id="ex:derek">
+        <prov:type xsi:type="xsd:QName">prov:Person</prov:type>
+        <foaf:givenName xsi:type="xsd:string">Derek</foaf:givenName>
+        <foaf:mbox xsi:type="xsd:string">&lt;mailto:derek@example.org&gt;</foaf:mbox>
+    </prov:agent>
+    <prov:wasAssociatedWith>
+        <prov:activity prov:ref="ex:compose"/>
+        <prov:agent prov:ref="ex:derek"/>
+    </prov:wasAssociatedWith>
+    <prov:wasAssociatedWith>
+        <prov:activity prov:ref="ex:illustrate"/>
+        <prov:agent prov:ref="ex:derek"/>
+    </prov:wasAssociatedWith>
+    <prov:agent prov:id="ex:chartgen">
+        <prov:type xsi:type="xsd:QName">prov:Organization</prov:type>
+        <foaf:name xsi:type="xsd:string">Chart Generators Inc</foaf:name>
+    </prov:agent>
+    <prov:actedOnBehalfOf>
+        <prov:delegate prov:ref="ex:derek"/>
+        <prov:responsible prov:ref="ex:chartgen"/>
+        <prov:activity prov:ref="ex:compose"/>
+    </prov:actedOnBehalfOf>
+    <prov:wasAttributedTo>
+        <prov:entity prov:ref="ex:chart1"/>
+        <prov:agent prov:ref="ex:derek"/>
+    </prov:wasAttributedTo>
+    <prov:used>
+        <prov:activity prov:ref="ex:compose"/>
+        <prov:entity prov:ref="ex:dataSet1"/>
+        <prov:role xsi:type="xsd:QName">ex:dataToCompose</prov:role>
+    </prov:used>
+    <prov:used>
+        <prov:activity prov:ref="ex:compose"/>
+        <prov:entity prov:ref="ex:regionList"/>
+        <prov:role xsi:type="xsd:QName">ex:regionsToAggregateBy</prov:role>
+    </prov:used>
+    <prov:wasGeneratedBy>
+        <prov:entity prov:ref="ex:dataSet2"/>
+        <prov:activity prov:ref="ex:correct"/>
+    </prov:wasGeneratedBy>
+    <prov:used>
+        <prov:activity prov:ref="ex:correct"/>
+        <prov:entity prov:ref="ex:dataSet1"/>
+    </prov:used>
+    <prov:wasDerivedFrom>
+        <prov:generatedEntity prov:ref="ex:dataSet2"/>
+        <prov:usedEntity prov:ref="ex:dataSet1"/>
+        <prov:type xsi:type="xsd:QName">prov:Revision</prov:type>
+    </prov:wasDerivedFrom>
+    <prov:wasDerivedFrom>
+        <prov:generatedEntity prov:ref="ex:chart2"/>
+        <prov:usedEntity prov:ref="ex:dataSet2"/>
+    </prov:wasDerivedFrom>
+    <prov:wasDerivedFrom>
+        <prov:generatedEntity prov:ref="ex:blogEntry"/>
+        <prov:usedEntity prov:ref="ex:article"/>
+        <prov:type xsi:type="xsd:QName">prov:Quotation</prov:type>
+    </prov:wasDerivedFrom>
+    <prov:specializationOf>
+        <prov:specificEntity prov:ref="ex:articleV1"/>
+        <prov:generalEntity prov:ref="ex:article"/>
+    </prov:specializationOf>
+    <prov:wasDerivedFrom>
+        <prov:generatedEntity prov:ref="ex:articleV1"/>
+        <prov:usedEntity prov:ref="ex:dataSet1"/>
+    </prov:wasDerivedFrom>
+    <prov:specializationOf>
+        <prov:specificEntity prov:ref="ex:articleV2"/>
+        <prov:generalEntity prov:ref="ex:article"/>
+    </prov:specializationOf>
+    <prov:wasDerivedFrom>
+        <prov:generatedEntity prov:ref="ex:articleV2"/>
+        <prov:usedEntity prov:ref="ex:dataSet2"/>
+    </prov:wasDerivedFrom>
+    <prov:alternateOf>
+        <prov:alternate1 prov:ref="ex:articleV2"/>
+        <prov:alternate2 prov:ref="ex:articleV1"/>
+    </prov:alternateOf>
+</prov:document>

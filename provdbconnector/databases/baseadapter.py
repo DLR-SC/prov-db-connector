@@ -1,19 +1,25 @@
 from abc import ABC, abstractmethod
 
-class AdapterException (Exception):
+
+class AdapterException(Exception):
     pass
+
 
 class InvalidOptionsException(AdapterException):
     pass
 
+
 class AuthException(AdapterException):
     pass
+
 
 class DatabaseException(AdapterException):
     pass
 
+
 class CreateRecordException(DatabaseException):
     pass
+
 
 class CreateRelationException(DatabaseException):
     pass
@@ -21,15 +27,15 @@ class CreateRelationException(DatabaseException):
 class NotFoundException(DatabaseException):
     pass
 
-METADATA_KEY_BUNDLE_ID  = "bundle_id"
-METADATA_PARENT_ID      = "parent_id"
-METADATA_KEY_PROV_TYPE  = "prov_type"
-METADATA_KEY_LABEL      = "label"
+METADATA_KEY_BUNDLE_ID = "bundle_id"
+METADATA_PARENT_ID = "parent_id"
+METADATA_KEY_PROV_TYPE = "prov_type"
+METADATA_KEY_LABEL = "label"
 METADATA_KEY_NAMESPACES = "namespaces"
-METADATA_KEY_TYPE_MAP   = "type_map"
+METADATA_KEY_TYPE_MAP = "type_map"
+
 
 class BaseAdapter(ABC):
-
     @abstractmethod
     def __init__(self, *args, **kwargs):
         pass
@@ -43,16 +49,15 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_bundle(self, document_id,attributes, metadata):
+    def create_bundle(self, document_id, attributes, metadata):
         pass
-
 
     @abstractmethod
     def create_record(self, bundle_id, attributes, metadata):
         pass
 
     @abstractmethod
-    def create_relation(self, bundle_id,from_node,to_node, attributes, metadata):
+    def create_relation(self, bundle_id, from_node, to_node, attributes, metadata):
         pass
 
     @abstractmethod
