@@ -1,6 +1,6 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL,METADATA_KEY_BUNDLE_ID,METADATA_PARENT_ID
+from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL,METADATA_KEY_BUNDLE_ID,METADATA_PARENT_ID, NotFoundException
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 from provdbconnector.utils.serializer import encode_string_value_to_primitive,encode_dict_values_to_primitive
@@ -14,6 +14,49 @@ def isnamedtupleinstance(x):
     f = getattr(t, '_fields', None)
     if not isinstance(f, tuple): return False
     return all(type(n)==str for n in f)
+
+def insert_document_with_bundles(instance):
+    args_record = base_connector_record_parameter_example()
+    args_bundle = base_connector_bundle_parameter_example()
+
+    #document with 1 record
+    doc_id = instance.create_document()
+    doc_record_id = instance.create_record(doc_id, args_record["attributes"], args_record["metadata"])
+
+    #bundle with 1 record
+    bundle_id = instance.create_bundle(doc_id, args_bundle["attributes"], args_bundle["metadata"])
+    bundle_record_id = instance.create_record(bundle_id, args_record["attributes"], args_record["metadata"])
+
+
+    #add relation
+
+    from_record_args = base_connector_record_parameter_example()
+    to_record_args = base_connector_record_parameter_example()
+    relation_args = base_connector_record_parameter_example()
+
+    from_label = "FROM NODE"
+    to_label = "FROM NODE"
+    from_record_args["metadata"][METADATA_KEY_LABEL] = from_label
+    to_record_args["metadata"][METADATA_KEY_LABEL] = to_label
+
+    from_record_id = instance.create_record(doc_id, from_record_args["attributes"],from_record_args["metadata"])
+    to_record_id = instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])
+
+
+    relation_id = instance.create_relation(doc_id, from_label, to_label, relation_args["attributes"],relation_args["metadata"])
+
+
+
+    return {
+        "relation_id": relation_id,
+        "from_record_id": from_record_id,
+        "to_record_id": to_record_id,
+        "bundle_id": bundle_id,
+        "bundle_record_id": bundle_record_id,
+        "doc_id": doc_id,
+        "doc_record_id": doc_record_id
+    }
+
 
 class AdapterTestTemplate(unittest.TestCase):
 
@@ -128,6 +171,9 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_doc.bundles,list)
         self.assertEqual(len(raw_doc.bundles),0)
 
+    def test_get_document_not_found(self):
+        with self.assertRaises(NotFoundException):
+            self.instance.get_document("99999999")
 
     def test_get_bundle(self):
         args = base_connector_record_parameter_example()
@@ -174,6 +220,10 @@ class AdapterTestTemplate(unittest.TestCase):
 
         # check bundle
 
+    def test_get_bundle_not_found(self):
+        with self.assertRaises(NotFoundException):
+            self.instance.get_bundle("99999999")
+
     def test_get_record(self):
         args = base_connector_record_parameter_example()
 
@@ -199,6 +249,10 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(record_raw.metadata,metadata_primitive)
 
         self.assertIs(type(record_id), str, "id should be a string ")
+
+    def test_get_record_not_found(self):
+        with self.assertRaises(NotFoundException):
+            self.instance.get_record("99999999")
 
     def test_get_relation(self):
         from_record_args = base_connector_record_parameter_example()
@@ -233,11 +287,20 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(relation_raw.attributes, attributes_primitive)
         self.assertEqual(relation_raw.metadata, metadata_primitive)
 
-
+    def test_get_relation_not_found(self):
+        with self.assertRaises(NotFoundException):
+            self.instance.get_relation("99999999")
 
     ###Delete section ###
-    def test_delete_document(self):
-        raise NotImplementedError()
+    # def test_delete_document(self):
+    #     ids = insert_document_with_bundles(self.instance)
+    #     doc_id  = ids["doc_id"]
+    #     result = self.instance.delete_document(doc_id)
+    #     self.assertIsInstance(result,bool)
+    #     self.assertTrue(result)
+    #
+    #     with self.assertRaises(NotFoundException):
+    #         self.instance.get_document(doc_id)
 
     def test_delete_bundle(self):
         raise NotImplementedError()

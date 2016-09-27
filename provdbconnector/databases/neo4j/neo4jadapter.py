@@ -225,6 +225,9 @@ class Neo4jAdapter(BaseAdapter):
             raw_record = self._split_attributes_metadata_from_node(bundle["b"])
             identifier = raw_record.metadata[METADATA_KEY_LABEL]
 
+        if raw_record is None and len(records) == 0:
+            raise NotFoundException("bundle with the id {} was not found ".format(bundle_id))
+
         Bundle = namedtuple('Bundle', 'identifier, records, bundle_record')
 
         return Bundle(identifier, records,raw_record)
