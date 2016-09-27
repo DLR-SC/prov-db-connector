@@ -313,7 +313,14 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_bundle(bundle_id)
 
     def test_delete_record(self):
-        raise NotImplementedError()
+        ids = insert_document_with_bundles(self.instance)
+        from_record_id = ids["from_record_id"]
+        result = self.instance.delete_record(from_record_id)
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            self.instance.get_record(from_record_id)
 
     def test_delete_relation(self):
         raise NotImplementedError()
