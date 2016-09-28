@@ -8,10 +8,19 @@ from prov.tests.examples import primer_example,\
    long_literals,\
    datatypes
 import datetime
-from prov.model import ProvDocument, QualifiedName
-from prov.constants import PROV_RECORD_IDS_MAP
+from prov.model import ProvDocument, QualifiedName, ProvRecord, ProvRelation, ProvActivity, Literal, Identifier
+from prov.constants import PROV_RECORD_IDS_MAP,PROV
 from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_LABEL
+import collections
 
+
+def attributes_dict_example():
+    attributes = dict()
+    attributes.update({"ex:individual attribute": "Some value"})
+    attributes.update({"ex:int value": 99})
+    attributes.update({"ex:double value": 99.33})
+    attributes.update({"ex:date value": datetime.datetime.now()})
+    return attributes
 
 def base_connector_bundle_parameter_example():
     doc = ProvDocument()
@@ -39,11 +48,7 @@ def base_connector_bundle_parameter_example():
 
 def base_connector_record_parameter_example():
     doc = ProvDocument()
-    attributes = dict()
-    attributes.update({"individual attribute": "Some value"})
-    attributes.update({"int value": 99})
-    attributes.update({"double value": 99.33})
-    attributes.update({"date value": datetime.datetime.now()})
+
 
 
     namespaces = dict()
@@ -64,7 +69,7 @@ def base_connector_record_parameter_example():
 
 
     return_data = dict()
-    return_data.update({"attributes": attributes})
+    return_data.update({"attributes": attributes_dict_example()})
     return_data.update({"metadata": metadata})
 
     return return_data
@@ -75,13 +80,6 @@ def base_connector_relation_parameter_example():
     doc = ProvDocument()
     doc.add_namespace("ex", "http://example.com")
     doc.add_namespace("custom", "http://custom.com")
-
-    attributes = dict()
-    attributes.update({"individual attribute": "Some value"})
-    attributes.update({"int value": 99})
-    attributes.update({"double value": 99.33})
-    attributes.update({"date value": datetime.datetime.now()})
-
 
     namespaces = dict()
     namespaces.update({"ex": "http://example.com"})
@@ -101,7 +99,7 @@ def base_connector_relation_parameter_example():
 
 
     return_data = dict()
-    return_data.update({"attributes": attributes})
+    return_data.update({"attributes": attributes_dict_example()})
     return_data.update({"metadata": metadata})
     return_data.update({"from_node": doc.valid_qualified_name("ex:Yoda")})
     return_data.update({"to_node": doc.valid_qualified_name("ex:Luke Skywalker")})
@@ -111,3 +109,51 @@ def base_connector_relation_parameter_example():
 
 
 
+def prov_api_record_example():
+
+    doc = ProvDocument()
+    doc.add_namespace("ex", "http://example.com")
+    doc.add_namespace("custom", "http://custom.com")
+
+    attributes = attributes_dict_example()
+    attributes.update({"ex:Qualified name ": doc.valid_qualified_name("custom:qualified name")})
+    attributes.update({"ex:Qualified name 2": "ex:unqualified_name"})
+    attributes.update({"ex:Literral": Literal("test literral", langtag="en")})
+    attributes.update({"ex:Literral 2": Literal("test literral with datatype", langtag="en", datatype=PROV["InternationalizedString"])})
+    attributes.update({"ex:identifier": Identifier("http://example.com/#test")})
+
+
+    expected_attributes = dict()
+    for key, value in attributes.items():
+        new_key = doc.valid_qualified_name(key)
+        expected_attributes.update({new_key: value})
+
+    valid_name = doc.valid_qualified_name("ex:Qualified name 2")
+    expected_attributes[valid_name] = doc.valid_qualified_name("ex:unqualified_name")
+
+
+    namespaces = dict()
+    namespaces.update({"ex": "http://example.com"})
+    namespaces.update({"custom": "http://custom.com"})
+
+    type_map = dict()
+    type_map.update({"ex:date value": {"type": "xsd:dateTime"}})
+    type_map.update({"ex:double value": {"type": "xsd:double"}})
+    type_map.update({"ex:int value":  {"type":"xsd:int"}})
+
+    type_map.update({"ex:Qualified name ": {'type': 'prov:QUALIFIED_NAME'}})
+    type_map.update({"ex:Qualified name 2":{'type': 'prov:QUALIFIED_NAME'}})
+    type_map.update({"ex:Literral": {'lang': 'en'}})
+    type_map.update({"ex:Literral 2": {'lang': 'en'}})
+    type_map.update({"ex:identifier":{'type': 'prov:QUALIFIED_NAME'}})
+
+    metadata = dict()
+    metadata.update({METADATA_KEY_PROV_TYPE: PROV_RECORD_IDS_MAP["activity"]})
+    metadata.update({METADATA_KEY_LABEL: doc.valid_qualified_name("ex:record")})
+    metadata.update({METADATA_KEY_NAMESPACES: namespaces})
+    metadata.update({METADATA_KEY_TYPE_MAP: type_map})
+
+    record = ProvActivity(doc, "ex:record", attributes)
+    Example = collections.namedtuple("prov_api_metadata_record_example", "metadata, attributes, prov_record, expected_attributes")
+
+    return Example(metadata,attributes,record,expected_attributes)

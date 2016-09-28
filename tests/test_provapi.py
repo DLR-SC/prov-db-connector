@@ -3,6 +3,7 @@ import unittest
 from uuid import UUID
 import tests.examples as examples
 from provdbconnector import ProvApi
+from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_LABEL,METADATA_KEY_NAMESPACES,METADATA_PARENT_ID
 from provdbconnector.databases import InvalidOptionsException
 from provdbconnector.databases import Neo4jAdapter
 from provdbconnector.provapi import NoDataBaseAdapterException,InvalidArgumentTypeException
@@ -97,6 +98,9 @@ class ProvApiTestTemplate(unittest.TestCase):
 
 class ProvApiTests(unittest.TestCase):
 
+
+    maxDiff = None
+
     def setUp(self):
         self.authInfo = {"user_name": os.environ.get('NEO4J_USERNAME', 'neo4j'),
                          "user_password": os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j'),
@@ -158,3 +162,34 @@ class ProvApiTests(unittest.TestCase):
 
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi._create_bundle("xxxx",None)
+
+    def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi._get_metadata_and_attributes_for_record(None)
+
+    def test_get_metadata_and_attributes_for_record(self):
+        example = examples.prov_api_record_example()
+
+
+        result  = self.provapi._get_metadata_and_attributes_for_record(example.prov_record)
+        metadata_result = result.metadata
+        attributes_result = result.attributes
+
+        self.assertIsNotNone(result.attributes)
+        self.assertIsNotNone(result.metadata)
+        self.assertIsInstance(result.attributes, dict)
+        self.assertIsInstance(result.metadata, dict)
+
+        self.assertIsNotNone(metadata_result[METADATA_KEY_PROV_TYPE])
+        self.assertIsNotNone(metadata_result[METADATA_KEY_LABEL])
+        self.assertIsNotNone(metadata_result[METADATA_KEY_NAMESPACES])
+        self.assertIsNotNone(metadata_result[METADATA_KEY_TYPE_MAP])
+
+        #check metadata
+        self.assertEqual(example.metadata[METADATA_KEY_PROV_TYPE],metadata_result[METADATA_KEY_PROV_TYPE])
+        self.assertEqual(example.metadata[METADATA_KEY_LABEL],metadata_result[METADATA_KEY_LABEL])
+        self.assertEqual(example.metadata[METADATA_KEY_NAMESPACES],metadata_result[METADATA_KEY_NAMESPACES])
+        self.assertEqual(example.metadata[METADATA_KEY_TYPE_MAP],metadata_result[METADATA_KEY_TYPE_MAP])
+
+        #check attributes
+        self.assertEqual(example.expected_attributes,attributes_result)
