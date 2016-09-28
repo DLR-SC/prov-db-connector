@@ -83,8 +83,9 @@ class ProvApi(object):
 
 
     def get_document_as_prov(self, id=None):
-        raise NotImplementedError()
-
+        if not type(id) is str:
+            raise InvalidArgumentTypeException()
+        
 
     def _create_bundle(self,bundle_id,prov_bundle):
         if not isinstance(prov_bundle, ProvBundle) or type(bundle_id) is not str:
