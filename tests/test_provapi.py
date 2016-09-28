@@ -153,3 +153,8 @@ class ProvApiTests(unittest.TestCase):
 
     def test_get_document_as_prov(self):
         self.provapi.get_document_as_prov()
+
+    def test_create_bundle_invalid_arguments(self):
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi._create_bundle("xxxx",None)
