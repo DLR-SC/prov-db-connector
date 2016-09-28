@@ -21,16 +21,11 @@ class ProvApi(object):
         self._adapter = adapter()
         self._adapter.connect(authinfo)
 
+    #Converter Methods
     def create_document_from_json(self, content=None):
         raise NotImplementedError()
 
     def get_document_as_json(self, id=None):
-        raise NotImplementedError()
-
-    def create_document_from_prov(self, content=None):
-        raise NotImplementedError()
-
-    def get_document_as_prov(self, id=None):
         raise NotImplementedError()
 
     def create_document_from_xml(self, content=None):
@@ -43,4 +38,11 @@ class ProvApi(object):
         raise NotImplementedError()
 
     def get_document_as_provn(self, id=None):
+        raise NotImplementedError()
+
+    #Methods that consume ProvDocument instances and produce ProvDocument instances
+    def create_document_from_prov(self, content=None):
+        raise NotImplementedError()
+
+    def get_document_as_prov(self, id=None):
         raise NotImplementedError()
