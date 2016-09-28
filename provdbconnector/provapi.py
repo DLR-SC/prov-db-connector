@@ -145,8 +145,6 @@ class ProvApi(object):
     def _create_bundle_links(self,prov_bundle,bundle_id_map):
 
         from_bundle_id = bundle_id_map[prov_bundle.identifier]
-        if from_bundle_id is None:
-            raise InvalidArgumentTypeException("We cant find the bundle with the label {} in the bundle id map {}".format(prov_bundle.identifier,bundle_id_map))
 
         for mention in prov_bundle.get_records(ProvRelation):
             if mention.get_type() is not PROV_MENTION:
@@ -155,10 +153,6 @@ class ProvApi(object):
             to_bundle = mention.formal_attributes[2][1]
             to_bundle_id = bundle_id_map[to_bundle]
 
-            if from_bundle_id is None:
-                raise InvalidArgumentTypeException(
-                    "We cant find the bundle with the label {} in the bundle id map {}".format(prov_bundle.identifier,
-                                                                                                    bundle_id_map ))
             self._create_relation(from_bundle_id,to_bundle_id,mention)
 
 
