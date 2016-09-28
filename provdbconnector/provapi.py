@@ -64,17 +64,20 @@ class ProvApi(object):
         self._create_bundle(doc_id,prov_document)
 
 
+
+        bundle_id_map = dict()
         for bundle in prov_document.bundles:
             custom_bunlde_identifier = bundle.valid_qualified_name("prov:bundle:{}".format(bundle.identifier))
             bundle_record = ProvBundleRecord(bundle,identifier=custom_bunlde_identifier, attributes={"prov:bundle_name": bundle.identifier})
             (metadata,attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
             bundle_id = self._adapter.create_bundle(document_id=doc_id,attributes=attributes,metadata=metadata)
+            bundle_id_map.update({bundle.identifier: bundle_id})
+
             self._create_bundle(bundle_id,bundle)
             self._create_bundle_assosiation(document_id=doc_id,bundle_id=bundle_id,bundle_idientifier=custom_bunlde_identifier,prov_bundle=bundle)
 
-
-        # foreach bundle in bundles
-        #    self._create_bundle_links(bundle_id, prov_bundle)
+        for bundle in prov_document.bundles:
+            self._create_bundle_links(bundle,bundle_id_map)
 
         return doc_id
 
@@ -98,22 +101,26 @@ class ProvApi(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
-            #get from and to node
-            from_tuple, to_tuple= relation.formal_attributes[:2]
-            from_qualified_name = from_tuple[1]
-            to_qualified_name = to_tuple[1]
+            self._create_relation(bundle_id,bundle_id,relation)
 
-            #if target or origin record is unknown, create node "Unknown"
-            if from_qualified_name is None:
-                from_qualified_name = self._create_unknown_node(bundle_id)
 
-            if to_qualified_name is None:
-                to_qualified_name = self._create_unknown_node(bundle_id)
 
-            #split metadata and attributes
-            (metadata,attributes) = self._get_metadata_and_attributes_for_record(relation)
-            self._adapter.create_relation(bundle_id,from_qualified_name,bundle_id,to_qualified_name, attributes,metadata)
+    def _create_relation(self,from_bundle_id,to_bundle_id,prov_relation):
+        # get from and to node
+        from_tuple, to_tuple = prov_relation.formal_attributes[:2]
+        from_qualified_name = from_tuple[1]
+        to_qualified_name = to_tuple[1]
 
+        # if target or origin record is unknown, create node "Unknown"
+        if from_qualified_name is None:
+            from_qualified_name = self._create_unknown_node(from_bundle_id)
+
+        if to_qualified_name is None:
+            to_qualified_name = self._create_unknown_node(to_bundle_id)
+
+        # split metadata and attributes
+        (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
+        return self._adapter.create_relation(from_bundle_id, from_qualified_name, to_bundle_id, to_qualified_name, attributes,metadata)
 
     def _create_bundle_assosiation(self, document_id, bundle_id,bundle_idientifier,prov_bundle):
 
@@ -126,7 +133,6 @@ class ProvApi(object):
             from_qualified_name = metadata[METADATA_KEY_LABEL]
             self._adapter.create_relation(bundle_id, from_qualified_name, document_id, to_qualified_name, belong_attributes,belong_metadata)
 
-
     def _create_unknown_node(self,bundle_id):
         uid = uuid4()
         doc = ProvDocument()
@@ -136,12 +142,25 @@ class ProvApi(object):
         (metadata,attributes) = self._get_metadata_and_attributes_for_record(record)
         self._adapter.create_record(bundle_id,attributes,metadata)
         return label
-    def _create_bundle_links(self,prov_bundle):
+    def _create_bundle_links(self,prov_bundle,bundle_id_map):
 
-        #   foreach relation in bundle
-        #        if the relation type is"prov:mentionOf" (https://www.w3.org/TR/prov-links/)
-        #             create relation
-        pass
+        from_bundle_id = bundle_id_map[prov_bundle.identifier]
+        if from_bundle_id is None:
+            raise InvalidArgumentTypeException("We cant find the bundle with the label {} in the bundle id map {}".format(prov_bundle.identifier,bundle_id_map))
+
+        for mention in prov_bundle.get_records(ProvRelation):
+            if mention.get_type() is not PROV_MENTION:
+                continue
+
+            to_bundle = mention.formal_attributes[2][1]
+            to_bundle_id = bundle_id_map[to_bundle]
+
+            if from_bundle_id is None:
+                raise InvalidArgumentTypeException(
+                    "We cant find the bundle with the label {} in the bundle id map {}".format(prov_bundle.identifier,
+                                                                                                    bundle_id_map ))
+            self._create_relation(from_bundle_id,to_bundle_id,mention)
+
 
     def _get_metadata_and_attributes_for_record(self, prov_record):
         if not isinstance(prov_record, ProvRecord):
