@@ -18,7 +18,8 @@ def isnamedtupleinstance(x):
 def insert_document_with_bundles(instance):
     args_record = base_connector_record_parameter_example()
     args_bundle = base_connector_bundle_parameter_example()
-
+    doc = ProvDocument()
+    doc.add_namespace("ex","http://example.com")
     #document with 1 record
     doc_id = instance.create_document()
     doc_record_id = instance.create_record(doc_id, args_record["attributes"], args_record["metadata"])
@@ -34,8 +35,8 @@ def insert_document_with_bundles(instance):
     to_record_args = base_connector_record_parameter_example()
     relation_args = base_connector_relation_parameter_example()
 
-    from_label = "FROM NODE"
-    to_label = "TO NODE"
+    from_label = doc.valid_qualified_name("ex:FROM NODE")
+    to_label = doc.valid_qualified_name("ex:TO NODE")
     from_record_args["metadata"][METADATA_KEY_LABEL] = from_label
     to_record_args["metadata"][METADATA_KEY_LABEL] = to_label
 
@@ -43,7 +44,7 @@ def insert_document_with_bundles(instance):
     to_record_id = instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])
 
 
-    relation_id = instance.create_relation(doc_id, from_label, to_label, relation_args["attributes"],relation_args["metadata"])
+    relation_id = instance.create_relation(doc_id, from_label,doc_id, to_label, relation_args["attributes"],relation_args["metadata"])
 
 
 
@@ -117,7 +118,7 @@ class AdapterTestTemplate(unittest.TestCase):
         to_node_id  = self.instance.create_record(doc_id, args_records["attributes"], to_meta)
 
 
-        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],doc_id,args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
 
@@ -130,7 +131,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         #Skip the part that creates the from and to node
 
-        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],doc_id,args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
 
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
@@ -257,10 +258,10 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_get_relation(self):
         from_record_args = base_connector_record_parameter_example()
         to_record_args = base_connector_record_parameter_example()
-        relation_args = base_connector_record_parameter_example()
+        relation_args = base_connector_relation_parameter_example()
 
-        from_label = "FROM NODE"
-        to_label = "FROM NODE"
+        from_label = relation_args["from_node"]
+        to_label = relation_args["to_node"]
         from_record_args["metadata"][METADATA_KEY_LABEL] = from_label
         to_record_args["metadata"][METADATA_KEY_LABEL] = to_label
 
@@ -268,7 +269,7 @@ class AdapterTestTemplate(unittest.TestCase):
         from_record_id = self.instance.create_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])  #
         to_record_id = self.instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])  #
 
-        relation_id = self.instance.create_relation(doc_id,from_label,to_label,relation_args["attributes"], relation_args["metadata"])
+        relation_id = self.instance.create_relation(doc_id,from_label,doc_id,to_label,relation_args["attributes"], relation_args["metadata"])
 
         relation_raw = self.instance.get_relation(relation_id)
 
