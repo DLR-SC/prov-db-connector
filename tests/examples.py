@@ -11,7 +11,7 @@ import datetime
 from prov.model import ProvDocument, QualifiedName, ProvRecord, ProvRelation, ProvActivity, Literal, Identifier
 from prov.constants import PROV_RECORD_IDS_MAP,PROV
 from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_LABEL
-import collections
+from collections import namedtuple
 
 
 def attributes_dict_example():
@@ -155,6 +155,6 @@ def prov_api_record_example():
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
 
     record = ProvActivity(doc, "ex:record", attributes)
-    Example = collections.namedtuple("prov_api_metadata_record_example", "metadata, attributes, prov_record, expected_attributes")
+    Example = namedtuple("prov_api_metadata_record_example", "metadata, attributes, prov_record, expected_attributes")
 
     return Example(metadata,attributes,record,expected_attributes)
