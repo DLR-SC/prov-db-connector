@@ -1,5 +1,5 @@
 from uuid import uuid4
-from prov.model import  ProvDocument, ProvBundle,Identifier, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvMention
+from prov.model import  ProvDocument, ProvBundle,Identifier, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvAssociation, ProvMention
 from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION,PROV,PROV_BUNDLE
 from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
 from provdbconnector.utils.serializer import encode_json_representation
@@ -20,7 +20,6 @@ class ProvBundleRecord(ProvRecord):
 
     def get_type(self):
         return PROV_BUNDLE
-
 
 class ProvApi(object):
     def __init__(self, id=None, adapter=None, authinfo=None, *args):
@@ -62,7 +61,7 @@ class ProvApi(object):
 
         doc_id = self._adapter.create_document()
 
-        self._create_bundle(doc_id,prov_document,bundle_connection=False)
+        self._create_bundle(doc_id,prov_document)
 
 
         for bundle in prov_document.bundles:
@@ -70,6 +69,7 @@ class ProvApi(object):
             (metadata,attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
             bundle_id = self._adapter.create_bundle(document_id=doc_id,attributes=attributes,metadata=metadata)
             self._create_bundle(bundle_id,bundle)
+            self._create_bundle_assosiation(document_id=doc_id,bundle_id=bundle_id,prov_bundle=bundle)
 
 
         # foreach bundle in bundles
@@ -82,17 +82,16 @@ class ProvApi(object):
         raise NotImplementedError()
 
 
-    def _create_bundle(self,bundle_id,prov_bundle, bundle_connection=True):
+    def _create_bundle(self,bundle_id,prov_bundle):
         if not isinstance(prov_bundle, ProvBundle) or type(bundle_id) is not str:
             raise InvalidArgumentTypeException()
 
-
+        #create nodes
         for record in prov_bundle.get_records(ProvElement):
             (metadata,attributes) = self._get_metadata_and_attributes_for_record(record)
             self._adapter.create_record(bundle_id,attributes,metadata)
-        #        create relation between bundle node and record node, only if options (bundle_connection) is set
 
-
+        #create realtions
         for relation in prov_bundle.get_records(ProvRelation):
             #skip relations of the type "prov:mentionOf" https://www.w3.org/TR/prov-links/
             if relation.get_type() is PROV_MENTION:
@@ -115,6 +114,16 @@ class ProvApi(object):
             self._adapter.create_relation(bundle_id,from_qualified_name,bundle_id,to_qualified_name, attributes,metadata)
 
 
+    def _create_bundle_assosiation(self, document_id, bundle_id,prov_bundle):
+
+        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None)
+        (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
+        to_qualified_name = prov_bundle.identifier
+
+        for record in prov_bundle.get_records(ProvElement):
+            (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
+            from_qualified_name = metadata[METADATA_KEY_LABEL]
+            self._adapter.create_relation(bundle_id, from_qualified_name, document_id, to_qualified_name, belong_attributes,belong_metadata)
 
 
     def _create_unknown_node(self,bundle_id):
