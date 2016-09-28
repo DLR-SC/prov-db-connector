@@ -57,7 +57,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_relation(self, bundle_id, from_node, to_node, attributes, metadata):
+    def create_relation(self, from_bundle_id, from_node, to_bundle_id,to_node, attributes, metadata):
         pass
 
     @abstractmethod

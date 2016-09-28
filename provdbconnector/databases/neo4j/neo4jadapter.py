@@ -15,8 +15,8 @@ NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as I
 NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID """  # args: provType, values
 NEO4J_CREATE_RELATION_RETURN_ID = """
                                 MATCH
-                                    (from{{`meta:bundle_id`:'{bundle_id}',`meta:label`:'{from_label}'}}),
-                                    (to{{`meta:bundle_id`:'{bundle_id}', `meta:label`:'{to_label}'}})
+                                    (from{{`meta:bundle_id`:'{from_bundle_id}',`meta:label`:'{from_label}'}}),
+                                    (to{{`meta:bundle_id`:'{to_bundle_id}', `meta:label`:'{to_label}'}})
                                 CREATE
                                     (from)-[r:{relation_type} {{{property_labels}}}]->(to)
                                 RETURN
@@ -153,10 +153,10 @@ class Neo4jAdapter(BaseAdapter):
 
         return str(id)
 
-    def create_relation(self, bundle_id, from_node, to_node, attributes, metadata):
+    def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
 
         metadata = metadata.copy()
-        metadata.update({METADATA_KEY_BUNDLE_ID: bundle_id})
+        metadata.update({METADATA_KEY_BUNDLE_ID: from_bundle_id})
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
@@ -168,7 +168,8 @@ class Neo4jAdapter(BaseAdapter):
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_RELATION_RETURN_ID.format(bundle_id=bundle_id,
+        command = NEO4J_CREATE_RELATION_RETURN_ID.format(from_bundle_id=from_bundle_id,
+                                                         to_bundle_id=to_bundle_id,
                                                          from_label=from_node,
                                                          to_label=to_node,
                                                          relation_type=relationType,
