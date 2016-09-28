@@ -172,6 +172,25 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_doc.bundles,list)
         self.assertEqual(len(raw_doc.bundles),0)
 
+    def test_get_document_with_budles(self):
+        ids = insert_document_with_bundles(self.instance)
+        raw_doc = self.instance.get_document(ids["doc_id"])
+
+
+
+        #check document
+        self.assertIsNotNone(raw_doc)
+        self.assertIsNotNone(raw_doc.document)
+        self.assertIsInstance(raw_doc.document.records, list)
+        self.assertIsInstance(raw_doc.document.records[0].attributes, dict)
+        self.assertIsInstance(raw_doc.document.records[0].metadata, dict)
+
+        # check bundle
+        self.assertIsInstance(raw_doc.bundles, list)
+        self.assertEqual(len(raw_doc.bundles), 1)
+
+
+
     def test_get_document_not_found(self):
         with self.assertRaises(NotFoundException):
             self.instance.get_document("99999999")
