@@ -1,5 +1,5 @@
 from uuid import uuid4
-from prov.model import  ProvDocument, ProvBundle, ProvRecord,ProvRelation, QualifiedName
+from prov.model import  ProvDocument, ProvBundle, ProvRecord,ProvElement,ProvRelation, QualifiedName
 from prov.constants import PROV_ATTRIBUTES
 from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
 from provdbconnector.utils.serializer import encode_json_representation
@@ -74,6 +74,10 @@ class ProvApi(object):
         if not isinstance(prov_bundle, ProvBundle) or type(bundle_id) is not str:
             raise InvalidArgumentTypeException()
 
+
+        for record in prov_bundle.get_records(ProvElement):
+            (metadata,attributes) = self._get_metadata_and_attributes_for_record(record)
+            self._adapter.create_record(bundle_id,attributes,metadata)
         #    foreach record in bundle :
         #        prepare metadata (like labels, namespaces, type_map) as primitive datatypes
         #        create database node
@@ -116,6 +120,14 @@ class ProvApi(object):
                 prov_label =  qualified_name
 
         #extract namespaces from record
+
+        #add namespace from prov_type
+        namespace = prov_type.namespace
+        used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
+
+        #add namespace from prov label
+        namespace = prov_label.namespace
+        used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
 
         attributes = dict(prov_record.attributes.copy())
         for key,value in attributes.items():
