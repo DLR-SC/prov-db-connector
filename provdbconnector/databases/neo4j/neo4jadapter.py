@@ -91,12 +91,16 @@ class Neo4jAdapter(BaseAdapter):
         return prefixed_metadata
 
     def _parse_to_primitive_attributes(self, attributes, prefixed_metadata):
-        db_attributes = attributes.copy()
-        db_attributes.update(prefixed_metadata)
+        all_attributes = attributes.copy()
+        all_attributes.update(prefixed_metadata)
 
+        db_attributes = dict()
         # transform values
-        for key, value in db_attributes.items():
-            db_attributes[key] = encode_string_value_to_primitive(value)
+        for key, value in all_attributes.items():
+            key_primitive = encode_string_value_to_primitive(key)
+            value_primitive = encode_string_value_to_primitive(value)
+            db_attributes.update({key_primitive:value_primitive})
+
         return db_attributes
 
     def _get_attributes_labels_cypher_string(self, db_attributes):
