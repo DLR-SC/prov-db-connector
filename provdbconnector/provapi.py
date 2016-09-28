@@ -1,5 +1,5 @@
 from uuid import uuid4
-
+from prov.model import  ProvDocument
 
 class ProvApiException(Exception):
     pass
@@ -8,6 +8,8 @@ class ProvApiException(Exception):
 class NoDataBaseAdapter(ProvApiException):
     pass
 
+class InvalidArgumentTypeException(ProvApiException):
+    pass
 
 class ProvApi(object):
     def __init__(self, id=None, adapter=None, authinfo=None, *args):
@@ -42,7 +44,8 @@ class ProvApi(object):
 
     #Methods that consume ProvDocument instances and produce ProvDocument instances
     def create_document_from_prov(self, content=None):
-        raise NotImplementedError()
+        if not isinstance(content,ProvDocument):
+            raise InvalidArgumentTypeException()
 
     def get_document_as_prov(self, id=None):
         raise NotImplementedError()

@@ -5,7 +5,7 @@ import tests.examples as examples
 from provdbconnector import ProvApi
 from provdbconnector.databases import InvalidOptionsException
 from provdbconnector.databases import Neo4jAdapter
-from provdbconnector.provapi import NoDataBaseAdapter
+from provdbconnector.provapi import NoDataBaseAdapter,InvalidArgumentTypeException
 
 class ProvApiTestTemplate(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -144,6 +144,12 @@ class ProvApiTests(unittest.TestCase):
         document_id = self.provapi.create_document_from_prov(example)
         self.assertIsNone(document_id)
         self.assertIsInstance(document_id, str)
+
+    def test_create_document_from_prov_invalid_arguments(self):
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.create_document_from_prov(None)
+
 
     def test_get_document_as_prov(self):
         self.provapi.get_document_as_prov()
