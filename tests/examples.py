@@ -135,6 +135,7 @@ def prov_api_record_example():
     namespaces = dict()
     namespaces.update({"ex": "http://example.com"})
     namespaces.update({"custom": "http://custom.com"})
+    namespaces.update({"prov": "http://www.w3.org/ns/prov#"})
 
     type_map = dict()
     type_map.update({"ex:date value": {"type": "xsd:dateTime"}})
