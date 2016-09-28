@@ -65,11 +65,12 @@ class ProvApi(object):
 
 
         for bundle in prov_document.bundles:
-            bundle_record = ProvBundleRecord(bundle,identifier=bundle.identifier)
+            custom_bunlde_identifier = bundle.valid_qualified_name("prov:bundle:{}".format(bundle.identifier))
+            bundle_record = ProvBundleRecord(bundle,identifier=custom_bunlde_identifier, attributes={"prov:bundle_name": bundle.identifier})
             (metadata,attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
             bundle_id = self._adapter.create_bundle(document_id=doc_id,attributes=attributes,metadata=metadata)
             self._create_bundle(bundle_id,bundle)
-            self._create_bundle_assosiation(document_id=doc_id,bundle_id=bundle_id,prov_bundle=bundle)
+            self._create_bundle_assosiation(document_id=doc_id,bundle_id=bundle_id,bundle_idientifier=custom_bunlde_identifier,prov_bundle=bundle)
 
 
         # foreach bundle in bundles
@@ -114,11 +115,11 @@ class ProvApi(object):
             self._adapter.create_relation(bundle_id,from_qualified_name,bundle_id,to_qualified_name, attributes,metadata)
 
 
-    def _create_bundle_assosiation(self, document_id, bundle_id,prov_bundle):
+    def _create_bundle_assosiation(self, document_id, bundle_id,bundle_idientifier,prov_bundle):
 
         belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None)
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
-        to_qualified_name = prov_bundle.identifier
+        to_qualified_name = bundle_idientifier
 
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
