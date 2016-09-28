@@ -32,10 +32,10 @@ def insert_document_with_bundles(instance):
 
     from_record_args = base_connector_record_parameter_example()
     to_record_args = base_connector_record_parameter_example()
-    relation_args = base_connector_record_parameter_example()
+    relation_args = base_connector_relation_parameter_example()
 
     from_label = "FROM NODE"
-    to_label = "FROM NODE"
+    to_label = "TO NODE"
     from_record_args["metadata"][METADATA_KEY_LABEL] = from_label
     to_record_args["metadata"][METADATA_KEY_LABEL] = to_label
 
@@ -303,13 +303,34 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_document(doc_id)
 
     def test_delete_bundle(self):
-        raise NotImplementedError()
+        ids = insert_document_with_bundles(self.instance)
+        bundle_id  = ids["bundle_id"]
+        result = self.instance.delete_bundle(bundle_id)
+        self.assertIsInstance(result,bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            self.instance.get_bundle(bundle_id)
 
     def test_delete_record(self):
-        raise NotImplementedError()
+        ids = insert_document_with_bundles(self.instance)
+        from_record_id = ids["from_record_id"]
+        result = self.instance.delete_record(from_record_id)
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            self.instance.get_record(from_record_id)
 
     def test_delete_relation(self):
-        raise NotImplementedError()
+        ids = insert_document_with_bundles(self.instance)
+        relation_id = ids["relation_id"]
+        result = self.instance.delete_relation(relation_id)
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            self.instance.get_relation(relation_id)
 
 
 class BaseConnectorTests(unittest.TestCase):

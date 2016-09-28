@@ -31,6 +31,7 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                 """  # args: provType, values
 #get
 NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """MATCH (b {`meta:prov_type`:'prov:Bundle', `meta:bundle_id`: {bundle_id}}) RETURN b """
+NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID"""
 NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
 
                             MATCH (d)-[r]-(x)
@@ -51,7 +52,9 @@ NEO4J_GET_RECORD_RETURN_NODE  = """MATCH (node) WHERE ID(node)={record_id} RETUR
 NEO4J_GET_RELATION_RETURN_NODE  = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
 
 # delete
-NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {id} DETACH DELETE x """
+NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {node_id} DETACH DELETE x """
+NEO4J_DELETE_BUNDLE_BY_ID = """MATCH (d {`meta:bundle_id`:{bundle_id}}) DETACH DELETE  d"""
+NEO4J_DELETE_RELATION_BY_ID = """MATCH ()-[r]-() WHERE id(r) = {relation_id} DELETE r"""
 
 
 class Neo4jAdapter(BaseAdapter):
@@ -115,7 +118,7 @@ class Neo4jAdapter(BaseAdapter):
         for record in result:
             id = record["ID"]
 
-        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"id": id})
+        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": id})
 
         if id is None:
             raise DatabaseException("Could not get a valid ID result back")
@@ -204,6 +207,17 @@ class Neo4jAdapter(BaseAdapter):
 
         return doc
 
+    def get_bundle_ids(self,document_id):
+        session = self._create_session()
+
+        result_set = session.run(NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS,{"parent_id": document_id})
+
+        ids = list()
+        for result in result_set:
+            ids.append(result["ID"])
+
+        return ids
+
 
     def get_bundle(self, bundle_id):
 
@@ -275,6 +289,29 @@ class Neo4jAdapter(BaseAdapter):
         return self._split_attributes_metadata_from_node(relation)
 
     def delete_document(self, document_id):
+        bundleIds = self.get_bundle_ids(document_id)
+        result_list = list()
+        for id in bundleIds:
+            result_list.append(self.delete_bundle(id))
+
+        result_list.append(self.delete_bundle(document_id))
+
+        return all(result_list)
+
+    def delete_bundle(self, bundle_id):
         session = self._create_session()
 
-        result = session.run()
+        result_set = session.run(NEO4J_DELETE_BUNDLE_BY_ID,{"bundle_id": bundle_id})
+
+        return True
+
+    def delete_record(self,record_id):
+        session = self._create_session()
+        result_set = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
+        return True
+
+    def delete_relation(self, relation_id):
+        session = self._create_session()
+        result_set = session.run(NEO4J_DELETE_RELATION_BY_ID,{"relation_id": int(relation_id)})
+        return True
+

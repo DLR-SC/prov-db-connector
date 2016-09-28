@@ -80,3 +80,16 @@ class BaseAdapter(ABC):
     def delete_document(self, document_id):
         pass
 
+    @abstractmethod
+    def delete_bundle(self, bundle_id):
+        pass
+
+    @abstractmethod
+    def delete_record(self, record_id):
+        pass
+
+    @abstractmethod
+    def delete_relation(self, relation_id):
+        pass
+
+
