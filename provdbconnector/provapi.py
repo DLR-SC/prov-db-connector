@@ -1,6 +1,6 @@
 from uuid import uuid4
-from prov.model import  ProvDocument, ProvBundle, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvMention
-from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION
+from prov.model import  ProvDocument, ProvBundle,Identifier, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvMention
+from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION,PROV,PROV_BUNDLE
 from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
 from provdbconnector.utils.serializer import encode_json_representation
 from collections import namedtuple
@@ -15,6 +15,13 @@ class InvalidArgumentTypeException(ProvApiException):
     pass
 class InvalidProvRecordException(ProvApiException):
     pass
+
+class ProvBundleRecord(ProvRecord):
+
+    def get_type(self):
+        return PROV_BUNDLE
+
+
 class ProvApi(object):
     def __init__(self, id=None, adapter=None, authinfo=None, *args):
         if id is None:
@@ -57,13 +64,18 @@ class ProvApi(object):
 
         self._create_bundle(doc_id,prov_document,bundle_connection=False)
 
-        # foreach bundle
-        #    create bundle id
-        #    self._create_bundle(bundle_id, bundle)
+
+        for bundle in prov_document.bundles:
+            bundle_record = ProvBundleRecord(bundle,identifier=bundle.identifier)
+            (metadata,attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
+            bundle_id = self._adapter.create_bundle(document_id=doc_id,attributes=attributes,metadata=metadata)
+            self._create_bundle(bundle_id,bundle)
 
 
         # foreach bundle in bundles
         #    self._create_bundle_links(bundle_id, prov_bundle)
+
+        return doc_id
 
 
     def get_document_as_prov(self, id=None):
@@ -86,18 +98,34 @@ class ProvApi(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
+            #get from and to node
             from_tuple, to_tuple= relation.formal_attributes[:2]
             from_qualified_name = from_tuple[1]
             to_qualified_name = to_tuple[1]
-            #if target or origin record is unknown, create node "Unknown"
 
+            #if target or origin record is unknown, create node "Unknown"
+            if from_qualified_name is None:
+                from_qualified_name = self._create_unknown_node(bundle_id)
+
+            if to_qualified_name is None:
+                to_qualified_name = self._create_unknown_node(bundle_id)
+
+            #split metadata and attributes
             (metadata,attributes) = self._get_metadata_and_attributes_for_record(relation)
             self._adapter.create_relation(bundle_id,from_qualified_name,bundle_id,to_qualified_name, attributes,metadata)
 
 
 
 
+    def _create_unknown_node(self,bundle_id):
+        uid = uuid4()
+        doc = ProvDocument()
+        label = doc.valid_qualified_name("prov:Unknown-{}".format(uid))
+        record = ProvRecord(bundle=doc,identifier=label)
 
+        (metadata,attributes) = self._get_metadata_and_attributes_for_record(record)
+        self._adapter.create_record(bundle_id,attributes,metadata)
+        return label
     def _create_bundle_links(self,prov_bundle):
 
         #   foreach relation in bundle
@@ -114,6 +142,10 @@ class ProvApi(object):
 
         prov_type = prov_record.get_type()
         prov_label = prov_record.label
+
+
+        if prov_type is None and isinstance(prov_record,ProvRecord):
+            prov_type = bundle.valid_qualified_name("prov:Unknown")
 
         #if relation without label -> use prov_type as label
         if prov_label is None and prov_record.identifier is None:
