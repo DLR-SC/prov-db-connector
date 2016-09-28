@@ -1,8 +1,10 @@
 import os
 import unittest
 from provdbconnector.databases import Neo4jAdapter
+from provdbconnector.provapi import ProvApi
 from provdbconnector.databases import InvalidOptionsException, AuthException
 from tests.databases.test_baseadapter import AdapterTestTemplate
+from tests.test_provapi import ProvApiTestTemplate
 
 
 neo4j_default_user = os.environ.get('NEO4J_USERNAME', 'neo4j')
@@ -51,3 +53,17 @@ class Neo4jAdapterTests(AdapterTestTemplate):
         session.run("MATCH (x) DETACH DELETE x")
         del self.instance
 
+
+class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
+
+    def setUp(self):
+        self.authInfo = {"user_name": os.environ.get('NEO4J_USERNAME', 'neo4j'),
+                         "user_password": os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j'),
+                         "host": os.environ.get('NEO4J_HOST', 'localhost:7687')
+                         }
+        self.provapi = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
+
+    def tearDown(self):
+        session = self.provapi._adapter._create_session()
+        session.run("MATCH (x) DETACH DELETE x")
+        del self.provapi

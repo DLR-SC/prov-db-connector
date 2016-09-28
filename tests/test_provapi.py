@@ -30,69 +30,72 @@ class ProvApiTestTemplate(unittest.TestCase):
         else:
             self.run = lambda self, *args, **kwargs: None
 
+    def setUp(self):
+        #this function will never be executed !!!!
+        self.provapi = ProvApi()
 
     def test_prov_primer_example(self):
         prov_document = examples.primer_example()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def primer_example_alternate(self):
+    def test_primer_example_alternate(self):
         prov_document = examples.primer_example_alternate()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def w3c_publication_1(self):
+    def test_w3c_publication_1(self):
         prov_document = examples.w3c_publication_1()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def w3c_publication_2(self):
+    def test_w3c_publication_2(self):
         prov_document = examples.w3c_publication_2()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def bundles1(self):
+    def test_bundles1(self):
         prov_document = examples.bundles1()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def bundles2(self):
+    def test_bundles2(self):
         prov_document = examples.bundles2()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def collections(self):
+    def test_collections(self):
         prov_document = examples.collections()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def long_literals(self):
+    def test_long_literals(self):
         prov_document = examples.long_literals()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def datatypes(self):
+    def test_datatypes(self):
         prov_document = examples.datatypes()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
 
 
