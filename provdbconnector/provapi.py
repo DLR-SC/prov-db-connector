@@ -5,7 +5,7 @@ class ProvApiException(Exception):
     pass
 
 
-class NoDataBaseAdapter(ProvApiException):
+class NoDataBaseAdapterException(ProvApiException):
     pass
 
 class InvalidArgumentTypeException(ProvApiException):
@@ -19,7 +19,7 @@ class ProvApi(object):
             self.apiid = id
 
         if adapter is None:
-            raise NoDataBaseAdapter()
+            raise NoDataBaseAdapterException()
         self._adapter = adapter()
         self._adapter.connect(authinfo)
 

@@ -5,7 +5,7 @@ import tests.examples as examples
 from provdbconnector import ProvApi
 from provdbconnector.databases import InvalidOptionsException
 from provdbconnector.databases import Neo4jAdapter
-from provdbconnector.provapi import NoDataBaseAdapter,InvalidArgumentTypeException
+from provdbconnector.provapi import NoDataBaseAdapterException,InvalidArgumentTypeException
 
 class ProvApiTestTemplate(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -109,7 +109,7 @@ class ProvApiTests(unittest.TestCase):
 
     #Test create instnace
     def test_provapi_instance(self):
-        self.assertRaises(NoDataBaseAdapter, lambda: ProvApi())
+        self.assertRaises(NoDataBaseAdapterException, lambda: ProvApi())
         self.assertRaises(InvalidOptionsException, lambda: ProvApi(id=1, adapter=Neo4jAdapter))
 
         obj = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
