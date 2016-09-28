@@ -146,7 +146,25 @@ class ProvApiTests(unittest.TestCase):
     def test_create_document_from_prov(self):
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
-        self.assertIsNone(document_id)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+    def test_create_document_from_prov_alternate(self):
+        example = examples.primer_example_alternate()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+    def test_create_document_from_prov_bundles(self):
+        example = examples.bundles1()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+    def test_create_document_from_prov_bundles2(self):
+        example = examples.bundles2()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
     def test_create_document_from_prov_invalid_arguments(self):
