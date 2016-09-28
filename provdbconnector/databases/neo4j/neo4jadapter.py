@@ -201,9 +201,12 @@ class Neo4jAdapter(BaseAdapter):
         Document = namedtuple('Document', 'document, bundles')
 
         document = self.get_bundle(document_id)
-        doc = Document(document,list())
 
-        return doc
+        bundles = list()
+        for bundle_id in self.get_bundle_ids(document_id):
+            bundles.append(self.get_bundle(bundle_id))
+
+        return Document(document,bundles)
 
     def get_bundle_ids(self,document_id):
         session = self._create_session()
@@ -218,7 +221,7 @@ class Neo4jAdapter(BaseAdapter):
 
 
     def get_bundle(self, bundle_id):
-
+        bundle_id = str(bundle_id)
         session = self._create_session()
         records = list()
         result_set = session.run(NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS,{"bundle_id":bundle_id})
