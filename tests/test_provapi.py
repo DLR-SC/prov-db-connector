@@ -93,9 +93,6 @@ class ProvApiTestTemplate(unittest.TestCase):
 
         self.assertNotEqual(stored_document, prov_document)
 
-from provdbconnector.databases import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT, NEO4J_HTTP_PORT
-from provdbconnector.provapi import NoDataBaseAdapter
-
 
 class ProvApiTests(unittest.TestCase):
 
