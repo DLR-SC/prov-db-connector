@@ -23,7 +23,7 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                     ID(r) as ID
                                 """  # args: provType, values
 #get
-NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """MATCH (b {`meta:prov_type`:'prov:Bundle', `meta:bundle_id`: {bundle_id}}) RETURN b """
+NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """MATCH (b {`meta:prov_type`:'prov:Bundle'}) WHERE ID(b)=toInt({bundle_id}) RETURN b """
 NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID"""
 NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
 
