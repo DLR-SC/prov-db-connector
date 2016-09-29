@@ -1,9 +1,12 @@
 from uuid import uuid4
 from prov.model import  ProvDocument, ProvBundle,Identifier, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvAssociation, ProvMention
-from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION,PROV,PROV_BUNDLE
+from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION,PROV,PROV_BUNDLE,PROV_RECORD_IDS_MAP
 from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
-from provdbconnector.utils.serializer import encode_json_representation
+from provdbconnector.utils.serializer import encode_json_representation,add_namespaces_to_bundle,create_prov_record
 from collections import namedtuple
+from io import StringIO
+import json
+
 class ProvApiException(Exception):
     pass
 
@@ -13,6 +16,7 @@ class NoDataBaseAdapterException(ProvApiException):
 
 class InvalidArgumentTypeException(ProvApiException):
     pass
+
 class InvalidProvRecordException(ProvApiException):
     pass
 
@@ -85,7 +89,58 @@ class ProvApi(object):
     def get_document_as_prov(self, id=None):
         if not type(id) is str:
             raise InvalidArgumentTypeException()
-        
+
+        raw_doc = self._adapter.get_document(id)
+        # parse document
+
+        prov_document = ProvDocument()
+        for record in raw_doc.document.records:
+            self._parse_record(prov_document,record)
+
+        for bundle in raw_doc.bundles:
+            identifier = bundle.identifier
+            prov_bundle = prov_document.bundle(identifier=identifier)
+
+            for record in bundle.records:
+                self._parse_record(prov_bundle,record)
+        return prov_document
+
+
+    def _parse_record(self,prov_bundle,raw_record):
+        #check if record belongs to this bundle
+        prov_type = raw_record.metadata[METADATA_KEY_PROV_TYPE]
+        prov_type = prov_bundle.valid_qualified_name(prov_type)
+
+        #skip record if prov:type "prov:Unknown"
+        if prov_type is prov_bundle.valid_qualified_name("prov:Unknown"):
+            return
+
+        prov_id = raw_record.metadata[METADATA_KEY_LABEL]
+        prov_id_qualified = prov_bundle.valid_qualified_name(prov_id)
+
+        #set label only if it is not a prov type
+        if prov_id_qualified == prov_type:
+            prov_id = None
+
+        #get type map
+        type_map = raw_record.metadata[METADATA_KEY_TYPE_MAP]
+
+        if type(type_map) is str:
+            io = StringIO(type_map)
+            type_map = json.load(io)
+
+        elif type(type_map) is not dict:
+            raise InvalidArgumentTypeException("The type_map must be a dict or json string got: {}".format(type_map))
+
+
+
+        add_namespaces_to_bundle(prov_bundle,raw_record.metadata)
+        create_prov_record(prov_bundle,prov_type,prov_id,raw_record.attributes,type_map)
+
+
+
+
+
 
     def _create_bundle(self,bundle_id,prov_bundle):
         if not isinstance(prov_bundle, ProvBundle) or type(bundle_id) is not str:
@@ -166,7 +221,6 @@ class ProvApi(object):
 
         prov_type = prov_record.get_type()
         prov_label = prov_record.label
-
 
         if prov_type is None and isinstance(prov_record,ProvRecord):
             prov_type = bundle.valid_qualified_name("prov:Unknown")
