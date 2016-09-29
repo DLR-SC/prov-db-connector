@@ -29,17 +29,17 @@ NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
 
                             MATCH (d)-[r]-(x)
                             WHERE not((d)-[:includeIn]-(x)) and not(d.`meta:prov_type`='prov:Bundle' or x.`meta:prov_type`='prov:Bundle')and (d.`meta:bundle_id`) ={bundle_id}
-                            RETURN d as from, r as rel, x as to
+                            RETURN DISTINCT r as re
                             //Get all nodes that are alone without connections to other
                             UNION
-                            MATCH (a) WHERE (a.`meta:bundle_id`)={bundle_id}  AND NOT (a)<-[]->() and not(a.`meta:prov_type`='prov:Bundle')
-                            RETURN a as from, NULL as rel, NULL as to
+                            MATCH (a) WHERE (a.`meta:bundle_id`)={bundle_id} and not(a.`meta:prov_type`='prov:Bundle')
+                            RETURN DISTINCT a as re
                             UNION
                             //Get all nodes that have only the includeIn connection to the bundle
                             MATCH (a)-[r:includeIn]->()
                             WITH a,count(r) as relation_count
                             WHERE (a.`meta:bundle_id`)={bundle_id} and NOT(a.`meta:prov_type`='prov:Bundle') AND relation_count=1
-                            RETURN a as from,NULL as rel, NULL as to
+                            RETURN DISTINCT a as re
                         """
 NEO4J_GET_RECORD_RETURN_NODE  = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
 NEO4J_GET_RELATION_RETURN_NODE  = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
@@ -226,20 +226,12 @@ class Neo4jAdapter(BaseAdapter):
         records = list()
         result_set = session.run(NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS,{"bundle_id":bundle_id})
         for result in result_set:
-            from_node   = result["from"]
-            to_node     = result["to"]
-            relation    = result["rel"]
+            record     = result["re"]
 
-            if from_node is not None:
-                from_record_raw = self._split_attributes_metadata_from_node(from_node)
-                records.append(from_record_raw)
-
-            if to_node is not None:
-                to_node_record = self._split_attributes_metadata_from_node(to_node)
-                records.append(to_node_record)
-            if relation is not None:
-                relation_record = self._split_attributes_metadata_from_node(relation)
-                records.append(relation_record)
+            if record is  None:
+                raise DatabaseException("Record response should not be None")
+            relation_record = self._split_attributes_metadata_from_node(record)
+            records.append(relation_record)
 
         #Get bundle node and set identifier if there is a bundle node.
         bundle_node_result = session.run(NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE,{"bundle_id": bundle_id})
