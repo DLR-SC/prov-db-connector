@@ -184,10 +184,14 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_doc.document.records, list)
         self.assertIsInstance(raw_doc.document.records[0].attributes, dict)
         self.assertIsInstance(raw_doc.document.records[0].metadata, dict)
+        #3 records + 1 relation
+        self.assertEqual(len(raw_doc.document.records), 4)
 
         # check bundle
         self.assertIsInstance(raw_doc.bundles, list)
         self.assertEqual(len(raw_doc.bundles), 1)
+        #1 record
+        self.assertEqual(len(raw_doc.bundles[0].records), 1)
 
 
 
@@ -218,7 +222,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsNotNone(raw_bundle.bundle_record)
         self.assertIsNotNone(raw_bundle.bundle_record.metadata)
         self.assertIsNotNone(raw_bundle.bundle_record.attributes)
-        self.assertEqual(raw_bundle.identifier,args_bundle["metadata"][METADATA_KEY_LABEL])
+        self.assertEqual(raw_bundle.identifier,str(args_bundle["metadata"][METADATA_KEY_LABEL]))
         self.assertIsInstance(raw_bundle.records, list)
         self.assertIsInstance(raw_bundle.bundle_record.attributes, dict)
         self.assertIsInstance(raw_bundle.bundle_record.metadata, dict)
