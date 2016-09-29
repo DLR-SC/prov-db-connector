@@ -25,6 +25,7 @@ class ProvBundleRecord(ProvRecord):
     def get_type(self):
         return PROV_BUNDLE
 
+PROV_API_BUNDLE_IDENTIFIER_PREFIX = "prov:bundle:{}"
 class ProvApi(object):
     def __init__(self, id=None, adapter=None, authinfo=None, *args):
         if id is None:
@@ -71,7 +72,7 @@ class ProvApi(object):
 
         bundle_id_map = dict()
         for bundle in prov_document.bundles:
-            custom_bunlde_identifier = bundle.valid_qualified_name("prov:bundle:{}".format(bundle.identifier))
+            custom_bunlde_identifier = bundle.valid_qualified_name(PROV_API_BUNDLE_IDENTIFIER_PREFIX.format(bundle.identifier))
             bundle_record = ProvBundleRecord(bundle,identifier=custom_bunlde_identifier, attributes={"prov:bundle_name": bundle.identifier})
             (metadata,attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
             bundle_id = self._adapter.create_bundle(document_id=doc_id,attributes=attributes,metadata=metadata)
@@ -98,7 +99,7 @@ class ProvApi(object):
             self._parse_record(prov_document,record)
 
         for bundle in raw_doc.bundles:
-            identifier = bundle.identifier
+            identifier = bundle.identifier[len(PROV_API_BUNDLE_IDENTIFIER_PREFIX)-2:] ##remove prefix
             prov_bundle = prov_document.bundle(identifier=identifier)
 
             for record in bundle.records:
