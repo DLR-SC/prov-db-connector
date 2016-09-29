@@ -20,6 +20,9 @@ def attributes_dict_example():
     attributes.update({"ex:int value": 99})
     attributes.update({"ex:double value": 99.33})
     attributes.update({"ex:date value": datetime.datetime.now()})
+    attributes.update({"ex:list value": ["list","of","strings"]})
+    attributes.update({"ex:dict value": {"dict":"value"}})
+
     return attributes
 
 def base_connector_bundle_parameter_example():

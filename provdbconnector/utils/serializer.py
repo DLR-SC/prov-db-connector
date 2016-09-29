@@ -2,11 +2,12 @@ from prov.model import Literal,Identifier, QualifiedName,Namespace,parse_xsd_dat
 from prov.constants import PROV_QUALIFIEDNAME,PROV_ATTRIBUTES_ID_MAP,PROV_ATTRIBUTES,PROV_MEMBERSHIP,PROV_ATTR_ENTITY,PROV_ATTRIBUTE_QNAMES,PROV_ATTR_COLLECTION,XSD_ANYURI
 from provdbconnector.databases.baseadapter import METADATA_KEY_NAMESPACES
 from datetime import datetime
+from io import StringIO
 import logging
 import six
 import sys
 import ast
-
+import json
 class SerializerException(Exception):
     pass
 
@@ -46,6 +47,10 @@ def encode_string_value_to_primitive(value):
         return value
     elif type(value) is list:
         return value
+    elif type(value) is dict:
+        io = StringIO()
+        json.dump(value, io)
+        return io.getvalue()
     return str(value)
 
 
