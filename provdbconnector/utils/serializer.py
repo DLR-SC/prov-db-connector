@@ -86,9 +86,17 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
     namespaces = dict()
     try:
         namespace_str = metadata[METADATA_KEY_NAMESPACES]
-        namespaces = ast.literal_eval(namespace_str)
     except ValueError:
         SerializerException("No valid namespace provided, should be a string of a dict: {}".format(metadata))
+        return
+
+    if type(namespace_str) is str:
+        io = StringIO(namespace_str)
+        namespaces= json.load(io)
+    elif type(namespace_str) is dict:
+        namespaces = namespace_str
+    else:
+        raise SerializerException("Namespaces metadata should returned as json string or dict not as {}".format(type(namespace_str)))
 
     for prefix, uri in namespaces.items():
         if prefix is not None and uri is not None:
@@ -100,7 +108,7 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
             SerializerException("No valid namespace provided for the metadata: {}".format(metadata) )
 
 
-def create_prov_record(bundle, prov_type, prov_id, properties):
+def create_prov_record(bundle, prov_type, prov_id, properties,type_map):
     """
 
     :param prov_type: valid prov type like prov:Entry as string
@@ -162,11 +170,15 @@ def create_prov_record(bundle, prov_type, prov_id, properties):
             )
             attributes[attr] = value
         else:
+            value_type = None
+            if type_map:
+                value_type = type_map.get(attr_name,None)
+
             if isinstance(values, list):
                 other_attributes.extend(
                     (
                         attr,
-                        decode_json_representation(value,None, bundle)
+                        decode_json_representation(value,value_type, bundle)
                     )
                     for value in values
                 )
@@ -175,7 +187,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties):
                 other_attributes.append(
                     (
                         attr,
-                        decode_json_representation(values,None, bundle)
+                        decode_json_representation(values,value_type, bundle)
                     )
                 )
     record = bundle.new_record(
