@@ -1,10 +1,16 @@
-from prov.model import Literal,Identifier, QualifiedName
-from prov.constants import PROV_QUALIFIEDNAME
+from prov.model import Literal,Identifier, QualifiedName,Namespace,parse_xsd_datetime
+from prov.constants import PROV_QUALIFIEDNAME,PROV_ATTRIBUTES_ID_MAP,PROV_ATTRIBUTES,PROV_MEMBERSHIP,PROV_ATTR_ENTITY,PROV_ATTRIBUTE_QNAMES,PROV_ATTR_COLLECTION,XSD_ANYURI
+from provdbconnector.databases.baseadapter import METADATA_KEY_NAMESPACES
 from datetime import datetime
+import logging
 import six
 import sys
+import ast
 
+class SerializerException(Exception):
+    pass
 
+logger = logging.getLogger(__name__)
 # Reverse map for prov.model.XSD_DATATYPE_PARSERS
 LITERAL_XSDTYPE_MAP = {
     float: 'xsd:double',
@@ -67,3 +73,134 @@ def encode_json_representation(value):
     else:
         return None
 
+
+
+#DECODE
+
+def add_namespaces_to_bundle(prov_bundle, metadata):
+    namespaces = dict()
+    try:
+        namespace_str = metadata[METADATA_KEY_NAMESPACES]
+        namespaces = ast.literal_eval(namespace_str)
+    except ValueError:
+        SerializerException("No valid namespace provided, should be a string of a dict: {}".format(metadata))
+
+    for prefix, uri in namespaces.items():
+        if prefix is not None and uri is not None:
+            if prefix != 'default':
+                prov_bundle.add_namespace(Namespace(prefix, uri))
+            else:
+                prov_bundle.set_default_namespace(uri)
+        else:
+            SerializerException("No valid namespace provided for the metadata: {}".format(metadata) )
+
+
+def create_prov_record(bundle, prov_type, prov_id, properties):
+    """
+
+    :param prov_type: valid prov type like prov:Entry as string
+    :param prov_id: valid id as string like <namespace>:<name>
+    :param properties: dict{attr_name:attr_value} dict with all properties (prov and additional)
+    :return: ProvRecord
+    """
+    # Parse attributes
+    if isinstance(properties, dict):
+        properties_list = properties.items()
+    elif isinstance(properties, list):
+        properties_list = properties
+    else:
+        raise SerializerException("please provide properties as list[(key,value)] or dict your provided: %s" % properties.__class__.__name__)
+
+    attributes = dict()
+    other_attributes = []
+    # this is for the multiple-entity membership hack to come
+    membership_extra_members = None
+    for attr_name, values in properties_list:
+
+        attr = (
+            PROV_ATTRIBUTES_ID_MAP[attr_name]
+            if attr_name in PROV_ATTRIBUTES_ID_MAP
+            else bundle.valid_qualified_name(attr_name)
+        )
+        if attr in PROV_ATTRIBUTES:
+            if isinstance(values, list):
+                # only one value is allowed
+                if len(values) > 1:
+                    # unless it is the membership hack
+                    if prov_type == PROV_MEMBERSHIP and \
+                                    attr == PROV_ATTR_ENTITY:
+                        # This is a membership relation with
+                        # multiple entities
+                        # HACK: create multiple membership
+                        # relations, one x each entity
+
+                        # Store all the extra entities
+                        membership_extra_members = values[1:]
+                        # Create the first membership relation as
+                        # normal for the first entity
+                        value = values[0]
+                    else:
+                        error_msg = (
+                            'The prov package does not support PROV'
+                            ' attributes having multiple values.'
+                        )
+                        logger.error(error_msg)
+                        raise SerializerException(error_msg)
+                else:
+                    value = values[0]
+            else:
+                value = values
+            value = (
+                bundle.valid_qualified_name(value)
+                if attr in PROV_ATTRIBUTE_QNAMES
+                else parse_xsd_datetime(value)
+            )
+            attributes[attr] = value
+        else:
+            if isinstance(values, list):
+                other_attributes.extend(
+                    (
+                        attr,
+                        decode_json_representation(value,None, bundle)
+                    )
+                    for value in values
+                )
+            else:
+                # single value
+                other_attributes.append(
+                    (
+                        attr,
+                        decode_json_representation(values,None, bundle)
+                    )
+                )
+    record = bundle.new_record(
+        prov_type, prov_id, attributes, other_attributes
+    )
+    # HACK: creating extra (unidentified) membership relations
+    if membership_extra_members:
+        collection = attributes[PROV_ATTR_COLLECTION]
+        for member in membership_extra_members:
+            bundle.membership(
+                collection, bundle.valid_qualified_name(member)
+            )
+    return record
+
+
+def decode_json_representation(value,type, bundle):
+    if isinstance(type, dict):
+        # complex type
+        datatype = type['type'] if 'type' in type else None
+        datatype = bundle.valid_qualified_name(datatype)
+        langtag = type['lang'] if 'lang' in type else None
+        if datatype == XSD_ANYURI:
+            return Identifier(value)
+        elif datatype == PROV_QUALIFIEDNAME:
+            return bundle.valid_qualified_name( value)
+        else:
+            # The literal of standard Python types is not converted here
+            # It will be automatically converted when added to a record by
+            # _auto_literal_conversion()
+            return Literal(value, datatype, langtag)
+    else:
+        # simple type, just return it
+        return value
