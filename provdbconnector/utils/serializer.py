@@ -1,13 +1,16 @@
-from prov.model import Literal,Identifier, QualifiedName,Namespace,parse_xsd_datetime
-from prov.constants import PROV_QUALIFIEDNAME,PROV_ATTRIBUTES_ID_MAP,PROV_ATTRIBUTES,PROV_MEMBERSHIP,PROV_ATTR_ENTITY,PROV_ATTRIBUTE_QNAMES,PROV_ATTR_COLLECTION,XSD_ANYURI
-from provdbconnector.databases.baseadapter import METADATA_KEY_NAMESPACES
+import json
+import logging
+import sys
 from datetime import datetime
 from io import StringIO
-import logging
+
 import six
-import sys
-import ast
-import json
+from prov.constants import PROV_QUALIFIEDNAME,PROV_ATTRIBUTES_ID_MAP,PROV_ATTRIBUTES,PROV_MEMBERSHIP,PROV_ATTR_ENTITY,PROV_ATTRIBUTE_QNAMES,PROV_ATTR_COLLECTION,XSD_ANYURI
+from prov.model import Literal,Identifier, QualifiedName,Namespace,parse_xsd_datetime
+
+from provdbconnector.databases.baseadapter import METADATA_KEY_NAMESPACES
+
+
 class SerializerException(Exception):
     pass
 

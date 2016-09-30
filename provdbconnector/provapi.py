@@ -1,12 +1,16 @@
-from uuid import uuid4
-from prov.model import  ProvDocument, ProvBundle,Identifier, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvAssociation, ProvMention
-from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION,PROV,PROV_BUNDLE,PROV_RECORD_IDS_MAP
-from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
-from provdbconnector.utils.serializer import encode_json_representation,add_namespaces_to_bundle,create_prov_record
-from provdbconnector.utils import form_string, to_json,to_provn,to_xml
+import json
 from collections import namedtuple
 from io import StringIO
-import json
+from uuid import uuid4
+
+from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE
+from prov.model import  ProvDocument, ProvBundle, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvAssociation
+
+from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES, \
+    METADATA_KEY_TYPE_MAP
+from provdbconnector.utils import form_string, to_json,to_provn,to_xml
+from provdbconnector.utils.serializer import encode_json_representation,add_namespaces_to_bundle,create_prov_record
+
 
 class ProvApiException(Exception):
     pass
@@ -265,7 +269,7 @@ class ProvApi(object):
                 namespace = key.namespace
                 used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
             else:
-                raise InvalidProvRecordException("Not support key type %s" % type(key))
+                raise InvalidProvRecordException("Not support key type {}".format(type(key)))
 
             #try to add
             if isinstance(value, QualifiedName):

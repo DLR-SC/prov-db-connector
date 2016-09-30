@@ -1,7 +1,10 @@
-from prov.model import ProvDocument
-from io import BufferedReader, StringIO
 from functools import  reduce
+from io import BufferedReader
+
 import  six
+from prov.model import ProvDocument
+
+
 class ConverterException(Exception):
     pass
 
