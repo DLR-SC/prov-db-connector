@@ -1,3 +1,5 @@
+import os
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, METADATA_PARENT_ID, \
     METADATA_KEY_IDENTIFIER, METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
@@ -7,6 +9,12 @@ from neo4j.v1 import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive
+
+NEO4J_USER = os.environ.get('NEO4J_USERNAME', 'neo4j')
+NEO4J_PASS = os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j')
+NEO4J_HOST = os.environ.get('NEO4J_HOST', 'localhost')
+NEO4J_BOLT_PORT = os.environ.get('NEO4J_BOLT_PORT', '7687')
+NEO4J_HTTP_PORT = os.environ.get('NEO4J_BOLT_PORT', '7474')
 
 NEO4J_META_PREFIX = "meta:"
 

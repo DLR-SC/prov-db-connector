@@ -1,5 +1,5 @@
-import os
 import unittest
+from provdbconnector.databases import Neo4jAdapter, NEO4J_USER,NEO4J_PASS,NEO4J_HOST, NEO4J_BOLT_PORT, NEO4J_HTTP_PORT
 from provdbconnector.databases import Neo4jAdapter
 from provdbconnector.provapi import ProvApi
 from provdbconnector.databases import InvalidOptionsException, AuthException
@@ -7,33 +7,29 @@ from tests.databases.test_baseadapter import AdapterTestTemplate
 from tests.test_provapi import ProvApiTestTemplate
 
 
-neo4j_default_user = os.environ.get('NEO4J_USERNAME', 'neo4j')
-neo4j_default_pass = os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j')
-neo4j_default_host = os.environ.get('NEO4J_HOST', 'localhost:7687')
-
 class Neo4jAdapterTests(AdapterTestTemplate):
 
     def setUp(self):
         self.instance = Neo4jAdapter()
-        authInfo = {"user_name": neo4j_default_user,
-                    "user_password": neo4j_default_pass,
-                    "host": neo4j_default_host
+        authInfo = {"user_name": NEO4J_USER,
+                    "user_password": NEO4J_PASS,
+                    "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
         }
         self.instance.connect(authInfo)
     @unittest.skip("Skiped because the server configuration currently is set to 'no password', so the authentication will never fail")
     def test_connect_fails(self):
-        authInfo = {"user_name": neo4j_default_user,
+        authInfo = {"user_name": NEO4J_USER,
                     "user_password": 'xxxxxx',
-                    "host": neo4j_default_host
+                    "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
         }
         self.instance.connect(authInfo)
         with self.assertRaises(AuthException):
             self.instance.connect(authInfo)
 
     def test_connect_invalid_options(self):
-        authInfo = {"u": neo4j_default_user,
+        authInfo = {"u": NEO4J_USER,
                     "p": 'xxxxxx',
-                    "h": neo4j_default_host
+                    "h": NEO4J_HOST+":"+NEO4J_BOLT_PORT
         }
         with self.assertRaises(InvalidOptionsException):
             self.instance.connect(authInfo)
