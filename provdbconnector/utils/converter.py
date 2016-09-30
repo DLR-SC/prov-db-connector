@@ -1,6 +1,7 @@
 from prov.model import ProvDocument
-
-
+from io import BufferedReader, StringIO
+from functools import  reduce
+import  six
 class ConverterException(Exception):
     pass
 
@@ -13,6 +14,29 @@ class NoDocumentException(ConverterException):
     pass
 
 
+
+def form_string(content):
+    """
+    Take a string or BufferdReader as argument and transform the string into a ProvDocument
+    :param content: Takes a sting or BufferedReader
+    :return:ProvDocument
+    """
+    if isinstance(content, ProvDocument):
+       return content
+    elif isinstance(content,BufferedReader):
+       content = reduce(lambda total, a:total +  a ,content.readlines())
+
+    if type(content) is six.binary_type:
+       content_str = content[0:15].decode()
+       if content_str.find("{") > -1:
+           return ProvDocument.deserialize(content=content, format='json')
+       if content_str.find('<?xml') > -1:
+           return ProvDocument.deserialize(content=content, format='xml')
+       elif content_str.find('document') > -1:
+           return ProvDocument.deserialize(content=content, format='provn')
+
+    raise ParseException("Unsupported input type {}".format(type(content)))
+
 def to_json(document=None):
     if document is None:
         raise NoDocumentException()
@@ -22,7 +46,7 @@ def to_json(document=None):
 def from_json(document=None):
     if document is None:
         raise NoDocumentException()
-    return ProvDocument.deserialize(document, format='json')
+    return ProvDocument.deserialize(source=document, format='json')
 
 
 def to_provn(document=None):
@@ -34,7 +58,7 @@ def to_provn(document=None):
 def from_provn(document=None):
     if document is None:
         raise NoDocumentException()
-    return ProvDocument.deserialize(document, format='provn')
+    return ProvDocument.deserialize(source=document, format='provn')
 
 
 def to_xml(document=None):
@@ -46,4 +70,4 @@ def to_xml(document=None):
 def from_xml(document=None):
     if document is None:
         raise NoDocumentException()
-    return ProvDocument.deserialize(document, format='xml')
+    return ProvDocument.deserialize(source=document, format='xml')
