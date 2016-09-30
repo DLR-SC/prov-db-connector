@@ -21,10 +21,11 @@ You can view [prov-db-connector on PyPi's package index](https://pypi.python.org
 # Current status
 
 ## Todos / Next steps
-* [Implement Tests: baseconnector and neo4jconnector class](https://github.com/DLR-SC/prov-db-connector/issues/9) 
+* Implement Logging 
+* Documentation of classes and functions 
+* Implement low-level functions in ProvApi like *reate_record()*
 * [Implement Tests: validator and validator class](https://github.com/DLR-SC/prov-db-connector/issues/1)
-* [Implement Tests: convert and converter class](https://github.com/DLR-SC/prov-db-connector/issues/2)
-* Define / Implement ProvAPI class methods 
+
 
 
 
