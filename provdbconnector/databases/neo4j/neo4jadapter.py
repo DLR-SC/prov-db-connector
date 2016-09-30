@@ -28,7 +28,7 @@ NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """MATCH (d {`meta:parent_id`:{parent_id},
 NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
 
                             MATCH (d)-[r]-(x)
-                            WHERE not((d)-[:includeIn]-(x)) and not(d.`meta:prov_type`='prov:Bundle' or x.`meta:prov_type`='prov:Bundle')and (d.`meta:bundle_id`) ={bundle_id}
+                            WHERE not((d)-[:includeIn]-(x)) and not(d.`meta:prov_type`='prov:Bundle' or x.`meta:prov_type`='prov:Bundle')and (r.`meta:bundle_id`) ={bundle_id}
                             RETURN DISTINCT r as re
                             //Get all nodes that are alone without connections to other
                             UNION
