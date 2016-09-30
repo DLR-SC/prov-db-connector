@@ -3,6 +3,7 @@ from prov.model import  ProvDocument, ProvBundle,Identifier, ProvRecord,ProvElem
 from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION,PROV,PROV_BUNDLE,PROV_RECORD_IDS_MAP
 from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
 from provdbconnector.utils.serializer import encode_json_representation,add_namespaces_to_bundle,create_prov_record
+from provdbconnector.utils import form_string, to_json,to_provn,to_xml
 from collections import namedtuple
 from io import StringIO
 import json
@@ -40,22 +41,29 @@ class ProvApi(object):
 
     #Converter Methods
     def create_document_from_json(self, content=None):
-        raise NotImplementedError()
+        prov_document = form_string(content=content)
+        return self.create_document_from_prov(content=prov_document)
 
     def get_document_as_json(self, id=None):
-        raise NotImplementedError()
+        prov_document = self.get_document_as_prov(id=id)
+        return to_json(prov_document)
+
 
     def create_document_from_xml(self, content=None):
-        raise NotImplementedError()
+        prov_document = form_string(content=content)
+        return self.create_document_from_prov(content=prov_document)
 
     def get_document_as_xml(self, id=None):
-        raise NotImplementedError()
+        prov_document = self.get_document_as_prov(id=id)
+        return to_xml(prov_document)
 
     def create_document_from_provn(self, content=None):
-        raise NotImplementedError()
+        prov_document = form_string(content=content)
+        return self.create_document_from_prov(content=prov_document)
 
     def get_document_as_provn(self, id=None):
-        raise NotImplementedError()
+        prov_document = self.get_document_as_prov(id=id)
+        return to_provn(prov_document)
 
     #Methods that consume ProvDocument instances and produce ProvDocument instances
     def create_document_from_prov(self, content=None):

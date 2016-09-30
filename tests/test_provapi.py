@@ -2,11 +2,14 @@ import os
 import unittest
 from uuid import UUID
 import tests.examples as examples
+from io import StringIO
+from prov.model import  ProvDocument
 from provdbconnector import ProvApi
 from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES,METADATA_PARENT_ID
 from provdbconnector.databases import InvalidOptionsException
 from provdbconnector.databases import Neo4jAdapter
 from provdbconnector.provapi import NoDataBaseAdapterException,InvalidArgumentTypeException
+
 
 class ProvApiTestTemplate(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -128,22 +131,52 @@ class ProvApiTests(unittest.TestCase):
 
     #Methods that automatically convert to ProvDocument
     def test_create_document_from_json(self):
-        self.provapi.create_document_from_json()
+        json_buffer = examples.test_prov_files["json"]
+        self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_json(self):
-        self.provapi.get_document_as_json()
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_str = self.provapi.get_document_as_json(document_id)
+        self.assertIsNotNone(prov_str)
+        self.assertIsInstance(prov_str,str)
+        prov_document_reverse = ProvDocument.deserialize(content=prov_str, format="json")
+        self.assertEqual(prov_document_reverse,example)
 
     def test_create_document_from_xml(self):
-        raise NotImplementedError()
+        json_buffer = examples.test_prov_files["xml"]
+        self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_xml(self):
-        raise NotImplementedError()
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_str = self.provapi.get_document_as_xml(document_id)
+        self.assertIsNotNone(prov_str)
+        self.assertIsInstance(prov_str, str)
+
+        prov_document_reverse = ProvDocument.deserialize(content=prov_str, format="xml")
+        self.assertEqual(prov_document_reverse, example)
 
     def test_create_document_from_provn(self):
-        raise NotImplementedError()
+        json_buffer = examples.test_prov_files["provn"]
+        with self.assertRaises(NotImplementedError):
+            self.provapi.create_document_from_provn(json_buffer)
 
     def test_get_document_as_provn(self):
-        raise NotImplementedError()
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_str = self.provapi.get_document_as_provn(document_id)
+        self.assertIsNotNone(prov_str)
+        self.assertIsInstance(prov_str,str)
+
+        #This check throws NotImplementedError, so skip it
+
+        #prov_document_reverse = ProvDocument.deserialize(content=prov_str,format="provn")
+        #self.assertEqual(prov_document_reverse, example)
+
 
     #Methods with ProvDocument input / output
     def test_create_document_from_prov(self):
@@ -177,7 +210,14 @@ class ProvApiTests(unittest.TestCase):
 
 
     def test_get_document_as_prov(self):
-        self.provapi.get_document_as_prov()
+        example = examples.bundles2()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_document = self.provapi.get_document_as_prov(document_id)
+        self.assertIsNotNone(prov_document)
+        self.assertIsInstance(prov_document, ProvDocument)
+
+        self.assertEqual(prov_document, example)
 
     def test_get_document_as_prov_invalid_arguments(self):
         with self.assertRaises(InvalidArgumentTypeException):
