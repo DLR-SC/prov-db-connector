@@ -119,7 +119,7 @@ class ProvApi(object):
         prov_id = raw_record.metadata[METADATA_KEY_IDENTIFIER]
         prov_id_qualified = prov_bundle.valid_qualified_name(prov_id)
 
-        #set label only if it is not a prov type
+        #set identifier only if it is not a prov type
         if prov_id_qualified == prov_type:
             prov_id = None
 
@@ -193,12 +193,12 @@ class ProvApi(object):
     def _create_unknown_node(self,bundle_id):
         uid = uuid4()
         doc = ProvDocument()
-        label = doc.valid_qualified_name("prov:Unknown-{}".format(uid))
-        record = ProvRecord(bundle=doc,identifier=label)
+        identifier = doc.valid_qualified_name("prov:Unknown-{}".format(uid))
+        record = ProvRecord(bundle=doc,identifier=identifier)
 
         (metadata,attributes) = self._get_metadata_and_attributes_for_record(record)
         self._adapter.create_record(bundle_id,attributes,metadata)
-        return label
+        return identifier
     def _create_bundle_links(self,prov_bundle,bundle_id_map):
 
         from_bundle_id = bundle_id_map[prov_bundle.identifier]
@@ -221,23 +221,23 @@ class ProvApi(object):
         bundle = prov_record.bundle
 
         prov_type = prov_record.get_type()
-        prov_label = prov_record.label
+        prov_identifier = prov_record.identifier
 
         if prov_type is None and isinstance(prov_record,ProvRecord):
             prov_type = bundle.valid_qualified_name("prov:Unknown")
 
-        #if relation without label -> use prov_type as label
-        if prov_label is None and prov_record.identifier is None:
-            prov_label = prov_type
+        #if relation without identifier -> use prov_type as identifier
+        if prov_identifier is None and prov_record.identifier is None:
+            prov_identifier = prov_type
 
-        # Be sure that the prov_label is a qualified name instnace
+        # Be sure that the prov_identifier is a qualified name instnace
 
-        if not isinstance(prov_label, QualifiedName):
-            qualified_name = bundle.valid_qualified_name(prov_label)
+        if not isinstance(prov_identifier, QualifiedName):
+            qualified_name = bundle.valid_qualified_name(prov_identifier)
             if qualified_name is None:
-                raise InvalidProvRecordException("The prov record {} is invalid because the prov_label {} can't be qualified".format(prov_record,prov_label))
+                raise InvalidProvRecordException("The prov record {} is invalid because the prov_identifier {} can't be qualified".format(prov_record,prov_identifier))
             else:
-                prov_label =  qualified_name
+                prov_identifier =  qualified_name
 
         #extract namespaces from record
 
@@ -245,8 +245,8 @@ class ProvApi(object):
         namespace = prov_type.namespace
         used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
 
-        #add namespace from prov label
-        namespace = prov_label.namespace
+        #add namespace from prov identifier
+        namespace = prov_identifier.namespace
         used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
 
         attributes = dict(prov_record.attributes.copy())
@@ -267,7 +267,7 @@ class ProvApi(object):
                 qualified_name = bundle.valid_qualified_name(value)
                 if qualified_name is not None:
                     #Don't update the attribute, so we only save the namespace instead of the attribute as a qualified name.
-                    #For some reason the prov-libary allow a string with a schnema: <namespace_prefix>:<label>
+                    #For some reason the prov-libary allow a string with a schnema: <namespace_prefix>:<identifier>
                     #This line cause an error during the test: "test_primer_example_alternate"
                     #attributes[key] = qualified_name # update attribute
 
@@ -284,7 +284,7 @@ class ProvApi(object):
 
         metadata = {
             METADATA_KEY_PROV_TYPE: prov_type,
-            METADATA_KEY_IDENTIFIER: prov_label,
+            METADATA_KEY_IDENTIFIER: prov_identifier,
             METADATA_KEY_NAMESPACES: used_namespaces,
             METADATA_KEY_TYPE_MAP: types_dict
         }
