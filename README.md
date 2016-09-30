@@ -1,6 +1,6 @@
 # PROV Database Connector
 
-[![Build Status](https://travis-ci.org/DLR-SC/prov-db-connector.svg?branch=master)](https://travis-ci.org/DLR-SC/prov-db-connector) [![Coverage Status](https://coveralls.io/repos/github/DLR-SC/prov-db-connector/badge.svg?branch=master)](https://coveralls.io/github/DLR-SC/prov-db-connector?branch=master) [![Code Issues](https://www.quantifiedcode.com/api/v1/project/3ee099c99b0340728ca4d54392caae83/badge.svg)](https://www.quantifiedcode.com/app/project/3ee099c99b0340728ca4d54392caae83)
+[![Build Status](https://travis-ci.org/DLR-SC/prov-db-connector.svg?branch=master)](https://travis-ci.org/DLR-SC/prov-db-connector) [![Coverage Status](https://coveralls.io/repos/github/DLR-SC/prov-db-connector/badge.svg?branch=master)](https://coveralls.io/github/DLR-SC/prov-db-connector?branch=master)[![Code Issues](https://www.quantifiedcode.com/api/v1/project/3ee099c99b0340728ca4d54392caae83/badge.svg)](https://www.quantifiedcode.com/app/project/3ee099c99b0340728ca4d54392caae83)
 
 
 
