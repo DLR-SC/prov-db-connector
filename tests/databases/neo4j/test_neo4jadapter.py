@@ -53,10 +53,10 @@ class Neo4jAdapterTests(AdapterTestTemplate):
 class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
 
     def setUp(self):
-        self.authInfo = {"user_name": os.environ.get('NEO4J_USERNAME', 'neo4j'),
-                         "user_password": os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j'),
-                         "host": os.environ.get('NEO4J_HOST', 'localhost:7687')
-                         }
+        self.authInfo = {"user_name": NEO4J_USER,
+                    "user_password": NEO4J_PASS,
+                    "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
+                    }
         self.provapi = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
 
     def tearDown(self):
