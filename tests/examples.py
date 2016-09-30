@@ -10,7 +10,7 @@ from prov.tests.examples import primer_example,\
 import datetime
 from prov.model import ProvDocument, QualifiedName, ProvRecord, ProvRelation, ProvActivity, Literal, Identifier
 from prov.constants import PROV_RECORD_IDS_MAP,PROV
-from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_LABEL
+from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_IDENTIFIER
 from collections import namedtuple
 
 
@@ -40,7 +40,7 @@ def base_connector_bundle_parameter_example():
     metadata = dict()
 
     metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Bundle")})
-    metadata.update({METADATA_KEY_LABEL: doc.valid_qualified_name("ex:bundle name")})
+    metadata.update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("ex:bundle name")})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
@@ -67,7 +67,7 @@ def base_connector_record_parameter_example():
     metadata  = dict()
 
     metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Activity")})
-    metadata.update({METADATA_KEY_LABEL: "label for the node"})
+    metadata.update({METADATA_KEY_IDENTIFIER: "label for the node"})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
@@ -97,7 +97,7 @@ def base_connector_relation_parameter_example():
     metadata  = dict()
 
     metadata.update({METADATA_KEY_PROV_TYPE: PROV_RECORD_IDS_MAP["mentionOf"]})
-    metadata.update({METADATA_KEY_LABEL: "label for the relation"})
+    metadata.update({METADATA_KEY_IDENTIFIER: "identifier for the relation"})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
@@ -124,7 +124,7 @@ def prov_api_record_example():
     attributes.update({"ex:Qualified name 2": "ex:unqualified_name"})
     attributes.update({"ex:Literral": Literal("test literral", langtag="en")})
     attributes.update({"ex:Literral 2": Literal("test literral with datatype", langtag="en", datatype=PROV["InternationalizedString"])})
-    attributes.update({"ex:identifier": Identifier("http://example.com/#test")})
+    attributes.update({"ex:identifier type": Identifier("http://example.com/#test")})
 
 
     expected_attributes = dict()
@@ -150,11 +150,11 @@ def prov_api_record_example():
     type_map.update({"ex:Qualified name 2":{'type': 'prov:QUALIFIED_NAME'}})
     type_map.update({"ex:Literral": {'lang': 'en'}})
     type_map.update({"ex:Literral 2": {'lang': 'en'}})
-    type_map.update({"ex:identifier":{'type': 'prov:QUALIFIED_NAME'}})
+    type_map.update({"ex:identifier type":{'type': 'prov:QUALIFIED_NAME'}})
 
     metadata = dict()
     metadata.update({METADATA_KEY_PROV_TYPE: PROV_RECORD_IDS_MAP["activity"]})
-    metadata.update({METADATA_KEY_LABEL: doc.valid_qualified_name("ex:record")})
+    metadata.update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("ex:record")})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
 

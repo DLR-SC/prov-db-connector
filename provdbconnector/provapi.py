@@ -1,7 +1,7 @@
 from uuid import uuid4
 from prov.model import  ProvDocument, ProvBundle,Identifier, ProvRecord,ProvElement,ProvRelation, QualifiedName, ProvAssociation, ProvMention
 from prov.constants import PROV_ATTRIBUTES, PROV_N_MAP, PROV_MENTION,PROV,PROV_BUNDLE,PROV_RECORD_IDS_MAP
-from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
+from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE,METADATA_PARENT_ID,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES,METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP
 from provdbconnector.utils.serializer import encode_json_representation,add_namespaces_to_bundle,create_prov_record
 from collections import namedtuple
 from io import StringIO
@@ -116,7 +116,7 @@ class ProvApi(object):
         if prov_type is prov_bundle.valid_qualified_name("prov:Unknown"):
             return
 
-        prov_id = raw_record.metadata[METADATA_KEY_LABEL]
+        prov_id = raw_record.metadata[METADATA_KEY_IDENTIFIER]
         prov_id_qualified = prov_bundle.valid_qualified_name(prov_id)
 
         #set label only if it is not a prov type
@@ -187,7 +187,7 @@ class ProvApi(object):
 
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
-            from_qualified_name = metadata[METADATA_KEY_LABEL]
+            from_qualified_name = metadata[METADATA_KEY_IDENTIFIER]
             self._adapter.create_relation(bundle_id, from_qualified_name, document_id, to_qualified_name, belong_attributes,belong_metadata)
 
     def _create_unknown_node(self,bundle_id):
@@ -284,7 +284,7 @@ class ProvApi(object):
 
         metadata = {
             METADATA_KEY_PROV_TYPE: prov_type,
-            METADATA_KEY_LABEL: prov_label,
+            METADATA_KEY_IDENTIFIER: prov_label,
             METADATA_KEY_NAMESPACES: used_namespaces,
             METADATA_KEY_TYPE_MAP: types_dict
         }

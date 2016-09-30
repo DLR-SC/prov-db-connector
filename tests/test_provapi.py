@@ -3,7 +3,7 @@ import unittest
 from uuid import UUID
 import tests.examples as examples
 from provdbconnector import ProvApi
-from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_LABEL,METADATA_KEY_NAMESPACES,METADATA_PARENT_ID
+from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES,METADATA_PARENT_ID
 from provdbconnector.databases import InvalidOptionsException
 from provdbconnector.databases import Neo4jAdapter
 from provdbconnector.provapi import NoDataBaseAdapterException,InvalidArgumentTypeException
@@ -206,13 +206,13 @@ class ProvApiTests(unittest.TestCase):
         self.assertIsInstance(result.metadata, dict)
 
         self.assertIsNotNone(metadata_result[METADATA_KEY_PROV_TYPE])
-        self.assertIsNotNone(metadata_result[METADATA_KEY_LABEL])
+        self.assertIsNotNone(metadata_result[METADATA_KEY_IDENTIFIER])
         self.assertIsNotNone(metadata_result[METADATA_KEY_NAMESPACES])
         self.assertIsNotNone(metadata_result[METADATA_KEY_TYPE_MAP])
 
         #check metadata
         self.assertEqual(example.metadata[METADATA_KEY_PROV_TYPE],metadata_result[METADATA_KEY_PROV_TYPE])
-        self.assertEqual(example.metadata[METADATA_KEY_LABEL],metadata_result[METADATA_KEY_LABEL])
+        self.assertEqual(example.metadata[METADATA_KEY_IDENTIFIER], metadata_result[METADATA_KEY_IDENTIFIER])
         self.assertEqual(example.metadata[METADATA_KEY_NAMESPACES],metadata_result[METADATA_KEY_NAMESPACES])
         self.assertEqual(example.metadata[METADATA_KEY_TYPE_MAP],metadata_result[METADATA_KEY_TYPE_MAP])
 

@@ -1,4 +1,4 @@
-from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_PARENT_ID,METADATA_KEY_LABEL,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_PARENT_ID,METADATA_KEY_IDENTIFIER,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth,Relationship
@@ -15,10 +15,10 @@ NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as I
 NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID """  # args: provType, values
 NEO4J_CREATE_RELATION_RETURN_ID = """
                                 MATCH
-                                    (from{{`meta:bundle_id`:'{from_bundle_id}',`meta:label`:'{from_label}'}}),
-                                    (to{{`meta:bundle_id`:'{to_bundle_id}', `meta:label`:'{to_label}'}})
+                                    (from{{`meta:bundle_id`:'{from_bundle_id}',`meta:identifier`:'{from_identifier}'}}),
+                                    (to{{`meta:bundle_id`:'{to_bundle_id}', `meta:identifier`:'{to_identifier}'}})
                                 CREATE
-                                    (from)-[r:{relation_type} {{{property_labels}}}]->(to)
+                                    (from)-[r:{relation_type} {{{property_identifiers}}}]->(to)
                                 RETURN
                                     ID(r) as ID
                                 """  # args: provType, values
@@ -104,10 +104,10 @@ class Neo4jAdapter(BaseAdapter):
 
         return db_attributes
 
-    def _get_attributes_labels_cypher_string(self, db_attributes):
-        db_attributes_labels = map(lambda key: "`%s`: {`%s`}" % (key, key), list(db_attributes.keys()))
+    def _get_attributes_identifiers_cypher_string(self, db_attributes):
+        db_attributes_identifiers = map(lambda key: "`%s`: {`%s`}" % (key, key), list(db_attributes.keys()))
 
-        return ",".join(db_attributes_labels)
+        return ",".join(db_attributes_identifiers)
 
     def create_document(self):
         session = self._create_session()
@@ -138,11 +138,11 @@ class Neo4jAdapter(BaseAdapter):
 
         provType = metadata[METADATA_KEY_PROV_TYPE]
 
-        label_str = self._get_attributes_labels_cypher_string(db_attributes)
+        identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes)
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart, label_str)
+        command = NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart, identifier_str)
         result = session.run(command, dict(db_attributes))
 
         id = None
@@ -165,16 +165,16 @@ class Neo4jAdapter(BaseAdapter):
 
         relationType = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
-        label_str = self._get_attributes_labels_cypher_string(db_attributes)
+        identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes)
 
         session = self._create_session()
 
         command = NEO4J_CREATE_RELATION_RETURN_ID.format(from_bundle_id=from_bundle_id,
                                                          to_bundle_id=to_bundle_id,
-                                                         from_label=from_node,
-                                                         to_label=to_node,
+                                                         from_identifier=from_node,
+                                                         to_identifier=to_node,
                                                          relation_type=relationType,
-                                                         property_labels=label_str)
+                                                         property_identifiers=identifier_str)
         result = session.run(command, dict(db_attributes))
 
         id = None
@@ -240,7 +240,7 @@ class Neo4jAdapter(BaseAdapter):
         raw_record = None
         for bundle in bundle_node_result:
             raw_record = self._split_attributes_metadata_from_node(bundle["b"])
-            identifier = raw_record.metadata[METADATA_KEY_LABEL]
+            identifier = raw_record.metadata[METADATA_KEY_IDENTIFIER]
 
         if raw_record is None and len(records) == 0:
             raise NotFoundException("bundle with the id {} was not found ".format(bundle_id))

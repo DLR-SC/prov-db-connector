@@ -1,6 +1,6 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_LABEL,METADATA_KEY_BUNDLE_ID,METADATA_PARENT_ID, NotFoundException
+from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER,METADATA_KEY_BUNDLE_ID,METADATA_PARENT_ID, NotFoundException
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 from provdbconnector.utils.serializer import encode_string_value_to_primitive,encode_dict_values_to_primitive
@@ -37,8 +37,8 @@ def insert_document_with_bundles(instance):
 
     from_label = doc.valid_qualified_name("ex:FROM NODE")
     to_label = doc.valid_qualified_name("ex:TO NODE")
-    from_record_args["metadata"][METADATA_KEY_LABEL] = from_label
-    to_record_args["metadata"][METADATA_KEY_LABEL] = to_label
+    from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_label
+    to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_label
 
     from_record_id = instance.create_record(doc_id, from_record_args["attributes"],from_record_args["metadata"])
     to_record_id = instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])
@@ -110,11 +110,11 @@ class AdapterTestTemplate(unittest.TestCase):
         doc_id = self.instance.create_document()
 
         from_meta = args_records["metadata"].copy()
-        from_meta.update({METADATA_KEY_LABEL: args_relation["from_node"]})
+        from_meta.update({METADATA_KEY_IDENTIFIER: args_relation["from_node"]})
         from_node_id  = self.instance.create_record(doc_id, args_records["attributes"], from_meta)
 
         to_meta = args_records["metadata"].copy()
-        to_meta.update({METADATA_KEY_LABEL: args_relation["to_node"]})
+        to_meta.update({METADATA_KEY_IDENTIFIER: args_relation["to_node"]})
         to_node_id  = self.instance.create_record(doc_id, args_records["attributes"], to_meta)
 
 
@@ -222,7 +222,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsNotNone(raw_bundle.bundle_record)
         self.assertIsNotNone(raw_bundle.bundle_record.metadata)
         self.assertIsNotNone(raw_bundle.bundle_record.attributes)
-        self.assertEqual(raw_bundle.identifier,str(args_bundle["metadata"][METADATA_KEY_LABEL]))
+        self.assertEqual(raw_bundle.identifier, str(args_bundle["metadata"][METADATA_KEY_IDENTIFIER]))
         self.assertIsInstance(raw_bundle.records, list)
         self.assertIsInstance(raw_bundle.bundle_record.attributes, dict)
         self.assertIsInstance(raw_bundle.bundle_record.metadata, dict)
@@ -283,16 +283,16 @@ class AdapterTestTemplate(unittest.TestCase):
         to_record_args = base_connector_record_parameter_example()
         relation_args = base_connector_relation_parameter_example()
 
-        from_label = relation_args["from_node"]
-        to_label = relation_args["to_node"]
-        from_record_args["metadata"][METADATA_KEY_LABEL] = from_label
-        to_record_args["metadata"][METADATA_KEY_LABEL] = to_label
+        from_identifier = relation_args["from_node"]
+        to_identifier = relation_args["to_node"]
+        from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_identifier
+        to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_identifier
 
         doc_id = self.instance.create_document()
         from_record_id = self.instance.create_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])  #
         to_record_id = self.instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])  #
 
-        relation_id = self.instance.create_relation(doc_id,from_label,doc_id,to_label,relation_args["attributes"], relation_args["metadata"])
+        relation_id = self.instance.create_relation(doc_id,from_identifier,doc_id,to_identifier,relation_args["attributes"], relation_args["metadata"])
 
         relation_raw = self.instance.get_relation(relation_id)
 

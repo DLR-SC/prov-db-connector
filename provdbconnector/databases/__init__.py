@@ -11,7 +11,7 @@ from provdbconnector.databases.baseadapter import DatabaseException
 from provdbconnector.databases.baseadapter import CreateRelationException
 
 from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID
-from provdbconnector.databases.baseadapter import METADATA_KEY_LABEL
+from provdbconnector.databases.baseadapter import METADATA_KEY_IDENTIFIER
 from provdbconnector.databases.baseadapter import METADATA_KEY_NAMESPACES
 from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE
 from provdbconnector.databases.baseadapter import METADATA_KEY_TYPE_MAP
