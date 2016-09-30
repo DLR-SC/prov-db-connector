@@ -2,10 +2,14 @@ import os
 import unittest
 from uuid import UUID
 import tests.examples as examples
+from io import StringIO
+from prov.model import  ProvDocument
 from provdbconnector import ProvApi
+from provdbconnector.databases.baseadapter import METADATA_KEY_BUNDLE_ID,METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES,METADATA_PARENT_ID
 from provdbconnector.databases import InvalidOptionsException
 from provdbconnector.databases import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT, NEO4J_HTTP_PORT
 from provdbconnector.provapi import NoDataBaseAdapterException,InvalidArgumentTypeException
+
 
 class ProvApiTestTemplate(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -29,72 +33,78 @@ class ProvApiTestTemplate(unittest.TestCase):
         else:
             self.run = lambda self, *args, **kwargs: None
 
+    def setUp(self):
+        #this function will never be executed !!!!
+        self.provapi = ProvApi()
 
     def test_prov_primer_example(self):
         prov_document = examples.primer_example()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def primer_example_alternate(self):
+    def test_primer_example_alternate(self):
         prov_document = examples.primer_example_alternate()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def w3c_publication_1(self):
+    def test_w3c_publication_1(self):
         prov_document = examples.w3c_publication_1()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def w3c_publication_2(self):
+    def test_w3c_publication_2(self):
         prov_document = examples.w3c_publication_2()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def bundles1(self):
+    def test_bundles1(self):
         prov_document = examples.bundles1()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def bundles2(self):
+    def test_bundles2(self):
         prov_document = examples.bundles2()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def collections(self):
+    def test_collections(self):
         prov_document = examples.collections()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def long_literals(self):
+    def test_long_literals(self):
         prov_document = examples.long_literals()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
-    def datatypes(self):
+    def test_datatypes(self):
         prov_document = examples.datatypes()
-        stored_document_id = self.instance.create_document_from_prov(prov_document)
-        stored_document = self.instance.get_document_as_prov(prov_document)
+        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
-        self.assertNotEqual(stored_document, prov_document)
+        self.assertEqual(stored_document, prov_document)
 
 
 class ProvApiTests(unittest.TestCase):
+
+
+    maxDiff = None
 
     def setUp(self):
         self.authInfo = {"user_name": NEO4J_USER,
@@ -120,28 +130,76 @@ class ProvApiTests(unittest.TestCase):
 
     #Methods that automatically convert to ProvDocument
     def test_create_document_from_json(self):
-        self.provapi.create_document_from_json()
+        json_buffer = examples.test_prov_files["json"]
+        self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_json(self):
-        self.provapi.get_document_as_json()
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_str = self.provapi.get_document_as_json(document_id)
+        self.assertIsNotNone(prov_str)
+        self.assertIsInstance(prov_str,str)
+        prov_document_reverse = ProvDocument.deserialize(content=prov_str, format="json")
+        self.assertEqual(prov_document_reverse,example)
 
     def test_create_document_from_xml(self):
-        raise NotImplementedError()
+        json_buffer = examples.test_prov_files["xml"]
+        self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_xml(self):
-        raise NotImplementedError()
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_str = self.provapi.get_document_as_xml(document_id)
+        self.assertIsNotNone(prov_str)
+        self.assertIsInstance(prov_str, str)
+
+        prov_document_reverse = ProvDocument.deserialize(content=prov_str, format="xml")
+        self.assertEqual(prov_document_reverse, example)
 
     def test_create_document_from_provn(self):
-        raise NotImplementedError()
+        json_buffer = examples.test_prov_files["provn"]
+        with self.assertRaises(NotImplementedError):
+            self.provapi.create_document_from_provn(json_buffer)
 
     def test_get_document_as_provn(self):
-        raise NotImplementedError()
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_str = self.provapi.get_document_as_provn(document_id)
+        self.assertIsNotNone(prov_str)
+        self.assertIsInstance(prov_str,str)
+
+        #This check throws NotImplementedError, so skip it
+
+        #prov_document_reverse = ProvDocument.deserialize(content=prov_str,format="provn")
+        #self.assertEqual(prov_document_reverse, example)
+
 
     #Methods with ProvDocument input / output
     def test_create_document_from_prov(self):
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
-        self.assertIsNone(document_id)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+    def test_create_document_from_prov_alternate(self):
+        example = examples.primer_example_alternate()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+    def test_create_document_from_prov_bundles(self):
+        example = examples.bundles1()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+    def test_create_document_from_prov_bundles2(self):
+        example = examples.bundles2()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
     def test_create_document_from_prov_invalid_arguments(self):
@@ -151,4 +209,51 @@ class ProvApiTests(unittest.TestCase):
 
 
     def test_get_document_as_prov(self):
-        self.provapi.get_document_as_prov()
+        example = examples.bundles2()
+        document_id = self.provapi.create_document_from_prov(example)
+
+        prov_document = self.provapi.get_document_as_prov(document_id)
+        self.assertIsNotNone(prov_document)
+        self.assertIsInstance(prov_document, ProvDocument)
+
+        self.assertEqual(prov_document, example)
+
+    def test_get_document_as_prov_invalid_arguments(self):
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.get_document_as_prov()
+
+    def test_create_bundle_invalid_arguments(self):
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi._create_bundle("xxxx",None)
+
+    def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi._get_metadata_and_attributes_for_record(None)
+
+    def test_get_metadata_and_attributes_for_record(self):
+        example = examples.prov_api_record_example()
+
+
+        result  = self.provapi._get_metadata_and_attributes_for_record(example.prov_record)
+        metadata_result = result.metadata
+        attributes_result = result.attributes
+
+        self.assertIsNotNone(result.attributes)
+        self.assertIsNotNone(result.metadata)
+        self.assertIsInstance(result.attributes, dict)
+        self.assertIsInstance(result.metadata, dict)
+
+        self.assertIsNotNone(metadata_result[METADATA_KEY_PROV_TYPE])
+        self.assertIsNotNone(metadata_result[METADATA_KEY_IDENTIFIER])
+        self.assertIsNotNone(metadata_result[METADATA_KEY_NAMESPACES])
+        self.assertIsNotNone(metadata_result[METADATA_KEY_TYPE_MAP])
+
+        #check metadata
+        self.assertEqual(example.metadata[METADATA_KEY_PROV_TYPE],metadata_result[METADATA_KEY_PROV_TYPE])
+        self.assertEqual(example.metadata[METADATA_KEY_IDENTIFIER], metadata_result[METADATA_KEY_IDENTIFIER])
+        self.assertEqual(example.metadata[METADATA_KEY_NAMESPACES],metadata_result[METADATA_KEY_NAMESPACES])
+        self.assertEqual(example.metadata[METADATA_KEY_TYPE_MAP],metadata_result[METADATA_KEY_TYPE_MAP])
+
+        #check attributes
+        self.assertEqual(example.expected_attributes,attributes_result)
