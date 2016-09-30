@@ -266,7 +266,11 @@ class ProvApi(object):
             else:
                 qualified_name = bundle.valid_qualified_name(value)
                 if qualified_name is not None:
-                    attributes[key] = qualified_name # update attribute
+                    #Don't update the attribute, so we only save the namespace instead of the attribute as a qualified name.
+                    #For some reason the prov-libary allow a string with a schnema: <namespace_prefix>:<label>
+                    #This line cause an error during the test: "test_primer_example_alternate"
+                    #attributes[key] = qualified_name # update attribute
+
                     namespace = qualified_name.namespace
                     used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
 
