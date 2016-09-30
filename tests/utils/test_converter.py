@@ -51,8 +51,12 @@ class ConverterTests(unittest.TestCase):
 
     def test_from_provn(self):
         self.assertRaises(NoDocumentException, lambda: from_provn())
-        prov = from_provn(self.test_files['provn'])
-        self.assertIsInstance(prov, ProvDocument)
+        #currently the prov lib don't support from_provn
+
+        with self.assertRaises(NotImplementedError):
+            prov = from_provn(self.test_files['provn'])
+
+        #self.assertIsInstance(prov, ProvDocument)
 
     def test_to_xml(self):
         self.assertRaises(NoDocumentException, lambda: to_xml())
