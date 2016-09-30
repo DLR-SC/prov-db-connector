@@ -24,8 +24,10 @@ class CreateRecordException(DatabaseException):
 class CreateRelationException(DatabaseException):
     pass
 
+
 class NotFoundException(DatabaseException):
     pass
+
 
 METADATA_KEY_BUNDLE_ID = "bundle_id"
 METADATA_PARENT_ID = "parent_id"
@@ -57,7 +59,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_relation(self, from_bundle_id, from_node, to_bundle_id,to_node, attributes, metadata):
+    def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
         pass
 
     @abstractmethod
@@ -69,7 +71,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_record(self,record_id):
+    def get_record(self, record_id):
         pass
 
     @abstractmethod
@@ -91,5 +93,3 @@ class BaseAdapter(ABC):
     @abstractmethod
     def delete_relation(self, relation_id):
         pass
-
-

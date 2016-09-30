@@ -5,14 +5,16 @@ from datetime import datetime
 from io import StringIO
 
 import six
-from prov.constants import PROV_QUALIFIEDNAME,PROV_ATTRIBUTES_ID_MAP,PROV_ATTRIBUTES,PROV_MEMBERSHIP,PROV_ATTR_ENTITY,PROV_ATTRIBUTE_QNAMES,PROV_ATTR_COLLECTION,XSD_ANYURI
-from prov.model import Literal,Identifier, QualifiedName,Namespace,parse_xsd_datetime
+from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTRIBUTES, PROV_MEMBERSHIP, \
+    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI
+from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime
 
 from provdbconnector.databases.baseadapter import METADATA_KEY_NAMESPACES
 
 
 class SerializerException(Exception):
     pass
+
 
 logger = logging.getLogger(__name__)
 # Reverse map for prov.model.XSD_DATATYPE_PARSERS
@@ -28,13 +30,13 @@ if six.integer_types[-1] not in LITERAL_XSDTYPE_MAP:
     LITERAL_XSDTYPE_MAP[six.integer_types[-1]] = 'xsd:long'
 
 
-
 def encode_dict_values_to_primitive(dict_values):
     dict_values = dict_values.copy()
-    for key,value in dict_values.items():
+    for key, value in dict_values.items():
         dict_values[key] = encode_string_value_to_primitive(value)
 
     return dict_values
+
 
 def encode_string_value_to_primitive(value):
     if sys.version_info[0] < 3:
@@ -65,6 +67,7 @@ def literal_json_representation(literal):
     else:
         return {'type': six.text_type(datatype)}
 
+
 def encode_json_representation(value):
     if isinstance(value, Literal):
         return literal_json_representation(value)
@@ -82,8 +85,7 @@ def encode_json_representation(value):
         return None
 
 
-
-#DECODE
+# DECODE
 
 def add_namespaces_to_bundle(prov_bundle, metadata):
     namespaces = dict()
@@ -95,11 +97,12 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
 
     if type(namespace_str) is str:
         io = StringIO(namespace_str)
-        namespaces= json.load(io)
+        namespaces = json.load(io)
     elif type(namespace_str) is dict:
         namespaces = namespace_str
     else:
-        raise SerializerException("Namespaces metadata should returned as json string or dict not as {}".format(type(namespace_str)))
+        raise SerializerException(
+            "Namespaces metadata should returned as json string or dict not as {}".format(type(namespace_str)))
 
     for prefix, uri in namespaces.items():
         if prefix is not None and uri is not None:
@@ -108,10 +111,10 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
             else:
                 prov_bundle.set_default_namespace(uri)
         else:
-            SerializerException("No valid namespace provided for the metadata: {}".format(metadata) )
+            SerializerException("No valid namespace provided for the metadata: {}".format(metadata))
 
 
-def create_prov_record(bundle, prov_type, prov_id, properties,type_map):
+def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
     """
 
     :param prov_type: valid prov type like prov:Entry as string
@@ -125,7 +128,8 @@ def create_prov_record(bundle, prov_type, prov_id, properties,type_map):
     elif isinstance(properties, list):
         properties_list = properties
     else:
-        raise SerializerException("please provide properties as list[(key,value)] or dict your provided: %s" % properties.__class__.__name__)
+        raise SerializerException(
+            "please provide properties as list[(key,value)] or dict your provided: %s" % properties.__class__.__name__)
 
     attributes = dict()
     other_attributes = []
@@ -175,13 +179,13 @@ def create_prov_record(bundle, prov_type, prov_id, properties,type_map):
         else:
             value_type = None
             if type_map:
-                value_type = type_map.get(attr_name,None)
+                value_type = type_map.get(attr_name, None)
 
             if isinstance(values, list):
                 other_attributes.extend(
                     (
                         attr,
-                        decode_json_representation(value,value_type, bundle)
+                        decode_json_representation(value, value_type, bundle)
                     )
                     for value in values
                 )
@@ -190,7 +194,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties,type_map):
                 other_attributes.append(
                     (
                         attr,
-                        decode_json_representation(values,value_type, bundle)
+                        decode_json_representation(values, value_type, bundle)
                     )
                 )
     record = bundle.new_record(
@@ -206,7 +210,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties,type_map):
     return record
 
 
-def decode_json_representation(value,type, bundle):
+def decode_json_representation(value, type, bundle):
     if isinstance(type, dict):
         # complex type
         datatype = type['type'] if 'type' in type else None
@@ -215,7 +219,7 @@ def decode_json_representation(value,type, bundle):
         if datatype == XSD_ANYURI:
             return Identifier(value)
         elif datatype == PROV_QUALIFIEDNAME:
-            return bundle.valid_qualified_name( value)
+            return bundle.valid_qualified_name(value)
         else:
             # The literal of standard Python types is not converted here
             # It will be automatically converted when added to a record by

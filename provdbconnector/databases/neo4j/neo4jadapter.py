@@ -1,8 +1,10 @@
-from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, DatabaseException,CreateRecordException,NotFoundException,CreateRelationException,METADATA_PARENT_ID,METADATA_KEY_IDENTIFIER,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
+from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, \
+    DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, METADATA_PARENT_ID, \
+    METADATA_KEY_IDENTIFIER, METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 
 from neo4j.v1.exceptions import ProtocolError
-from neo4j.v1 import GraphDatabase, basic_auth,Relationship
-from prov.constants import  PROV_N_MAP
+from neo4j.v1 import GraphDatabase, basic_auth, Relationship
+from prov.constants import PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive
 
@@ -22,7 +24,7 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                 RETURN
                                     ID(r) as ID
                                 """  # args: provType, values
-#get
+# get
 NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """MATCH (b {`meta:prov_type`:'prov:Bundle'}) WHERE ID(b)=toInt({bundle_id}) RETURN b """
 NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID"""
 NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
@@ -41,8 +43,8 @@ NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
                             WHERE (a.`meta:bundle_id`)={bundle_id} and NOT(a.`meta:prov_type`='prov:Bundle') AND relation_count=1
                             RETURN DISTINCT a as re
                         """
-NEO4J_GET_RECORD_RETURN_NODE  = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
-NEO4J_GET_RELATION_RETURN_NODE  = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
+NEO4J_GET_RECORD_RETURN_NODE = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
+NEO4J_GET_RELATION_RETURN_NODE = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
 
 # delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {node_id} DETACH DELETE x """
@@ -100,7 +102,7 @@ class Neo4jAdapter(BaseAdapter):
         for key, value in all_attributes.items():
             key_primitive = encode_string_value_to_primitive(key)
             value_primitive = encode_string_value_to_primitive(value)
-            db_attributes.update({key_primitive:value_primitive})
+            db_attributes.update({key_primitive: value_primitive})
 
         return db_attributes
 
@@ -186,16 +188,17 @@ class Neo4jAdapter(BaseAdapter):
 
         return str(id)
 
-    def _split_attributes_metadata_from_node(self,db_node):
+    def _split_attributes_metadata_from_node(self, db_node):
         Record = namedtuple('Record', 'attributes, metadata')
-        metadata = {k.replace(NEO4J_META_PREFIX,""): v for k, v in db_node.properties.items() if k.startswith(NEO4J_META_PREFIX, 0,len(NEO4J_META_PREFIX)) }
-        attributes = {k: v for k, v in db_node.properties.items() if not k.startswith(NEO4J_META_PREFIX,0,len(NEO4J_META_PREFIX)) }
-        record = Record(attributes,metadata)
+        metadata = {k.replace(NEO4J_META_PREFIX, ""): v for k, v in db_node.properties.items() if
+                    k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
+        attributes = {k: v for k, v in db_node.properties.items() if
+                      not k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
+        record = Record(attributes, metadata)
         return record
 
-    def decode_string_value_to_primitive(self,attributes,metadata):
+    def decode_string_value_to_primitive(self, attributes, metadata):
         type_map = metadata[METADATA_KEY_TYPE_MAP]
-
 
     def get_document(self, document_id):
 
@@ -207,12 +210,12 @@ class Neo4jAdapter(BaseAdapter):
         for bundle_id in self.get_bundle_ids(document_id):
             bundles.append(self.get_bundle(bundle_id))
 
-        return Document(document,bundles)
+        return Document(document, bundles)
 
-    def get_bundle_ids(self,document_id):
+    def get_bundle_ids(self, document_id):
         session = self._create_session()
 
-        result_set = session.run(NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS,{"parent_id": document_id})
+        result_set = session.run(NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS, {"parent_id": document_id})
 
         ids = list()
         for result in result_set:
@@ -220,22 +223,21 @@ class Neo4jAdapter(BaseAdapter):
 
         return ids
 
-
     def get_bundle(self, bundle_id):
         bundle_id = str(bundle_id)
         session = self._create_session()
         records = list()
-        result_set = session.run(NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS,{"bundle_id":bundle_id})
+        result_set = session.run(NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS, {"bundle_id": bundle_id})
         for result in result_set:
-            record     = result["re"]
+            record = result["re"]
 
-            if record is  None:
+            if record is None:
                 raise DatabaseException("Record response should not be None")
             relation_record = self._split_attributes_metadata_from_node(record)
             records.append(relation_record)
 
-        #Get bundle node and set identifier if there is a bundle node.
-        bundle_node_result = session.run(NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE,{"bundle_id": bundle_id})
+        # Get bundle node and set identifier if there is a bundle node.
+        bundle_node_result = session.run(NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE, {"bundle_id": bundle_id})
         identifier = None
         raw_record = None
         for bundle in bundle_node_result:
@@ -247,38 +249,43 @@ class Neo4jAdapter(BaseAdapter):
 
         Bundle = namedtuple('Bundle', 'identifier, records, bundle_record')
 
-        return Bundle(identifier, records,raw_record)
+        return Bundle(identifier, records, raw_record)
 
-    def get_record(self,record_id):
+    def get_record(self, record_id):
 
         session = self._create_session()
-        result_set = session.run(NEO4J_GET_RECORD_RETURN_NODE,{"record_id": int(record_id)})
+        result_set = session.run(NEO4J_GET_RECORD_RETURN_NODE, {"record_id": int(record_id)})
 
         node = None
         for result in result_set:
             if node is not None:
-                raise DatabaseException("get_record should return only one node for the id {}, command {}".format(record_id, NEO4J_GET_RECORD_RETURN_NODE))
+                raise DatabaseException(
+                    "get_record should return only one node for the id {}, command {}".format(record_id,
+                                                                                              NEO4J_GET_RECORD_RETURN_NODE))
             node = result["node"]
 
         if node is None:
-            raise NotFoundException("We cant find the node with the id: {}, database command {}".format(record_id,NEO4J_GET_RECORD_RETURN_NODE))
+            raise NotFoundException("We cant find the node with the id: {}, database command {}".format(record_id,
+                                                                                                        NEO4J_GET_RECORD_RETURN_NODE))
 
         return self._split_attributes_metadata_from_node(node)
 
     def get_relation(self, relation_id):
 
         session = self._create_session()
-        result_set = session.run(NEO4J_GET_RELATION_RETURN_NODE,{"relation_id": int(relation_id)})
+        result_set = session.run(NEO4J_GET_RELATION_RETURN_NODE, {"relation_id": int(relation_id)})
 
         relation = None
         for result in result_set:
-            if not isinstance(result["relation"],Relationship):
-                raise DatabaseException(" should return only relationship {}, command {}".format(relation_id, NEO4J_GET_RECORD_RETURN_NODE))
+            if not isinstance(result["relation"], Relationship):
+                raise DatabaseException(
+                    " should return only relationship {}, command {}".format(relation_id, NEO4J_GET_RECORD_RETURN_NODE))
 
             relation = result["relation"]
 
         if relation is None:
-            raise NotFoundException("We cant find the relation with the id: {}, database command {}".format(relation_id,NEO4J_GET_RECORD_RETURN_NODE))
+            raise NotFoundException("We cant find the relation with the id: {}, database command {}".format(relation_id,
+                                                                                                            NEO4J_GET_RECORD_RETURN_NODE))
 
         return self._split_attributes_metadata_from_node(relation)
 
@@ -295,18 +302,17 @@ class Neo4jAdapter(BaseAdapter):
     def delete_bundle(self, bundle_id):
         session = self._create_session()
 
-        result_set = session.run(NEO4J_DELETE_BUNDLE_BY_ID,{"bundle_id": bundle_id})
-        result_set = session.run(NEO4J_DELETE_BUNDLE_NODE_BY_ID,{"bundle_id": bundle_id})
+        result_set = session.run(NEO4J_DELETE_BUNDLE_BY_ID, {"bundle_id": bundle_id})
+        result_set = session.run(NEO4J_DELETE_BUNDLE_NODE_BY_ID, {"bundle_id": bundle_id})
 
         return True
 
-    def delete_record(self,record_id):
+    def delete_record(self, record_id):
         session = self._create_session()
         result_set = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
         return True
 
     def delete_relation(self, relation_id):
         session = self._create_session()
-        result_set = session.run(NEO4J_DELETE_RELATION_BY_ID,{"relation_id": int(relation_id)})
+        result_set = session.run(NEO4J_DELETE_RELATION_BY_ID, {"relation_id": int(relation_id)})
         return True
-

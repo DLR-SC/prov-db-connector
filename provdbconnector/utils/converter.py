@@ -1,7 +1,7 @@
-from functools import  reduce
+from functools import reduce
 from io import BufferedReader
 
-import  six
+import six
 from prov.model import ProvDocument
 
 
@@ -17,7 +17,6 @@ class NoDocumentException(ConverterException):
     pass
 
 
-
 def form_string(content):
     """
     Take a string or BufferdReader as argument and transform the string into a ProvDocument
@@ -25,20 +24,21 @@ def form_string(content):
     :return:ProvDocument
     """
     if isinstance(content, ProvDocument):
-       return content
-    elif isinstance(content,BufferedReader):
-       content = reduce(lambda total, a:total +  a ,content.readlines())
+        return content
+    elif isinstance(content, BufferedReader):
+        content = reduce(lambda total, a: total + a, content.readlines())
 
     if type(content) is six.binary_type:
-       content_str = content[0:15].decode()
-       if content_str.find("{") > -1:
-           return ProvDocument.deserialize(content=content, format='json')
-       if content_str.find('<?xml') > -1:
-           return ProvDocument.deserialize(content=content, format='xml')
-       elif content_str.find('document') > -1:
-           return ProvDocument.deserialize(content=content, format='provn')
+        content_str = content[0:15].decode()
+        if content_str.find("{") > -1:
+            return ProvDocument.deserialize(content=content, format='json')
+        if content_str.find('<?xml') > -1:
+            return ProvDocument.deserialize(content=content, format='xml')
+        elif content_str.find('document') > -1:
+            return ProvDocument.deserialize(content=content, format='provn')
 
     raise ParseException("Unsupported input type {}".format(type(content)))
+
 
 def to_json(document=None):
     if document is None:
