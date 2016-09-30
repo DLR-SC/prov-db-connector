@@ -130,6 +130,8 @@ def prov_api_record_example():
     doc.add_namespace("custom", "http://custom.com")
 
     attributes = attributes_dict_example()
+    del attributes["ex:dict value"] #remove dict value because it is not allowed in a prov_record, but for low level adapter tests necessary
+    del attributes["ex:list value"] #remove dict value because it is not allowed in a prov_record, but for low level adapter tests necessary
     attributes.update({"ex:Qualified name ": doc.valid_qualified_name("custom:qualified name")})
     attributes.update({"ex:Qualified name 2": "ex:unqualified_name"})
     attributes.update({"ex:Literral": Literal("test literral", langtag="en")})
@@ -142,8 +144,9 @@ def prov_api_record_example():
         new_key = doc.valid_qualified_name(key)
         expected_attributes.update({new_key: value})
 
-    valid_name = doc.valid_qualified_name("ex:Qualified name 2")
-    expected_attributes[valid_name] = doc.valid_qualified_name("ex:unqualified_name")
+    ##The prov lib don't require to auto convert string values into qualified names
+    #valid_name = doc.valid_qualified_name("ex:Qualified name 2")
+    #expected_attributes[valid_name] = doc.valid_qualified_name("ex:unqualified_name")
 
 
     namespaces = dict()
@@ -157,10 +160,10 @@ def prov_api_record_example():
     type_map.update({"ex:int value":  {"type":"xsd:int"}})
 
     type_map.update({"ex:Qualified name ": {'type': 'prov:QUALIFIED_NAME'}})
-    type_map.update({"ex:Qualified name 2":{'type': 'prov:QUALIFIED_NAME'}})
+    #type_map.update({"ex:Qualified name 2":{'type': 'prov:QUALIFIED_NAME'}}) #The prov lib don't require to auto convert strings into qualified names
     type_map.update({"ex:Literral": {'lang': 'en'}})
     type_map.update({"ex:Literral 2": {'lang': 'en'}})
-    type_map.update({"ex:identifier type":{'type': 'prov:QUALIFIED_NAME'}})
+    type_map.update({"ex:identifier type":{'type': 'xsd:anyURI'}})
 
     metadata = dict()
     metadata.update({METADATA_KEY_PROV_TYPE: PROV_RECORD_IDS_MAP["activity"]})
