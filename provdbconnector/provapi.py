@@ -6,7 +6,7 @@ from uuid import uuid4
 from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE
 from prov.model import ProvDocument, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, ProvAssociation
 
-from provdbconnector.databases.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
 from provdbconnector.utils import form_string, to_json, to_provn, to_xml

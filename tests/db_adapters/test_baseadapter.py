@@ -1,6 +1,6 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.databases.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER,METADATA_KEY_BUNDLE_ID,METADATA_PARENT_ID, NotFoundException
+from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER,METADATA_KEY_BUNDLE_ID,METADATA_PARENT_ID, NotFoundException
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 from provdbconnector.utils.serializer import encode_string_value_to_primitive,encode_dict_values_to_primitive

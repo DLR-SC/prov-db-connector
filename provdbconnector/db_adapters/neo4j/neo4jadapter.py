@@ -1,5 +1,5 @@
 import os
-from provdbconnector.databases.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, \
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, METADATA_PARENT_ID, \
     METADATA_KEY_IDENTIFIER, METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
 

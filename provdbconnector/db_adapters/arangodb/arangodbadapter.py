@@ -1,4 +1,4 @@
-from provdbconnector.databases import BaseAdapter
+from provdbconnector.db_adapters import BaseAdapter
 
 
 class ArangoDBAdapter(BaseAdapter):
