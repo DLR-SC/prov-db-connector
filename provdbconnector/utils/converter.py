@@ -22,7 +22,7 @@ class NoDocumentException(ConverterException):
 
 def form_string(content):
     """
-    Take a string or BufferdReader as argument and transform the string into a ProvDocument
+    Take a string or BufferedReader as argument and transform the string into a ProvDocument
     :param content: Takes a sting or BufferedReader
     :return:ProvDocument
     """

@@ -19,5 +19,29 @@ class ArangoDBAdapter(BaseAdapter):
     def create_bundle(self, document_id, attributes, metadata):
         raise NotImplemented()
 
-    def create_relation(self, from_bundle_id, from_node, to_bundle_id,to_node, attributes, metadata):
+    def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+        raise NotImplemented()
+
+    def delete_bundle(self, bundle_id):
+        raise NotImplemented()
+
+    def get_relation(self, relation_id):
+        raise NotImplemented()
+
+    def get_bundle(self, bundle_id):
+        raise NotImplemented()
+
+    def delete_relation(self, relation_id):
+        raise NotImplemented()
+
+    def get_record(self, record_id):
+        raise NotImplemented()
+
+    def delete_document(self, document_id):
+        raise NotImplemented()
+
+    def delete_record(self, record_id):
+        raise NotImplemented()
+
+    def get_document(self, document_id):
         raise NotImplemented()

@@ -1,5 +1,4 @@
 import json
-import logging
 import sys
 from datetime import datetime
 from io import StringIO
@@ -42,9 +41,8 @@ def encode_dict_values_to_primitive(dict_values):
 
 
 def encode_string_value_to_primitive(value):
-    if sys.version_info[0] < 3:
-        if type(value) is unicode:
-            return value.encode("utf8")
+    if sys.version_info[0] < 3 and type(value) is unicode:
+        return value.encode("utf8")
     if isinstance(value, Literal):
         return value.value
     elif type(value) is int:
@@ -132,7 +130,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
         properties_list = properties
     else:
         raise SerializerException(
-            "please provide properties as list[(key,value)] or dict your provided: %s" % properties.__class__.__name__)
+            "Please provide properties as list[(key,value)] or dict your provided: {}".format(properties.__class__.__name__))
 
     attributes = dict()
     other_attributes = []

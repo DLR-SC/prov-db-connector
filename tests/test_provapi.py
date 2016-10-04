@@ -119,7 +119,7 @@ class ProvApiTests(unittest.TestCase):
                          "user_password": NEO4J_PASS,
                          "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
         }
-        self.provapi = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
+        self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
 
     def tearDown(self):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
@@ -128,14 +128,14 @@ class ProvApiTests(unittest.TestCase):
     #Test create instnace
     def test_provapi_instance(self):
         self.assertRaises(NoDataBaseAdapterException, lambda: ProvApi())
-        self.assertRaises(InvalidOptionsException, lambda: ProvApi(id=1, adapter=Neo4jAdapter))
+        self.assertRaises(InvalidOptionsException, lambda: ProvApi(api_id=1, adapter=Neo4jAdapter))
 
-        obj = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
+        obj = ProvApi(api_id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
         self.assertIsInstance(obj, ProvApi)
-        self.assertEqual(obj.apiid, 1)
+        self.assertEqual(obj.api_id, 1)
 
         obj = ProvApi(adapter=Neo4jAdapter, authinfo=self.authInfo)
-        self.assertIsInstance(obj.apiid,UUID)
+        self.assertIsInstance(obj.api_id,UUID)
 
     #Methods that automatically convert to ProvDocument
     def test_create_document_from_json(self):
