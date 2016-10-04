@@ -29,7 +29,6 @@ class NotFoundException(DatabaseException):
     pass
 
 
-METADATA_KEY_BUNDLE_ID = "bundle_id"
 METADATA_PARENT_ID = "parent_id"
 METADATA_KEY_PROV_TYPE = "prov_type"
 METADATA_KEY_IDENTIFIER = "identifier"

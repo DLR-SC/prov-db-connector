@@ -1,7 +1,7 @@
 import os
 from provdbconnector.db_adapters.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, \
-    DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, METADATA_PARENT_ID, \
-    METADATA_KEY_IDENTIFIER, METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_BUNDLE_ID
+    DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, \
+    METADATA_KEY_IDENTIFIER, METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth, Relationship
@@ -16,6 +16,10 @@ NEO4J_BOLT_PORT = os.environ.get('NEO4J_BOLT_PORT', '7687')
 NEO4J_HTTP_PORT = os.environ.get('NEO4J_HTTP_PORT', '7474')
 
 NEO4J_META_PREFIX = "meta:"
+
+NEO4J_META_BUNDLE_ID = "bundle_id"
+
+NEO4J_META_PARENT_ID = "parent_id"
 
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 
@@ -133,13 +137,14 @@ class Neo4jAdapter(BaseAdapter):
         return str(id + 1)
 
     def create_bundle(self, document_id, attributes, metadata):
-        metadata.update({METADATA_PARENT_ID: document_id})
+        metadata = metadata.copy()
+        metadata.update({NEO4J_META_PARENT_ID: document_id})
         return self.create_record(document_id, attributes, metadata)
 
     def create_record(self, bundle_id, attributes, metadata):
 
         metadata = metadata.copy()
-        metadata.update({METADATA_KEY_BUNDLE_ID: bundle_id})
+        metadata.update({NEO4J_META_BUNDLE_ID: bundle_id})
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
@@ -166,7 +171,7 @@ class Neo4jAdapter(BaseAdapter):
     def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
 
         metadata = metadata.copy()
-        metadata.update({METADATA_KEY_BUNDLE_ID: from_bundle_id})
+        metadata.update({NEO4J_META_BUNDLE_ID: from_bundle_id})
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
@@ -197,10 +202,19 @@ class Neo4jAdapter(BaseAdapter):
 
     def _split_attributes_metadata_from_node(self, db_node):
         Record = namedtuple('Record', 'attributes, metadata')
+        #split data
         metadata = {k.replace(NEO4J_META_PREFIX, ""): v for k, v in db_node.properties.items() if
                     k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
         attributes = {k: v for k, v in db_node.properties.items() if
                       not k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
+
+        #remove adapter spesific code
+        if metadata.get(NEO4J_META_BUNDLE_ID) is not None:
+            del metadata[NEO4J_META_BUNDLE_ID]
+
+        if metadata.get(NEO4J_META_PARENT_ID) is not None:
+            del metadata[NEO4J_META_PARENT_ID]
+
         record = Record(attributes, metadata)
         return record
 
@@ -245,18 +259,17 @@ class Neo4jAdapter(BaseAdapter):
 
         # Get bundle node and set identifier if there is a bundle node.
         bundle_node_result = session.run(NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE, {"bundle_id": bundle_id})
-        identifier = None
+
         raw_record = None
         for bundle in bundle_node_result:
             raw_record = self._split_attributes_metadata_from_node(bundle["b"])
-            identifier = raw_record.metadata[METADATA_KEY_IDENTIFIER]
 
         if raw_record is None and len(records) == 0:
             raise NotFoundException("bundle with the id {} was not found ".format(bundle_id))
 
-        Bundle = namedtuple('Bundle', 'identifier, records, bundle_record')
+        Bundle = namedtuple('Bundle', 'records, bundle_record')
 
-        return Bundle(identifier, records, raw_record)
+        return Bundle(records, raw_record)
 
     def get_record(self, record_id):
 

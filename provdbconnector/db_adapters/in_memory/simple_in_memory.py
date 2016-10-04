@@ -1,5 +1,6 @@
-from provdbconnector.db_adapters.baseadapter import  BaseAdapter, DbDocument,DbBundle,DbRecord,DbRelation, InvalidOptionsException, NotFoundException
+from provdbconnector.db_adapters.baseadapter import  BaseAdapter, DbDocument,DbBundle,DbRecord,DbRelation, InvalidOptionsException, NotFoundException, METADATA_KEY_IDENTIFIER
 from collections import  namedtuple
+from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 from uuid import uuid4
 
 class SimpleInMemoryAdapter(BaseAdapter):
@@ -15,6 +16,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         super(SimpleInMemoryAdapter, self).__init__()
         pass
 
+
     def connect(self, authentication_info):
         if authentication_info is not None:
             raise InvalidOptionsException()
@@ -28,7 +30,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         self.document_bundle_ids.update({doc_id: list()})
 
-        doc_record = DbRecord(list(),list())
+        doc_record = self._create_db_record(dict(), dict())
 
         self.bundles.update({doc_id: DbBundle(list(),doc_record)})
 
@@ -38,7 +40,8 @@ class SimpleInMemoryAdapter(BaseAdapter):
         #save the bundle information and return id as string
         document_id = document_id
         bundle_id = str(uuid4())
-        self.bundles.update({bundle_id: DbBundle(list(),DbRecord(attributes,metadata))})
+
+        self.bundles.update({bundle_id: DbBundle(list(), self._create_db_record(attributes, metadata))})
 
         doc = self.document_bundle_ids.get(document_id)
         doc.append(bundle_id)
@@ -75,7 +78,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         bundle.records.append(new_rec_id)
 
-        db_record = DbRecord(attributes, metadata)
+        db_record = self._create_db_record(attributes, metadata)
 
         self.all_records.update({new_rec_id: db_record})
 
@@ -101,7 +104,16 @@ class SimpleInMemoryAdapter(BaseAdapter):
         super().get_relation(relation_id)
 
     def get_bundle(self, bundle_id):
-        super().get_bundle(bundle_id)
+        bundle = self.bundles.get(bundle_id)
+        if bundle is None:
+            raise NotFoundException()
+
+        records = list()
+        for record_id in bundle.records:
+            record =self.all_records.get(record_id)
+            records.append(record)
+
+        return DbBundle(records, bundle.bundle_record)
 
     def delete_document(self, document_id):
         super().delete_document(document_id)
@@ -129,5 +141,12 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
     def delete_record(self, record_id):
         super().delete_record(record_id)
+
+    def _create_db_record(self, attributes, metadata):
+
+        attr = encode_dict_values_to_primitive(attributes)
+        meta = encode_dict_values_to_primitive(metadata)
+
+        return DbRecord(attr,meta)
 
 

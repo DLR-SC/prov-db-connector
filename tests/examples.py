@@ -10,7 +10,7 @@ from prov.tests.examples import primer_example,\
 import datetime
 from prov.model import ProvDocument, QualifiedName, ProvRecord, ProvRelation, ProvActivity, Literal, Identifier
 from prov.constants import PROV_RECORD_IDS_MAP,PROV
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_BUNDLE_ID, METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_IDENTIFIER
+from provdbconnector.db_adapters.baseadapter import  METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_IDENTIFIER
 from collections import namedtuple
 import pkg_resources
 

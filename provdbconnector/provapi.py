@@ -116,7 +116,8 @@ class ProvApi(object):
             self._parse_record(prov_document, record)
 
         for bundle in raw_doc.bundles:
-            identifier = bundle.identifier[len(PROV_API_BUNDLE_IDENTIFIER_PREFIX) - 2:]  ##remove prefix
+            prefixed_identifier = bundle.bundle_record.metadata[METADATA_KEY_IDENTIFIER]
+            identifier = prefixed_identifier[len(PROV_API_BUNDLE_IDENTIFIER_PREFIX) - 2:]  ##remove prefix
             prov_bundle = prov_document.bundle(identifier=identifier)
 
             for record in bundle.records:

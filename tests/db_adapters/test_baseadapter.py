@@ -1,6 +1,6 @@
 import unittest
 from abc import ABC, abstractmethod
-from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER,METADATA_KEY_BUNDLE_ID,METADATA_PARENT_ID, NotFoundException
+from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER, NotFoundException
 from prov.tests.examples import primer_example
 from prov.model import ProvRecord, ProvDocument
 from provdbconnector.utils.serializer import encode_string_value_to_primitive,encode_dict_values_to_primitive
@@ -161,9 +161,6 @@ class AdapterTestTemplate(unittest.TestCase):
         attrDict = encode_dict_values_to_primitive(args["attributes"])
         metaDict = encode_dict_values_to_primitive(args["metadata"])
 
-        #add bundle_id to expected meta_data
-        metaDict.update({METADATA_KEY_BUNDLE_ID: raw_doc.document.records[0].metadata[METADATA_KEY_BUNDLE_ID]})
-
         self.assertEqual(raw_doc.document.records[0].attributes,attrDict )
         self.assertEqual(raw_doc.document.records[0].metadata, metaDict)
 
@@ -218,26 +215,23 @@ class AdapterTestTemplate(unittest.TestCase):
 
         # check bundle
         self.assertIsNotNone(raw_bundle)
-        self.assertIsNotNone(raw_bundle.identifier)
         self.assertIsNotNone(raw_bundle.bundle_record)
         self.assertIsNotNone(raw_bundle.bundle_record.metadata)
         self.assertIsNotNone(raw_bundle.bundle_record.attributes)
-        self.assertEqual(raw_bundle.identifier, str(args_bundle["metadata"][METADATA_KEY_IDENTIFIER]))
         self.assertIsInstance(raw_bundle.records, list)
         self.assertIsInstance(raw_bundle.bundle_record.attributes, dict)
         self.assertIsInstance(raw_bundle.bundle_record.metadata, dict)
         self.assertEqual(len(raw_bundle.records), 1)
 
-        #check parent document id information
-        parent_id = raw_bundle.bundle_record.metadata[METADATA_PARENT_ID]
-        self.assertEqual(doc_id,parent_id, "parent id should be the document id")
+
+        args_simple = encode_dict_values_to_primitive(args_bundle["metadata"])
+        self.assertEqual(raw_bundle.bundle_record.metadata,args_simple )
+
+
 
         #check if the metadata of the record equals
         attrDict = encode_dict_values_to_primitive(args["attributes"])
         metaDict = encode_dict_values_to_primitive(args["metadata"])
-
-        # add bundle_id to expected meta_data
-        metaDict.update({METADATA_KEY_BUNDLE_ID: raw_bundle.records[0].metadata[METADATA_KEY_BUNDLE_ID]})
 
         self.assertEqual(raw_bundle.records[0].attributes, attrDict)
         self.assertEqual(raw_bundle.records[0].metadata, metaDict)
@@ -265,9 +259,6 @@ class AdapterTestTemplate(unittest.TestCase):
 
         attributes_primitive= encode_dict_values_to_primitive(args["attributes"])
         metadata_primitive= encode_dict_values_to_primitive(args["metadata"])
-
-        # add bundle_id to expected meta_data
-        metadata_primitive.update({METADATA_KEY_BUNDLE_ID: record_raw.metadata[METADATA_KEY_BUNDLE_ID]})
 
         self.assertEqual(record_raw.attributes,attributes_primitive)
         self.assertEqual(record_raw.metadata,metadata_primitive)
@@ -304,9 +295,6 @@ class AdapterTestTemplate(unittest.TestCase):
 
         attributes_primitive = encode_dict_values_to_primitive(relation_args["attributes"])
         metadata_primitive = encode_dict_values_to_primitive(relation_args["metadata"])
-
-        # add bundle_id to expected meta_data
-        metadata_primitive.update({METADATA_KEY_BUNDLE_ID: relation_raw.metadata[METADATA_KEY_BUNDLE_ID]})
 
         self.assertEqual(relation_raw.attributes, attributes_primitive)
         self.assertEqual(relation_raw.metadata, metadata_primitive)
