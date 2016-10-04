@@ -11,6 +11,9 @@ from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_
 
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES
 
+import logging
+log = logging.getLogger(__name__)
+
 
 class SerializerException(Exception):
     pass

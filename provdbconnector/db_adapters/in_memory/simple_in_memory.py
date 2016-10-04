@@ -2,6 +2,9 @@ from provdbconnector.db_adapters.baseadapter import  BaseAdapter, DbDocument,DbB
 from collections import  namedtuple
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 from uuid import uuid4
+import logging
+log = logging.getLogger(__name__)
+
 
 class SimpleInMemoryAdapter(BaseAdapter):
 

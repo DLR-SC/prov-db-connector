@@ -4,6 +4,9 @@ from io import BufferedReader
 import six
 from prov.model import ProvDocument
 
+import logging
+log = logging.getLogger(__name__)
+
 
 class ConverterException(Exception):
     pass

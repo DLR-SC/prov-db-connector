@@ -1,4 +1,5 @@
 import json
+import os
 from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
@@ -12,6 +13,12 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, META
 from provdbconnector.utils import form_string, to_json, to_provn, to_xml
 from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
 
+import logging
+LOG_LEVEL = os.environ.get('LOG_LEVEL', '')
+NUMERIC_LEVEL = getattr(logging, LOG_LEVEL.upper(), None)
+logging.basicConfig(level=NUMERIC_LEVEL)
+logging.getLogger("prov.model").setLevel(logging.WARN)
+log = logging.getLogger(__name__)
 
 class ProvApiException(Exception):
     pass

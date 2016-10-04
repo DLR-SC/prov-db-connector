@@ -3,6 +3,7 @@ import unittest
 from uuid import UUID
 import tests.examples as examples
 from io import StringIO
+import pkg_resources
 from prov.model import  ProvDocument
 from provdbconnector import ProvApi
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES
@@ -107,6 +108,13 @@ class ProvApiTests(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
+
+        self.test_resources = {
+            'xml': {'package': 'provdbconnector', 'file': '../tests/resources/primer.provx'},
+            'json': {'package': 'provdbconnector', 'file': '../tests/resources/primer.json'},
+            'provn': {'package': 'provdbconnector', 'file': '../tests/resources/primer.provn'}
+        }
+        self.test_prov_files = dict((key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in self.test_resources.items())
         self.authInfo = {"user_name": NEO4J_USER,
                          "user_password": NEO4J_PASS,
                          "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
@@ -114,7 +122,8 @@ class ProvApiTests(unittest.TestCase):
         self.provapi = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
 
     def tearDown(self):
-        pass
+        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
+
 
     #Test create instnace
     def test_provapi_instance(self):
@@ -123,14 +132,14 @@ class ProvApiTests(unittest.TestCase):
 
         obj = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
         self.assertIsInstance(obj, ProvApi)
-        self.assertEquals(obj.apiid, 1)
+        self.assertEqual(obj.apiid, 1)
 
         obj = ProvApi(adapter=Neo4jAdapter, authinfo=self.authInfo)
         self.assertIsInstance(obj.apiid,UUID)
 
     #Methods that automatically convert to ProvDocument
     def test_create_document_from_json(self):
-        json_buffer = examples.test_prov_files["json"]
+        json_buffer = self.test_prov_files["json"]
         self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_json(self):
@@ -144,7 +153,7 @@ class ProvApiTests(unittest.TestCase):
         self.assertEqual(prov_document_reverse,example)
 
     def test_create_document_from_xml(self):
-        json_buffer = examples.test_prov_files["xml"]
+        json_buffer = self.test_prov_files["xml"]
         self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_xml(self):
@@ -159,7 +168,7 @@ class ProvApiTests(unittest.TestCase):
         self.assertEqual(prov_document_reverse, example)
 
     def test_create_document_from_provn(self):
-        json_buffer = examples.test_prov_files["provn"]
+        json_buffer = self.test_prov_files["provn"]
         with self.assertRaises(NotImplementedError):
             self.provapi.create_document_from_provn(json_buffer)
 

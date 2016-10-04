@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
 
+import logging
+log = logging.getLogger(__name__).addHandler(logging.NullHandler())
+
 class AdapterException(Exception):
     pass
 

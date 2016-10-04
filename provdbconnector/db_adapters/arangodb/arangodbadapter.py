@@ -1,4 +1,6 @@
 from provdbconnector.db_adapters import BaseAdapter
+import logging
+log = logging.getLogger(__name__)
 
 
 class ArangoDBAdapter(BaseAdapter):

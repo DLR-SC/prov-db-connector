@@ -9,6 +9,10 @@ from prov.constants import PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive
 
+import logging
+logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
+log = logging.getLogger(__name__)
+
 NEO4J_USER = os.environ.get('NEO4J_USERNAME', 'neo4j')
 NEO4J_PASS = os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j')
 NEO4J_HOST = os.environ.get('NEO4J_HOST', 'localhost')
@@ -71,6 +75,7 @@ class Neo4jAdapter(BaseAdapter):
         pass
 
     def _create_session(self):
+
         session = self.driver.session()
 
         if not session.healthy:
@@ -78,7 +83,6 @@ class Neo4jAdapter(BaseAdapter):
         return session
 
     def connect(self, authentication_options):
-
         if authentication_options is None:
             raise InvalidOptionsException()
 
