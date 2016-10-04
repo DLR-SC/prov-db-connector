@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+from collections import namedtuple
 
 class AdapterException(Exception):
     pass
@@ -36,6 +36,12 @@ METADATA_KEY_IDENTIFIER = "identifier"
 METADATA_KEY_NAMESPACES = "namespaces"
 METADATA_KEY_TYPE_MAP = "type_map"
 
+
+DbDocument = namedtuple("DbDocument", "records, bundles")
+DbBundle = namedtuple("DbBundle",  "records, bundle_record")
+
+DbRecord = namedtuple("DbRecord", "attributes, metadata")
+DbRelation = namedtuple("DbRelation", "attributes, metadata")
 
 class BaseAdapter(ABC):
     @abstractmethod
