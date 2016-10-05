@@ -179,7 +179,7 @@ class BaseAdapter(ABC):
     def delete_relation(self, relation_id):
         """
         Delete a single relation
-        :param record_id:
+        :param relation_id:
         :return:bool
         :raise NotFoundException
         """

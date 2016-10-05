@@ -2,7 +2,6 @@ from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbB
 from provdbconnector.db_adapters.baseadapter import InvalidOptionsException, NotFoundException
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 from uuid import uuid4
-from collections import namedtuple
 import logging
 log = logging.getLogger(__name__)
 
