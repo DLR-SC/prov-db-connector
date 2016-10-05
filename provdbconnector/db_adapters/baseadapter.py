@@ -36,7 +36,7 @@ METADATA_KEY_NAMESPACES = "namespaces"
 METADATA_KEY_TYPE_MAP = "type_map"
 
 
-DbDocument = namedtuple("DbDocument", "records, bundles")
+DbDocument = namedtuple("DbDocument", "document, bundles")
 DbBundle = namedtuple("DbBundle",  "records, bundle_record")
 
 DbRecord = namedtuple("DbRecord", "attributes, metadata")
