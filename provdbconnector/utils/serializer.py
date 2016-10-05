@@ -181,7 +181,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
         else:
             value_type = None
             if type_map:
-                value_type = type_map.get(attr_name, None)
+                value_type = type_map.get(attr_name)
 
             if isinstance(values, list):
                 other_attributes.extend(
