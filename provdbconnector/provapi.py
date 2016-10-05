@@ -3,7 +3,7 @@ from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
 
-from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE
+from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL
 from prov.model import ProvDocument, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, ProvAssociation
 
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
@@ -133,6 +133,11 @@ class ProvApi(object):
         if prov_type is prov_bundle.valid_qualified_name("prov:Unknown"):
             return
 
+        # skip connections between bundle entities and all records that belong to the bundle
+        prov_label = raw_record.attributes.get(str(PROV_LABEL))
+        if prov_label is not None and prov_label == "belongsToBundle":
+            return
+
         prov_id = raw_record.metadata[METADATA_KEY_IDENTIFIER]
         prov_id_qualified = prov_bundle.valid_qualified_name(prov_id)
 
@@ -190,7 +195,7 @@ class ProvApi(object):
 
     def _create_bundle_assosiation(self, document_id, bundle_id, bundle_idientifier, prov_bundle):
 
-        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None)
+        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None, attributes={PROV_LABEL: "belongsToBundle"})
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
         to_qualified_name = bundle_idientifier
 
