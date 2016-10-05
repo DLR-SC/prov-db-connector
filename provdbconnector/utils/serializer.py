@@ -31,11 +31,12 @@ if six.integer_types[-1] not in LITERAL_XSDTYPE_MAP:
 
 
 def encode_dict_values_to_primitive(dict_values):
-    dict_values = dict_values.copy()
+    new_dict_values = dict()
     for key, value in dict_values.items():
-        dict_values[key] = encode_string_value_to_primitive(value)
+        key_simple = str(key)
+        new_dict_values.update({key_simple:encode_string_value_to_primitive(value)})
 
-    return dict_values
+    return new_dict_values
 
 
 def encode_string_value_to_primitive(value):
