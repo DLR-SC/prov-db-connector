@@ -20,7 +20,6 @@ setup(
     package_dir={
         'provdbconnector': 'provdbconnector'
     },
-    scripts=['scripts/prov-convert', 'scripts/prov-compare'],
     include_package_data=True,
     install_requires=[
         "prov==1.4.0",
