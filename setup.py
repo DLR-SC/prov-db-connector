@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-from setuptools import setup
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    from distutils.core import setup, find_packages
+
 
 setup(
     name='prov-db-connector',
@@ -12,9 +16,12 @@ setup(
     author='DLR, Stefan Bieliauskas, Martin Stoffers',
     author_email='opensource@dlr.de, sb@conts.de, martin.stoffers@studserv.uni-leipzig.de',
     url='https://github.com/DLR-SC/prov-db-connector',
-    packages=[
-        'provdbconnector',
-    ],
+    packages=find_packages(),
+    package_dir={
+        'provdbconnector': 'provdbconnector'
+    },
+    scripts=['scripts/prov-convert', 'scripts/prov-compare'],
+    include_package_data=True,
     install_requires=[
         "prov==1.4.0",
         "neo4j-driver==1.0.2",
