@@ -25,9 +25,3 @@ script:
 after_success:
   - coveralls
   - docker-compose down
-
-# safelist
-branches:
-  only:
-  - master
-  - develop
