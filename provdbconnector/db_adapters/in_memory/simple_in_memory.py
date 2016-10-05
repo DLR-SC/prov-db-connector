@@ -1,21 +1,22 @@
-from provdbconnector.db_adapters.baseadapter import  BaseAdapter, DbDocument,DbBundle,DbRecord,DbRelation, InvalidOptionsException, NotFoundException, METADATA_KEY_IDENTIFIER
-from collections import  namedtuple
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbBundle, DbRecord, DbRelation
+from provdbconnector.db_adapters.baseadapter import InvalidOptionsException, NotFoundException
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 from uuid import uuid4
+import logging
+log = logging.getLogger(__name__)
+
 
 class SimpleInMemoryAdapter(BaseAdapter):
 
     document_bundle_ids = dict()
 
-    bundles = dict() #dict for alle bundles including record and relation information
+    bundles = dict()  # dict for all bundles including record and relation information
 
-    all_records = dict() # separate dict for records only (to get them by id)
-
+    all_records = dict()  # separate dict for records only (to get them by id)
 
     def __init__(self, *args):
         super(SimpleInMemoryAdapter, self).__init__()
         pass
-
 
     def connect(self, authentication_info):
         if authentication_info is not None:
@@ -24,20 +25,19 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return True
 
     def create_document(self):
-        #create new document id and return this is as stirng
-
+        # create new document id and return this is as string
         doc_id = str(uuid4())
 
         self.document_bundle_ids.update({doc_id: list()})
 
         doc_record = self._create_db_record(dict(), dict())
 
-        self.bundles.update({doc_id: DbBundle(list(),doc_record)})
+        self.bundles.update({doc_id: DbBundle(list(), doc_record)})
 
         return doc_id
 
     def create_bundle(self, document_id, attributes, metadata):
-        #save the bundle information and return id as string
+        # save the bundle information and return id as string
         document_id = document_id
         bundle_id = str(uuid4())
 
@@ -49,7 +49,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return bundle_id
 
     def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
-        #save all relation information and return the relation id as string
+        # save all relation information and return the relation id as string
 
         from_bundle = self.bundles.get(from_bundle_id)
         to_bundle = self.bundles.get(to_bundle_id)
@@ -61,18 +61,17 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         from_bundle.records.append(new_rel_id)
 
-        db_relations = DbRelation(metadata,attributes)
+        db_relations = DbRelation(metadata, attributes)
 
-        self.all_records.update({new_rel_id:db_relations})
+        self.all_records.update({new_rel_id: db_relations})
 
         return new_rel_id
 
     def create_record(self, bundle_id, attributes, metadata):
-        #save all record information and return record id as string
+        # save all record information and return record id as string
 
         bundle_id = bundle_id
         bundle = self.bundles.get(bundle_id)
-
 
         new_rec_id = str(uuid4())
 
@@ -84,18 +83,16 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return new_rec_id
 
-
     def get_document(self, document_id):
-        #Should return a namedtuple of type DbDocument
-        doc =  self.documents.get(document_id)
+        # Should return a namedtuple of type DbDocument
+        doc = self.documents.get(document_id)
         db_records = doc.records
-
 
         db_bundles = list()
         for bundle_id in doc.bundles:
             db_bundles.append(self.get_bundle(bundle_id))
 
-        return DbDocument(db_records,db_bundles)
+        return DbDocument(db_records, db_bundles)
 
     def get_record(self, record_id):
         super().get_record(record_id)
@@ -110,7 +107,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         records = list()
         for record_id in bundle.records:
-            record =self.all_records.get(record_id)
+            record = self.all_records.get(record_id)
             records.append(record)
 
         return DbBundle(records, bundle.bundle_record)
@@ -124,13 +121,13 @@ class SimpleInMemoryAdapter(BaseAdapter):
     def delete_bundle(self, bundle_id):
         bundle = self.bundles.get(bundle_id)
         if bundle is None:
-            raise  NotFoundException()
+            raise NotFoundException()
 
         for record_id in bundle.records:
             record = self.all_records.get(record_id)
 
             if record is None:
-                raise  NotFoundException()
+                raise NotFoundException()
 
             del self.all_records[record_id]
             del record
@@ -147,6 +144,6 @@ class SimpleInMemoryAdapter(BaseAdapter):
         attr = encode_dict_values_to_primitive(attributes)
         meta = encode_dict_values_to_primitive(metadata)
 
-        return DbRecord(attr,meta)
+        return DbRecord(attr, meta)
 
 

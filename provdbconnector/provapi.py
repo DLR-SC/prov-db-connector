@@ -1,4 +1,5 @@
 import json
+import os
 from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
@@ -11,6 +12,13 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, META
     METADATA_KEY_TYPE_MAP
 from provdbconnector.utils import form_string, to_json, to_provn, to_xml
 from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
+
+import logging
+LOG_LEVEL = os.environ.get('LOG_LEVEL', '')
+NUMERIC_LEVEL = getattr(logging, LOG_LEVEL.upper(), None)
+logging.basicConfig(level=NUMERIC_LEVEL)
+logging.getLogger("prov.model").setLevel(logging.WARN)
+log = logging.getLogger(__name__)
 
 
 class ProvApiException(Exception):
@@ -38,11 +46,11 @@ PROV_API_BUNDLE_IDENTIFIER_PREFIX = "prov:bundle:{}"
 
 
 class ProvApi(object):
-    def __init__(self, id=None, adapter=None, authinfo=None, *args):
-        if id is None:
-            self.apiid = uuid4()
+    def __init__(self, api_id=None, adapter=None, authinfo=None, *args):
+        if api_id is None:
+            self.api_id = uuid4()
         else:
-            self.apiid = id
+            self.api_id = api_id
 
         if adapter is None:
             raise NoDataBaseAdapterException()
@@ -54,24 +62,24 @@ class ProvApi(object):
         prov_document = form_string(content=content)
         return self.create_document_from_prov(content=prov_document)
 
-    def get_document_as_json(self, id=None):
-        prov_document = self.get_document_as_prov(id=id)
+    def get_document_as_json(self, document_id=None):
+        prov_document = self.get_document_as_prov(document_id=document_id)
         return to_json(prov_document)
 
     def create_document_from_xml(self, content=None):
         prov_document = form_string(content=content)
         return self.create_document_from_prov(content=prov_document)
 
-    def get_document_as_xml(self, id=None):
-        prov_document = self.get_document_as_prov(id=id)
+    def get_document_as_xml(self, document_id=None):
+        prov_document = self.get_document_as_prov(document_id=document_id)
         return to_xml(prov_document)
 
     def create_document_from_provn(self, content=None):
         prov_document = form_string(content=content)
         return self.create_document_from_prov(content=prov_document)
 
-    def get_document_as_provn(self, id=None):
-        prov_document = self.get_document_as_prov(id=id)
+    def get_document_as_provn(self, document_id=None):
+        prov_document = self.get_document_as_prov(document_id=document_id)
         return to_provn(prov_document)
 
     # Methods that consume ProvDocument instances and produce ProvDocument instances
@@ -87,37 +95,38 @@ class ProvApi(object):
 
         bundle_id_map = dict()
         for bundle in prov_document.bundles:
-            custom_bunlde_identifier = bundle.valid_qualified_name(
+            custom_bundle_identifier = bundle.valid_qualified_name(
                 PROV_API_BUNDLE_IDENTIFIER_PREFIX.format(bundle.identifier))
-            bundle_record = ProvBundleRecord(bundle, identifier=custom_bunlde_identifier,
+            bundle_record = ProvBundleRecord(bundle, identifier=custom_bundle_identifier,
                                              attributes={"prov:bundle_name": bundle.identifier})
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
             bundle_id = self._adapter.create_bundle(document_id=doc_id, attributes=attributes, metadata=metadata)
             bundle_id_map.update({bundle.identifier: bundle_id})
 
             self._create_bundle(bundle_id, bundle)
-            self._create_bundle_assosiation(document_id=doc_id, bundle_id=bundle_id,
-                                            bundle_idientifier=custom_bunlde_identifier, prov_bundle=bundle)
+            self._create_bundle_association(document_id=doc_id, bundle_id=bundle_id,
+                                            bundle_identifier=custom_bundle_identifier, prov_bundle=bundle)
 
         for bundle in prov_document.bundles:
             self._create_bundle_links(bundle, bundle_id_map)
 
         return doc_id
 
-    def get_document_as_prov(self, id=None):
-        if not type(id) is str:
+    def get_document_as_prov(self, document_id=None):
+        if type(document_id) is not str:
             raise InvalidArgumentTypeException()
 
-        raw_doc = self._adapter.get_document(id)
-        # parse document
+        raw_doc = self._adapter.get_document(document_id)
 
+        # parse document
         prov_document = ProvDocument()
         for record in raw_doc.document.records:
             self._parse_record(prov_document, record)
 
         for bundle in raw_doc.bundles:
             prefixed_identifier = bundle.bundle_record.metadata[METADATA_KEY_IDENTIFIER]
-            identifier = prefixed_identifier[len(PROV_API_BUNDLE_IDENTIFIER_PREFIX) - 2:]  ##remove prefix
+            # remove prefix
+            identifier = prefixed_identifier[len(PROV_API_BUNDLE_IDENTIFIER_PREFIX) - 2:]
             prov_bundle = prov_document.bundle(identifier=identifier)
 
             for record in bundle.records:
@@ -162,7 +171,7 @@ class ProvApi(object):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
             self._adapter.create_record(bundle_id, attributes, metadata)
 
-        # create realtions
+        # create relations
         for relation in prov_bundle.get_records(ProvRelation):
             # skip relations of the type "prov:mentionOf" https://www.w3.org/TR/prov-links/
             if relation.get_type() is PROV_MENTION:
@@ -188,11 +197,11 @@ class ProvApi(object):
         return self._adapter.create_relation(from_bundle_id, from_qualified_name, to_bundle_id, to_qualified_name,
                                              attributes, metadata)
 
-    def _create_bundle_assosiation(self, document_id, bundle_id, bundle_idientifier, prov_bundle):
+    def _create_bundle_association(self, document_id, bundle_id, bundle_identifier, prov_bundle):
 
         belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None)
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
-        to_qualified_name = bundle_idientifier
+        to_qualified_name = bundle_identifier
 
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
@@ -240,7 +249,7 @@ class ProvApi(object):
         if prov_identifier is None and prov_record.identifier is None:
             prov_identifier = prov_type
 
-        # Be sure that the prov_identifier is a qualified name instnace
+        # Be sure that the prov_identifier is a qualified name instance
 
         if not isinstance(prov_identifier, QualifiedName):
             qualified_name = bundle.valid_qualified_name(prov_identifier)
@@ -279,7 +288,7 @@ class ProvApi(object):
                 qualified_name = bundle.valid_qualified_name(value)
                 if qualified_name is not None:
                     # Don't update the attribute, so we only save the namespace instead of the attribute as a qualified name.
-                    # For some reason the prov-libary allow a string with a schnema: <namespace_prefix>:<identifier>
+                    # For some reason the prov-library allow a string with a schnema: <namespace_prefix>:<identifier>
                     # This line cause an error during the test: "test_primer_example_alternate"
                     # attributes[key] = qualified_name # update attribute
 
@@ -290,9 +299,9 @@ class ProvApi(object):
         types_dict = dict()
         for key, value in attributes.items():
             if key not in PROV_ATTRIBUTES:
-                type = encode_json_representation(value)
-                if type is not None:
-                    types_dict.update({str(key): type})
+                return_type = encode_json_representation(value)
+                if return_type is not None:
+                    types_dict.update({str(key): return_type})
 
         metadata = {
             METADATA_KEY_PROV_TYPE: prov_type,
@@ -300,6 +309,6 @@ class ProvApi(object):
             METADATA_KEY_NAMESPACES: used_namespaces,
             METADATA_KEY_TYPE_MAP: types_dict
         }
-        MetaAndAttributes = namedtuple("MetaAndAttributes", "metadata, attributes")
+        meta_and_attributes = namedtuple("MetaAndAttributes", "metadata, attributes")
 
-        return MetaAndAttributes(metadata, attributes)
+        return meta_and_attributes(metadata, attributes)

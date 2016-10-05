@@ -4,11 +4,11 @@
 
 
 
-This python module provide a general interface to save [W3C-Prov](https://www.w3.org/TR/prov-overview/)-Documents into a database. 
+This python module provides a general interface to save [W3C-Prov](https://www.w3.org/TR/prov-overview/)-Documents into a database. 
 Currently we support the [Neo4j](https://neo4j.com/)-Graph database.  
 
 
-# Installation
+## Installation
 
 **Not published yet**
 
@@ -18,12 +18,11 @@ pip install prov-db-connector
 
 You can view [prov-db-connector on PyPi's package index](https://pypi.python.org/pypi/prov-db-connector/)
 
-# Current status
+## Current status
 
-## Todos / Next steps
-* Implement Logging 
+### Todos / Next steps
 * Documentation of classes and functions 
-* Implement low-level functions in ProvApi like *reate_record()*
+* Implement low-level functions in ProvApi like *create_record()*
 * [Implement Tests: validator and validator class](https://github.com/DLR-SC/prov-db-connector/issues/1)
 
 
