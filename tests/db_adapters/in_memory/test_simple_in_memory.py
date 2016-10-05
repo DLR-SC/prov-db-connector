@@ -24,7 +24,7 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
 class SimpleInMemoryAdapterProvApiTests(ProvApiTestTemplate):
 
      def setUp(self):
-         self.provapi = ProvApi(id=1, adapter=SimpleInMemoryAdapter, authinfo=None)
+         self.provapi = ProvApi(api_id=1, adapter=SimpleInMemoryAdapter, authinfo=None)
 
      def tearDown(self):
          del self.provapi
