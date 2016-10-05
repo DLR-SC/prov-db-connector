@@ -178,6 +178,18 @@ class ProvApiTests(unittest.TestCase):
 
 
     #Methods with ProvDocument input / output
+    def test_create_document(self):
+        #test prov document input
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+        #test invalid optoions input
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.create_document(1)
+
+
     def test_create_document_from_prov(self):
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)

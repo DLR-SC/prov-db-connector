@@ -9,7 +9,7 @@ from prov.model import ProvDocument, ProvBundle, ProvRecord, ProvElement, ProvRe
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
-from provdbconnector.utils import form_string, to_json, to_provn, to_xml
+from provdbconnector.utils import form_string, to_json, to_provn, to_xml, ParseException
 from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
 
 
@@ -52,7 +52,7 @@ class ProvApi(object):
     # Converter Methods
     def create_document_from_json(self, content=None):
         prov_document = form_string(content=content)
-        return self.create_document_from_prov(content=prov_document)
+        return self.create_document(content=prov_document)
 
     def get_document_as_json(self, id=None):
         prov_document = self.get_document_as_prov(id=id)
@@ -60,7 +60,7 @@ class ProvApi(object):
 
     def create_document_from_xml(self, content=None):
         prov_document = form_string(content=content)
-        return self.create_document_from_prov(content=prov_document)
+        return self.create_document(content=prov_document)
 
     def get_document_as_xml(self, id=None):
         prov_document = self.get_document_as_prov(id=id)
@@ -68,16 +68,25 @@ class ProvApi(object):
 
     def create_document_from_provn(self, content=None):
         prov_document = form_string(content=content)
-        return self.create_document_from_prov(content=prov_document)
+        return self.create_document(content=prov_document)
 
     def get_document_as_provn(self, id=None):
         prov_document = self.get_document_as_prov(id=id)
         return to_provn(prov_document)
 
-    # Methods that consume ProvDocument instances and produce ProvDocument instances
-    def create_document_from_prov(self, content=None):
+    def create_document_from_prov(self,content=None):
         if not isinstance(content, ProvDocument):
             raise InvalidArgumentTypeException()
+        return self.create_document(content=content)
+
+    # Methods that consume ProvDocument instances and produce ProvDocument instances
+    def create_document(self, content=None):
+
+        #Try to convert the content into the provDocument, if it is already a ProvDocument instance the function will return this document
+        try:
+            content = form_string(content=content)
+        except ParseException as e:
+            raise InvalidArgumentTypeException(e)
 
         prov_document = content
 
