@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
 
+import logging
+log = logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+
 class AdapterException(Exception):
     pass
 
@@ -41,6 +45,7 @@ DbBundle = namedtuple("DbBundle",  "records, bundle_record")
 
 DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
+
 
 class BaseAdapter(ABC):
     @abstractmethod

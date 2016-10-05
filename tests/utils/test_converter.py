@@ -27,7 +27,7 @@ class ConverterTests(unittest.TestCase):
         self.prov_document = examples.primer_example()
 
     def tearDown(self):
-        pass
+        [self.test_files[k].close() for k in self.test_files.keys()]
 
     def test_form_string(self):
         result = form_string(self.test_files["json"])

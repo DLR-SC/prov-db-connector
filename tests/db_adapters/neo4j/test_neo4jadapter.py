@@ -56,7 +56,7 @@ class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
                     "user_password": NEO4J_PASS,
                     "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
                     }
-        self.provapi = ProvApi(id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
+        self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
 
     def tearDown(self):
         session = self.provapi._adapter._create_session()
