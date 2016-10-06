@@ -24,7 +24,7 @@ setup(
         "six==1.10.0"
     ],
     license="MIT",
-    test_suite='tests',
+    test_suite='provdbconnector.tests',
     classifiers=[
         'Development Status :: 1 - Alpha',
         'Topic :: Software Development :: Libraries :: Python Modules',

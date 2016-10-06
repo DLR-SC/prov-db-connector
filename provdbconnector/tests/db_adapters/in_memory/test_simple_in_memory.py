@@ -1,9 +1,8 @@
-import unittest
+from provdbconnector.db_adapters import InvalidOptionsException
 from provdbconnector.db_adapters import SimpleInMemoryAdapter
 from provdbconnector.provapi import ProvApi
-from provdbconnector.db_adapters import InvalidOptionsException, AuthException
-from tests.db_adapters.test_baseadapter import AdapterTestTemplate
-from tests.test_provapi import ProvApiTestTemplate
+from provdbconnector.tests import AdapterTestTemplate
+from provdbconnector.tests import ProvApiTestTemplate
 
 
 class SimpleInMemoryAdapterTest(AdapterTestTemplate):

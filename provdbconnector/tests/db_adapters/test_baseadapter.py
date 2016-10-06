@@ -1,11 +1,11 @@
 import unittest
-from abc import ABC, abstractmethod
-from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER, NotFoundException
-from prov.tests.examples import primer_example
-from prov.model import ProvRecord, ProvDocument
-from provdbconnector.utils.serializer import encode_string_value_to_primitive,encode_dict_values_to_primitive
 
-from tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
+from prov.model import ProvDocument
+
+from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER, NotFoundException
+from provdbconnector.tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
+from provdbconnector.utils.serializer import encode_dict_values_to_primitive
+
 
 def isnamedtupleinstance(x):
     t = type(x)
