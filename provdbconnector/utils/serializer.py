@@ -122,6 +122,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
     :param prov_type: valid prov type like prov:Entry as string
     :param prov_id: valid id as string like <namespace>:<name>
     :param properties: dict{attr_name:attr_value} dict with all properties (prov and additional)
+    :param type_map: dict{attr_name:type_str} Contains the type information for each property (only if type is necessary)
     :return: ProvRecord
     """
     # Parse attributes
