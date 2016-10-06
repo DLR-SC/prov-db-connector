@@ -15,7 +15,7 @@ auth_info  = {  "user_name": NEO4J_USER,
                 "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
         }
 
-prov_api = ProvApi(adapter=Neo4jAdapter,authinfo=auth_info)
+prov_api = ProvApi(adapter=Neo4jAdapter,auth_info=auth_info)
 
 
 #create the prov document
@@ -23,9 +23,20 @@ prov_document = ProvDocument()
 prov_document.add_namespace("ex", "http://example.com")
 
 prov_document.agent("ex:Bob")
+prov_document.agent("ex:Bob")
+prov_document.agent("ex:Bob")
+prov_document.agent("ex:Bob")
+prov_document.agent("ex:Bob")
+prov_document.agent("ex:Bob")
+prov_document.activity("ex:Alice")
+prov_document.activity("ex:Alice")
+prov_document.activity("ex:Alice")
 prov_document.activity("ex:Alice")
 
 prov_document.association("ex:Alice","ex:Bob")
+prov_document.association("ex:Alice","ex:Bob")
+prov_document.wasGeneratedBy("ex:Alice","ex:Bob")
+prov_document.wasGeneratedBy("ex:Alice","ex:Bob")
 
 document_id = prov_api.create_document(prov_document)
 

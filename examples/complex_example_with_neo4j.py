@@ -16,7 +16,7 @@ auth_info  = {  "user_name": NEO4J_USER,
                 "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
         }
 
-prov_api = ProvApi(adapter=Neo4jAdapter,authinfo=auth_info)
+prov_api = ProvApi(adapter=Neo4jAdapter,auth_info=auth_info)
 
 
 #create the prov document from examples

@@ -29,12 +29,12 @@ NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 
 # create
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
-NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID """  # args: provType, values
+NEO4J_CREATE_NODE_RETURN_ID = """MERGE (node:%s { %s}) RETURN ID(node) as ID """  # args: provType, values
 NEO4J_CREATE_RELATION_RETURN_ID = """
                                 MATCH
                                     (from{{`meta:bundle_id`:'{from_bundle_id}',`meta:identifier`:'{from_identifier}'}}),
                                     (to{{`meta:bundle_id`:'{to_bundle_id}', `meta:identifier`:'{to_identifier}'}})
-                                CREATE
+                                MERGE
                                     (from)-[r:{relation_type} {{{property_identifiers}}}]->(to)
                                 RETURN
                                     ID(r) as ID

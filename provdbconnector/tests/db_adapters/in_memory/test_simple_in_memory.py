@@ -12,9 +12,9 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
         self.instance.connect(None)
 
     def test_connect_invalid_options(self):
-        authInfo = {"invalid": "Invalid"}
+        auth_info = {"invalid": "Invalid"}
         with self.assertRaises(InvalidOptionsException):
-            self.instance.connect(authInfo)
+            self.instance.connect(auth_info)
 
     def tearDown(self):
         del self.instance
@@ -23,7 +23,7 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
 class SimpleInMemoryAdapterProvApiTests(ProvApiTestTemplate):
 
      def setUp(self):
-         self.provapi = ProvApi(api_id=1, adapter=SimpleInMemoryAdapter, authinfo=None)
+         self.provapi = ProvApi(api_id=1, adapter=SimpleInMemoryAdapter, auth_info=None)
 
      def tearDown(self):
          del self.provapi

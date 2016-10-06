@@ -158,11 +158,11 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_doc.document.records[0].attributes,dict)
         self.assertIsInstance(raw_doc.document.records[0].metadata,dict)
 
-        attrDict = encode_dict_values_to_primitive(args["attributes"])
-        metaDict = encode_dict_values_to_primitive(args["metadata"])
+        attr_dict = encode_dict_values_to_primitive(args["attributes"])
+        meta_dict = encode_dict_values_to_primitive(args["metadata"])
 
-        self.assertEqual(raw_doc.document.records[0].attributes,attrDict )
-        self.assertEqual(raw_doc.document.records[0].metadata, metaDict)
+        self.assertEqual(raw_doc.document.records[0].attributes,attr_dict )
+        self.assertEqual(raw_doc.document.records[0].metadata, meta_dict)
 
 
         #check bundle
@@ -230,11 +230,11 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
         #check if the metadata of the record equals
-        attrDict = encode_dict_values_to_primitive(args["attributes"])
-        metaDict = encode_dict_values_to_primitive(args["metadata"])
+        attr_dict = encode_dict_values_to_primitive(args["attributes"])
+        meta_dict = encode_dict_values_to_primitive(args["metadata"])
 
-        self.assertEqual(raw_bundle.records[0].attributes, attrDict)
-        self.assertEqual(raw_bundle.records[0].metadata, metaDict)
+        self.assertEqual(raw_bundle.records[0].attributes, attr_dict)
+        self.assertEqual(raw_bundle.records[0].metadata, meta_dict)
 
         # check bundle
 

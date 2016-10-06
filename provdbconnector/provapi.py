@@ -50,12 +50,12 @@ class ProvApi(object):
     The public api class. This class provide methods to save and get documents or part of ProvDocuments
 
     """
-    def __init__(self, api_id=None, adapter=None, authinfo=None, *args):
+    def __init__(self, api_id=None, adapter=None, auth_info=None, *args):
         """
         Create a new instance of ProvAPI
         :param api_id: The id of the api, optional
         :param adapter: The adapter class, must enhance from BaseAdapter
-        :param authinfo: A dict object that contains the information for authentication
+        :param auth_info: A dict object that contains the information for authentication
         """
         if api_id is None:
             self.api_id = uuid4()
@@ -65,7 +65,7 @@ class ProvApi(object):
         if adapter is None:
             raise NoDataBaseAdapterException()
         self._adapter = adapter()
-        self._adapter.connect(authinfo)
+        self._adapter.connect(auth_info)
 
     # Converter Methods
     def create_document_from_json(self, content=None):
