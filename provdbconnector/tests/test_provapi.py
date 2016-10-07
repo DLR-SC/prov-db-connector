@@ -1,14 +1,14 @@
-import os
 import unittest
 from uuid import UUID
-import tests.examples as examples
-from io import StringIO
+
 import pkg_resources
 from prov.model import  ProvDocument
+
+from provdbconnector.tests import examples as examples
 from provdbconnector import ProvApi
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES
 from provdbconnector.db_adapters import InvalidOptionsException
-from provdbconnector.db_adapters import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT, NEO4J_HTTP_PORT
+from provdbconnector.db_adapters import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES
 from provdbconnector.provapi import NoDataBaseAdapterException,InvalidArgumentTypeException
 
 
@@ -110,16 +110,16 @@ class ProvApiTests(unittest.TestCase):
     def setUp(self):
 
         self.test_resources = {
-            'xml': {'package': 'provdbconnector', 'file': '../tests/resources/primer.provx'},
-            'json': {'package': 'provdbconnector', 'file': '../tests/resources/primer.json'},
-            'provn': {'package': 'provdbconnector', 'file': '../tests/resources/primer.provn'}
+            'xml': {'package': 'provdbconnector', 'file': '/tests/resources/primer.provx'},
+            'json': {'package': 'provdbconnector', 'file': '/tests/resources/primer.json'},
+            'provn': {'package': 'provdbconnector', 'file': '/tests/resources/primer.provn'}
         }
         self.test_prov_files = dict((key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in self.test_resources.items())
-        self.authInfo = {"user_name": NEO4J_USER,
+        self.auth_info = {"user_name": NEO4J_USER,
                          "user_password": NEO4J_PASS,
                          "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
         }
-        self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
+        self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
     def tearDown(self):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
@@ -130,11 +130,11 @@ class ProvApiTests(unittest.TestCase):
         self.assertRaises(NoDataBaseAdapterException, lambda: ProvApi())
         self.assertRaises(InvalidOptionsException, lambda: ProvApi(api_id=1, adapter=Neo4jAdapter))
 
-        obj = ProvApi(api_id=1, adapter=Neo4jAdapter, authinfo=self.authInfo)
+        obj = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
         self.assertIsInstance(obj, ProvApi)
         self.assertEqual(obj.api_id, 1)
 
-        obj = ProvApi(adapter=Neo4jAdapter, authinfo=self.authInfo)
+        obj = ProvApi(adapter=Neo4jAdapter, auth_info=self.auth_info)
         self.assertIsInstance(obj.api_id,UUID)
 
     #Methods that automatically convert to ProvDocument
@@ -187,6 +187,18 @@ class ProvApiTests(unittest.TestCase):
 
 
     #Methods with ProvDocument input / output
+    def test_create_document(self):
+        #test prov document input
+        example = examples.primer_example()
+        document_id = self.provapi.create_document_from_prov(example)
+        self.assertIsNotNone(document_id)
+        self.assertIsInstance(document_id, str)
+
+        #test invalid optoions input
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.create_document(1)
+
+
     def test_create_document_from_prov(self):
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)

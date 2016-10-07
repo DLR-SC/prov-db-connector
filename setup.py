@@ -29,13 +29,13 @@ setup(
         "lxml==3.6.4",
         "six==1.10.0"
     ],
-    license="MIT",
-    test_suite='tests',
+    license="Apache License 2.0",
+    test_suite='provdbconnector.tests',
     classifiers=[
         'Development Status :: 1 - Alpha',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Scientific/Engineering',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: Apache License 2.0',
         'Programming Language :: Python 3.4',
     ]
 )

@@ -4,13 +4,13 @@ from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
 
-from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE
+from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL
 from prov.model import ProvDocument, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, ProvAssociation
 
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
-from provdbconnector.utils import form_string, to_json, to_provn, to_xml
+from provdbconnector.utils import form_string, to_json, to_provn, to_xml, ParseException
 from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
 
 import logging
@@ -46,7 +46,17 @@ PROV_API_BUNDLE_IDENTIFIER_PREFIX = "prov:bundle:{}"
 
 
 class ProvApi(object):
-    def __init__(self, api_id=None, adapter=None, authinfo=None, *args):
+    """
+    The public api class. This class provide methods to save and get documents or part of ProvDocuments
+
+    """
+    def __init__(self, api_id=None, adapter=None, auth_info=None, *args):
+        """
+        Create a new instance of ProvAPI
+        :param api_id: The id of the api, optional
+        :param adapter: The adapter class, must enhance from BaseAdapter
+        :param auth_info: A dict object that contains the information for authentication
+        """
         if api_id is None:
             self.api_id = uuid4()
         else:
@@ -55,41 +65,90 @@ class ProvApi(object):
         if adapter is None:
             raise NoDataBaseAdapterException()
         self._adapter = adapter()
-        self._adapter.connect(authinfo)
+        self._adapter.connect(auth_info)
 
     # Converter Methods
     def create_document_from_json(self, content=None):
+        """
+        creates a new document in the database
+        :param content: The content as str or Buffer
+        :return: document_id as string
+        """
         prov_document = form_string(content=content)
-        return self.create_document_from_prov(content=prov_document)
+        return self.create_document(content=prov_document)
 
     def get_document_as_json(self, document_id=None):
+        """
+        Get a ProvDocument from the database based on the document_id
+        :param document_id: The id as a sting value
+        :return: ProvDocument
+        """
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_json(prov_document)
 
     def create_document_from_xml(self, content=None):
+        """
+        Creates a prov document in the database based on the xml file
+        :param content: xml string or buffer
+        :return:document_id as string
+        """
         prov_document = form_string(content=content)
-        return self.create_document_from_prov(content=prov_document)
+        return self.create_document(content=prov_document)
 
     def get_document_as_xml(self, document_id=None):
+        """
+        Get a ProvDocument from the database based on the document_id
+        :param document_id: The id as a sting value
+        :return: ProvDocument
+        """
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_xml(prov_document)
 
     def create_document_from_provn(self, content=None):
+        """
+        Creates a prov document in the database based on the provn string or buffer
+        :param content: provn string or buffer
+        :return:document_id as string
+        """
         prov_document = form_string(content=content)
-        return self.create_document_from_prov(content=prov_document)
+        return self.create_document(content=prov_document)
 
     def get_document_as_provn(self, document_id=None):
+        """
+        Get a ProvDocument from the database based on the document_id
+        :param document_id: The id as a sting value
+        :return: ProvDocument
+        """
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_provn(prov_document)
 
-    # Methods that consume ProvDocument instances and produce ProvDocument instances
-    def create_document_from_prov(self, content=None):
+    def create_document_from_prov(self,content=None):
+        """
+        Creates a prov document in the database based on the prov document
+        :param content: prov document instnace
+        :return:document_id as string
+        """
         if not isinstance(content, ProvDocument):
             raise InvalidArgumentTypeException()
+        return self.create_document(content=content)
+
+    # Methods that consume ProvDocument instances and produce ProvDocument instances
+    def create_document(self, content=None):
+        """
+        The main method to create the document in the db
+        :param content: The content can be a xml, json or provn string or buffer or a ProvDocument instnace
+        :return:Document id as string
+        """
+
+        #Try to convert the content into the provDocument, if it is already a ProvDocument instance the function will return this document
+        try:
+            content = form_string(content=content)
+        except ParseException as e:
+            raise InvalidArgumentTypeException(e)
 
         prov_document = content
 
-        doc_id = self._adapter.create_document()
+        doc_id = self._adapter.save_document()
 
         self._create_bundle(doc_id, prov_document)
 
@@ -100,7 +159,7 @@ class ProvApi(object):
             bundle_record = ProvBundleRecord(bundle, identifier=custom_bundle_identifier,
                                              attributes={"prov:bundle_name": bundle.identifier})
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
-            bundle_id = self._adapter.create_bundle(document_id=doc_id, attributes=attributes, metadata=metadata)
+            bundle_id = self._adapter.save_bundle(document_id=doc_id, attributes=attributes, metadata=metadata)
             bundle_id_map.update({bundle.identifier: bundle_id})
 
             self._create_bundle(bundle_id, bundle)
@@ -113,6 +172,11 @@ class ProvApi(object):
         return doc_id
 
     def get_document_as_prov(self, document_id=None):
+        """
+        Get a ProvDocument from the database based on the document_id
+        :param document_id: The id as a sting value
+        :return: ProvDocument
+        """
         if type(document_id) is not str:
             raise InvalidArgumentTypeException()
 
@@ -134,12 +198,25 @@ class ProvApi(object):
         return prov_document
 
     def _parse_record(self, prov_bundle, raw_record):
+        """
+        This method creates a ProvRecord in the ProvBundle based on the raw database response
+
+        :param prov_bundle: ProvBundle instance
+        :param raw_record: DbRelation or DbRecord instance (namedtuple)
+        :return:None, the method updates the prov_bundle directly
+        """
+
         # check if record belongs to this bundle
         prov_type = raw_record.metadata[METADATA_KEY_PROV_TYPE]
         prov_type = prov_bundle.valid_qualified_name(prov_type)
 
         # skip record if prov:type "prov:Unknown"
         if prov_type is prov_bundle.valid_qualified_name("prov:Unknown"):
+            return
+
+        # skip connections between bundle entities and all records that belong to the bundle
+        prov_label = raw_record.attributes.get(str(PROV_LABEL))
+        if prov_label is not None and prov_label == "belongsToBundle":
             return
 
         prov_id = raw_record.metadata[METADATA_KEY_IDENTIFIER]
@@ -163,13 +240,19 @@ class ProvApi(object):
         create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
 
     def _create_bundle(self, bundle_id, prov_bundle):
+        """
+        Private method to create a bundle in the database
+        :param bundle_id: The bundle from the databasedatapter
+        :param prov_bundle: the ProvBundle
+        :return:None
+        """
         if not isinstance(prov_bundle, ProvBundle) or type(bundle_id) is not str:
             raise InvalidArgumentTypeException()
 
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
-            self._adapter.create_record(bundle_id, attributes, metadata)
+            self._adapter.save_record(bundle_id, attributes, metadata)
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
@@ -180,6 +263,14 @@ class ProvApi(object):
             self._create_relation(bundle_id, bundle_id, relation)
 
     def _create_relation(self, from_bundle_id, to_bundle_id, prov_relation):
+        """
+        Creates a relation between 2 nodes that are already in the database.
+
+        :param from_bundle_id: The database id for the start bundle
+        :param to_bundle_id: The database id for the target bundle (important for bundle-links)
+        :param prov_relation: The ProvRelation instance
+        :return:Relation id as string
+        """
         # get from and to node
         from_tuple, to_tuple = prov_relation.formal_attributes[:2]
         from_qualified_name = from_tuple[1]
@@ -194,32 +285,51 @@ class ProvApi(object):
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
-        return self._adapter.create_relation(from_bundle_id, from_qualified_name, to_bundle_id, to_qualified_name,
-                                             attributes, metadata)
+        return self._adapter.save_relation(from_bundle_id, from_qualified_name, to_bundle_id, to_qualified_name,
+                                           attributes, metadata)
 
     def _create_bundle_association(self, document_id, bundle_id, bundle_identifier, prov_bundle):
+        """
+        This method creates a relation between the bundle entity and all nodes in the bundle
+        :param document_id: The database document id
+        :param bundle_id: The database bundle id
+        :param bundle_identifier: The identifier of the target bundle
+        :param prov_bundle: The instance of ProvBundle
+        :return:
+        """
 
-        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None)
+        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None, attributes={PROV_LABEL: "belongsToBundle"})
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
         to_qualified_name = bundle_identifier
 
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
             from_qualified_name = metadata[METADATA_KEY_IDENTIFIER]
-            self._adapter.create_relation(bundle_id, from_qualified_name, document_id, to_qualified_name,
-                                          belong_attributes, belong_metadata)
+            self._adapter.save_relation(bundle_id, from_qualified_name, document_id, to_qualified_name,
+                                        belong_attributes, belong_metadata)
 
     def _create_unknown_node(self, bundle_id):
+        """
+        If a relation end or start is "Unknown" (yes this is allowed in PROV) we create a specific node to create the relation
+        :param bundle_id: The database bundle id
+        :return: The identifier of the Unknown node
+        """
         uid = uuid4()
         doc = ProvDocument()
         identifier = doc.valid_qualified_name("prov:Unknown-{}".format(uid))
         record = ProvRecord(bundle=doc, identifier=identifier)
 
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
-        self._adapter.create_record(bundle_id, attributes, metadata)
+        self._adapter.save_record(bundle_id, attributes, metadata)
         return identifier
 
     def _create_bundle_links(self, prov_bundle, bundle_id_map):
+        """
+        This function creates the links between nodes in bundles, see https://www.w3.org/TR/prov-links/
+        :param prov_bundle: For this bundle we will create the links
+        :param bundle_id_map: A map for the relation between {IDENTIFIER: DATABASE_ID}
+        :return: None
+        """
 
         from_bundle_id = bundle_id_map[prov_bundle.identifier]
 
@@ -233,6 +343,15 @@ class ProvApi(object):
             self._create_relation(from_bundle_id, to_bundle_id, mention)
 
     def _get_metadata_and_attributes_for_record(self, prov_record):
+        """
+        This function generate some meta data for the record for example:
+
+            * Namespaces: The prov_record use several namespaces and the metadata contain this namespaces
+            * Type_Map: The type map is important to get exactly the same document back, you have to save this information (like what attribute is a datetime)
+
+        :param prov_record: The ProvRecord (ProvRelation or ProvElement)
+        :return:
+        """
         if not isinstance(prov_record, ProvRecord):
             raise InvalidArgumentTypeException()
 

@@ -33,11 +33,12 @@ if six.integer_types[-1] not in LITERAL_XSDTYPE_MAP:
 
 
 def encode_dict_values_to_primitive(dict_values):
-    dict_values = dict_values.copy()
+    new_dict_values = dict()
     for key, value in dict_values.items():
-        dict_values[key] = encode_string_value_to_primitive(value)
+        key_simple = str(key)
+        new_dict_values.update({key_simple:encode_string_value_to_primitive(value)})
 
-    return dict_values
+    return new_dict_values
 
 
 def encode_string_value_to_primitive(value):
@@ -121,6 +122,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
     :param prov_type: valid prov type like prov:Entry as string
     :param prov_id: valid id as string like <namespace>:<name>
     :param properties: dict{attr_name:attr_value} dict with all properties (prov and additional)
+    :param type_map: dict{attr_name:type_str} Contains the type information for each property (only if type is necessary)
     :return: ProvRecord
     """
     # Parse attributes
@@ -180,7 +182,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
         else:
             value_type = None
             if type_map:
-                value_type = type_map.get(attr_name, None)
+                value_type = type_map.get(attr_name)
 
             if isinstance(values, list):
                 other_attributes.extend(

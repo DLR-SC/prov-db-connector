@@ -19,9 +19,9 @@ class ConverterTests(unittest.TestCase):
         #   <your_package>/templates/temp_file
         #   the correct way to read your template is to use pkg_resources package from setuptools distribution:
         test_resources = {
-            'xml': {'package': 'provdbconnector', 'file': '../tests/resources/primer.provx'},
-            'json':{'package':'provdbconnector', 'file':'../tests/resources/primer.json'},
-            'provn':{'package':'provdbconnector', 'file':'../tests/resources/primer.provn'}
+            'xml': {'package': 'provdbconnector', 'file': '/tests/resources/primer.provx'},
+            'json':{'package':'provdbconnector', 'file':'/tests/resources/primer.json'},
+            'provn':{'package':'provdbconnector', 'file':'/tests/resources/primer.provn'}
         }
         self.test_files = dict( (key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in test_resources.items())
         self.prov_document = examples.primer_example()
