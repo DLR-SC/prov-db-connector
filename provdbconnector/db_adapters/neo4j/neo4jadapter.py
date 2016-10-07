@@ -128,7 +128,7 @@ class Neo4jAdapter(BaseAdapter):
         db_attributes_identifiers = map(lambda key: "`{}`: {{`{}`}}".format(key, key), list(db_attributes.keys()))
         return ",".join(db_attributes_identifiers)
 
-    def create_document(self):
+    def save_document(self):
         session = self._create_session()
         result = session.run(NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID)
         record_id = None
@@ -142,12 +142,12 @@ class Neo4jAdapter(BaseAdapter):
 
         return str(record_id + 1)
 
-    def create_bundle(self, document_id, attributes, metadata):
+    def save_bundle(self, document_id, attributes, metadata):
         metadata = metadata.copy()
         metadata.update({NEO4J_META_PARENT_ID: document_id})
-        return self.create_record(document_id, attributes, metadata)
+        return self.save_record(document_id, attributes, metadata)
 
-    def create_record(self, bundle_id, attributes, metadata):
+    def save_record(self, bundle_id, attributes, metadata):
 
         metadata = metadata.copy()
         metadata.update({NEO4J_META_BUNDLE_ID: bundle_id})
@@ -174,7 +174,7 @@ class Neo4jAdapter(BaseAdapter):
 
         return str(record_id)
 
-    def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
 
         metadata = metadata.copy()
         metadata.update({NEO4J_META_BUNDLE_ID: from_bundle_id})

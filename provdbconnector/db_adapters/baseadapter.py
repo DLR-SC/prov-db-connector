@@ -65,7 +65,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_document(self):
+    def save_document(self):
         """
         Create a new document id, so you only need to return a unique id
         :return: unique id as string
@@ -73,7 +73,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_bundle(self, document_id, attributes, metadata):
+    def save_bundle(self, document_id, attributes, metadata):
         """
         Creates a bundle from the given parameter
         :param document_id: the parent document id
@@ -84,7 +84,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_record(self, bundle_id, attributes, metadata):
+    def save_record(self, bundle_id, attributes, metadata):
         """
         Creates a database node
         :param bundle_id: The new record belongs to this bundle
@@ -95,7 +95,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
         """
         Create a relation between 2 nodes
         :param from_bundle_id: The database for the from node

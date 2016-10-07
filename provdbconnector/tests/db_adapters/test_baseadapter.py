@@ -21,12 +21,12 @@ def insert_document_with_bundles(instance):
     doc = ProvDocument()
     doc.add_namespace("ex","http://example.com")
     #document with 1 record
-    doc_id = instance.create_document()
-    doc_record_id = instance.create_record(doc_id, args_record["attributes"], args_record["metadata"])
+    doc_id = instance.save_document()
+    doc_record_id = instance.save_record(doc_id, args_record["attributes"], args_record["metadata"])
 
     #bundle with 1 record
-    bundle_id = instance.create_bundle(doc_id, args_bundle["attributes"], args_bundle["metadata"])
-    bundle_record_id = instance.create_record(bundle_id, args_record["attributes"], args_record["metadata"])
+    bundle_id = instance.save_bundle(doc_id, args_bundle["attributes"], args_bundle["metadata"])
+    bundle_record_id = instance.save_record(bundle_id, args_record["attributes"], args_record["metadata"])
 
 
     #add relation
@@ -40,11 +40,11 @@ def insert_document_with_bundles(instance):
     from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_label
     to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_label
 
-    from_record_id = instance.create_record(doc_id, from_record_args["attributes"],from_record_args["metadata"])
-    to_record_id = instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])
+    from_record_id = instance.save_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])
+    to_record_id = instance.save_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])
 
 
-    relation_id = instance.create_relation(doc_id, from_label,doc_id, to_label, relation_args["attributes"],relation_args["metadata"])
+    relation_id = instance.save_relation(doc_id, from_label, doc_id, to_label, relation_args["attributes"], relation_args["metadata"])
 
 
 
@@ -84,54 +84,54 @@ class AdapterTestTemplate(unittest.TestCase):
             self.run = lambda self, *args, **kwargs: None
 
     ### create section ###
-    def test_create_document(self):
-        id = self.instance.create_document()
+    def test_save_document(self):
+        id = self.instance.save_document()
         self.assertIsNotNone(id)
         self.assertIs(type(id), str,"id should be a string ")
 
-    def test_create_bundle(self):
-        doc_id = self.instance.create_document()
+    def test_save_bundle(self):
+        doc_id = self.instance.save_document()
         args = base_connector_bundle_parameter_example()
-        id = self.instance.create_bundle(doc_id, args["attributes"], args["metadata"] )
+        id = self.instance.save_bundle(doc_id, args["attributes"], args["metadata"])
         self.assertIsNotNone(id)
         self.assertIs(type(id), str, "id should be a string ")
 
-    def test_create_record(self):
+    def test_save_record(self):
         args = base_connector_record_parameter_example()
 
-        doc_id = self.instance.create_document()
-        record_id  = self.instance.create_record(doc_id, args["attributes"], args["metadata"])
+        doc_id = self.instance.save_document()
+        record_id  = self.instance.save_record(doc_id, args["attributes"], args["metadata"])
         self.assertIsNotNone(record_id)
         self.assertIs(type(record_id), str, "id should be a string ")
 
-    def test_create_relation(self):
+    def test_save_relation(self):
         args_relation = base_connector_relation_parameter_example()
         args_records = base_connector_record_parameter_example()
-        doc_id = self.instance.create_document()
+        doc_id = self.instance.save_document()
 
         from_meta = args_records["metadata"].copy()
         from_meta.update({METADATA_KEY_IDENTIFIER: args_relation["from_node"]})
-        from_node_id  = self.instance.create_record(doc_id, args_records["attributes"], from_meta)
+        from_node_id  = self.instance.save_record(doc_id, args_records["attributes"], from_meta)
 
         to_meta = args_records["metadata"].copy()
         to_meta.update({METADATA_KEY_IDENTIFIER: args_relation["to_node"]})
-        to_node_id  = self.instance.create_record(doc_id, args_records["attributes"], to_meta)
+        to_node_id  = self.instance.save_record(doc_id, args_records["attributes"], to_meta)
 
 
-        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],doc_id,args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+        relation_id = self.instance.save_relation(doc_id, args_relation["from_node"], doc_id, args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
 
 
     @unittest.skip("We should discuss the possibility of relations that are create automatically nodes")
-    def test_create_relation_with_unknown_records(self):
+    def test_save_relation_with_unknown_records(self):
         args_relation = base_connector_relation_parameter_example()
 
-        doc_id = self.instance.create_document()
+        doc_id = self.instance.save_document()
 
         #Skip the part that creates the from and to node
 
-        relation_id = self.instance.create_relation(doc_id,args_relation["from_node"],doc_id,args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+        relation_id = self.instance.save_relation(doc_id, args_relation["from_node"], doc_id, args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
 
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
@@ -140,8 +140,8 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_get_document(self):
         args = base_connector_record_parameter_example()
 
-        doc_id = self.instance.create_document()
-        record_id = self.instance.create_record(doc_id, args["attributes"], args["metadata"])
+        doc_id = self.instance.save_document()
+        record_id = self.instance.save_record(doc_id, args["attributes"], args["metadata"])
 
         raw_doc = self.instance.get_document(doc_id)
 
@@ -200,10 +200,10 @@ class AdapterTestTemplate(unittest.TestCase):
         args = base_connector_record_parameter_example()
         args_bundle = base_connector_bundle_parameter_example()
 
-        doc_id = self.instance.create_document()
-        bundle_id= self.instance.create_bundle(doc_id,args_bundle["attributes"],args_bundle["metadata"])
+        doc_id = self.instance.save_document()
+        bundle_id= self.instance.save_bundle(doc_id, args_bundle["attributes"], args_bundle["metadata"])
 
-        record_id = self.instance.create_record(bundle_id, args["attributes"], args["metadata"])
+        record_id = self.instance.save_record(bundle_id, args["attributes"], args["metadata"])
 
         raw_bundle = self.instance.get_bundle(bundle_id)
 
@@ -245,8 +245,8 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_get_record(self):
         args = base_connector_record_parameter_example()
 
-        doc_id = self.instance.create_document()
-        record_id = self.instance.create_record(doc_id, args["attributes"], args["metadata"])#
+        doc_id = self.instance.save_document()
+        record_id = self.instance.save_record(doc_id, args["attributes"], args["metadata"])#
 
         record_raw = self.instance.get_record(record_id)
 
@@ -279,11 +279,11 @@ class AdapterTestTemplate(unittest.TestCase):
         from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_identifier
         to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_identifier
 
-        doc_id = self.instance.create_document()
-        from_record_id = self.instance.create_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])  #
-        to_record_id = self.instance.create_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])  #
+        doc_id = self.instance.save_document()
+        from_record_id = self.instance.save_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])  #
+        to_record_id = self.instance.save_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])  #
 
-        relation_id = self.instance.create_relation(doc_id,from_identifier,doc_id,to_identifier,relation_args["attributes"], relation_args["metadata"])
+        relation_id = self.instance.save_relation(doc_id, from_identifier, doc_id, to_identifier, relation_args["attributes"], relation_args["metadata"])
 
         relation_raw = self.instance.get_relation(relation_id)
 

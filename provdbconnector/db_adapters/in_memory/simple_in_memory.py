@@ -24,7 +24,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-    def create_document(self):
+    def save_document(self):
         # create new document id and return this is as string
         doc_id = str(uuid4())
 
@@ -41,7 +41,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return doc_id
 
-    def create_bundle(self, document_id, attributes, metadata):
+    def save_bundle(self, document_id, attributes, metadata):
         # save the bundle information and return id as string
         document_id = document_id
         bundle_id = str(uuid4())
@@ -60,7 +60,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return bundle_id
 
-    def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
         # save all relation information and return the relation id as string
 
         from_bundle = self.bundles.get(from_bundle_id)
@@ -83,7 +83,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return new_rel_id
 
-    def create_record(self, bundle_id, attributes, metadata):
+    def save_record(self, bundle_id, attributes, metadata):
         # save all record information and return record id as string
 
         bundle_id = bundle_id

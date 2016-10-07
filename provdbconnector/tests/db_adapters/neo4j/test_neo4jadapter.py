@@ -35,11 +35,11 @@ class Neo4jAdapterTests(AdapterTestTemplate):
             self.instance.connect(auth_info)
 
     def test_create_document_id_increment(self):
-        first= self.instance.create_document()
+        first= self.instance.save_document()
 
         first= int(first)
 
-        second = self.instance.create_document()
+        second = self.instance.save_document()
         second = int(second)
 
         self.assertEqual(first+1,second)

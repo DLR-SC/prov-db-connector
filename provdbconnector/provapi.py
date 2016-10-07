@@ -148,7 +148,7 @@ class ProvApi(object):
 
         prov_document = content
 
-        doc_id = self._adapter.create_document()
+        doc_id = self._adapter.save_document()
 
         self._create_bundle(doc_id, prov_document)
 
@@ -159,7 +159,7 @@ class ProvApi(object):
             bundle_record = ProvBundleRecord(bundle, identifier=custom_bundle_identifier,
                                              attributes={"prov:bundle_name": bundle.identifier})
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
-            bundle_id = self._adapter.create_bundle(document_id=doc_id, attributes=attributes, metadata=metadata)
+            bundle_id = self._adapter.save_bundle(document_id=doc_id, attributes=attributes, metadata=metadata)
             bundle_id_map.update({bundle.identifier: bundle_id})
 
             self._create_bundle(bundle_id, bundle)
@@ -252,7 +252,7 @@ class ProvApi(object):
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
-            self._adapter.create_record(bundle_id, attributes, metadata)
+            self._adapter.save_record(bundle_id, attributes, metadata)
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
@@ -285,8 +285,8 @@ class ProvApi(object):
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
-        return self._adapter.create_relation(from_bundle_id, from_qualified_name, to_bundle_id, to_qualified_name,
-                                             attributes, metadata)
+        return self._adapter.save_relation(from_bundle_id, from_qualified_name, to_bundle_id, to_qualified_name,
+                                           attributes, metadata)
 
     def _create_bundle_association(self, document_id, bundle_id, bundle_identifier, prov_bundle):
         """
@@ -305,8 +305,8 @@ class ProvApi(object):
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
             from_qualified_name = metadata[METADATA_KEY_IDENTIFIER]
-            self._adapter.create_relation(bundle_id, from_qualified_name, document_id, to_qualified_name,
-                                          belong_attributes, belong_metadata)
+            self._adapter.save_relation(bundle_id, from_qualified_name, document_id, to_qualified_name,
+                                        belong_attributes, belong_metadata)
 
     def _create_unknown_node(self, bundle_id):
         """
@@ -320,7 +320,7 @@ class ProvApi(object):
         record = ProvRecord(bundle=doc, identifier=identifier)
 
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
-        self._adapter.create_record(bundle_id, attributes, metadata)
+        self._adapter.save_record(bundle_id, attributes, metadata)
         return identifier
 
     def _create_bundle_links(self, prov_bundle, bundle_id_map):
