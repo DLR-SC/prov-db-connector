@@ -12,15 +12,6 @@ from prov.model import ProvDocument, QualifiedName, ProvRecord, ProvRelation, Pr
 from prov.constants import PROV_RECORD_IDS_MAP,PROV
 from provdbconnector.db_adapters.baseadapter import  METADATA_KEY_NAMESPACES,METADATA_KEY_PROV_TYPE,METADATA_KEY_TYPE_MAP,METADATA_KEY_IDENTIFIER
 from collections import namedtuple
-import pkg_resources
-
-test_resources = {
-    'xml': {'package': 'provdbconnector', 'file': '../tests/resources/primer.provx'},
-    'json': {'package': 'provdbconnector', 'file': '../tests/resources/primer.json'},
-    'provn': {'package': 'provdbconnector', 'file': '../tests/resources/primer.provn'}
-}
-test_prov_files = dict(
-    (key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in test_resources.items())
 
 
 

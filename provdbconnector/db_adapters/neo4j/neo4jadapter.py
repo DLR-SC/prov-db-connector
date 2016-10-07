@@ -1,13 +1,17 @@
 import os
 from provdbconnector.db_adapters.baseadapter import BaseAdapter, InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, \
-    METADATA_KEY_IDENTIFIER, METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP
+    METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive
+
+import logging
+logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
+log = logging.getLogger(__name__)
 
 NEO4J_USER = os.environ.get('NEO4J_USERNAME', 'neo4j')
 NEO4J_PASS = os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j')
@@ -36,10 +40,13 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                     ID(r) as ID
                                 """  # args: provType, values
 # get
-NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """MATCH (b {`meta:prov_type`:'prov:Bundle'}) WHERE ID(b)=toInt({bundle_id}) RETURN b """
-NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID"""
+NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """
+                        MATCH (b {`meta:prov_type`:'prov:Bundle'}) WHERE ID(b)=toInt({bundle_id}) RETURN b
+                    """
+NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """
+                        MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID
+                    """
 NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
-
                             MATCH (d)-[r]-(x)
                             WHERE not((d)-[:includeIn]-(x)) and not(d.`meta:prov_type`='prov:Bundle' or x.`meta:prov_type`='prov:Bundle')and (r.`meta:bundle_id`) ={bundle_id}
                             RETURN DISTINCT r as re
@@ -71,6 +78,7 @@ class Neo4jAdapter(BaseAdapter):
         pass
 
     def _create_session(self):
+
         session = self.driver.session()
 
         if not session.healthy:
@@ -78,13 +86,12 @@ class Neo4jAdapter(BaseAdapter):
         return session
 
     def connect(self, authentication_options):
-
         if authentication_options is None:
             raise InvalidOptionsException()
 
-        user_name = authentication_options.get("user_name", None)
-        user_pass = authentication_options.get("user_password", None)
-        host = authentication_options.get("host", None)
+        user_name = authentication_options.get("user_name")
+        user_pass = authentication_options.get("user_password")
+        host = authentication_options.get("host")
 
         if user_name is None or user_pass is None or host is None:
             raise InvalidOptionsException()
@@ -118,30 +125,29 @@ class Neo4jAdapter(BaseAdapter):
         return db_attributes
 
     def _get_attributes_identifiers_cypher_string(self, db_attributes):
-        db_attributes_identifiers = map(lambda key: "`%s`: {`%s`}" % (key, key), list(db_attributes.keys()))
-
+        db_attributes_identifiers = map(lambda key: "`{}`: {{`{}`}}".format(key, key), list(db_attributes.keys()))
         return ",".join(db_attributes_identifiers)
 
-    def create_document(self):
+    def save_document(self):
         session = self._create_session()
         result = session.run(NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID)
-        id = None
+        record_id = None
         for record in result:
-            id = record["ID"]
+            record_id = record["ID"]
 
-        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": id})
+        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": record_id})
 
-        if id is None:
+        if record_id is None:
             raise DatabaseException("Could not get a valid ID result back")
 
-        return str(id + 1)
+        return str(record_id + 1)
 
-    def create_bundle(self, document_id, attributes, metadata):
+    def save_bundle(self, document_id, attributes, metadata):
         metadata = metadata.copy()
         metadata.update({NEO4J_META_PARENT_ID: document_id})
-        return self.create_record(document_id, attributes, metadata)
+        return self.save_record(document_id, attributes, metadata)
 
-    def create_record(self, bundle_id, attributes, metadata):
+    def save_record(self, bundle_id, attributes, metadata):
 
         metadata = metadata.copy()
         metadata.update({NEO4J_META_BUNDLE_ID: bundle_id})
@@ -150,25 +156,25 @@ class Neo4jAdapter(BaseAdapter):
 
         db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
 
-        provType = metadata[METADATA_KEY_PROV_TYPE]
+        provtype = metadata[METADATA_KEY_PROV_TYPE]
 
         identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes)
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_NODE_RETURN_ID % (provType.localpart, identifier_str)
+        command = NEO4J_CREATE_NODE_RETURN_ID % (provtype.localpart, identifier_str)
         result = session.run(command, dict(db_attributes))
 
-        id = None
+        record_id = None
         for record in result:
-            id = record["ID"]
+            record_id = record["ID"]
 
-        if id is None:
+        if record_id is None:
             raise CreateRecordException("No ID property returned by database for the command {}".format(command))
 
-        return str(id)
+        return str(record_id)
 
-    def create_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
 
         metadata = metadata.copy()
         metadata.update({NEO4J_META_BUNDLE_ID: from_bundle_id})
@@ -177,7 +183,7 @@ class Neo4jAdapter(BaseAdapter):
 
         db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
 
-        relationType = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
+        relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
         identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes)
 
@@ -187,35 +193,35 @@ class Neo4jAdapter(BaseAdapter):
                                                          to_bundle_id=to_bundle_id,
                                                          from_identifier=from_node,
                                                          to_identifier=to_node,
-                                                         relation_type=relationType,
+                                                         relation_type=relationtype,
                                                          property_identifiers=identifier_str)
         result = session.run(command, dict(db_attributes))
 
-        id = None
+        record_id = None
         for record in result:
-            id = record["ID"]
+            record_id = record["ID"]
 
-        if id is None:
+        if record_id is None:
             raise CreateRelationException("No ID property returned by database for the command {}".format(command))
 
-        return str(id)
+        return str(record_id)
 
     def _split_attributes_metadata_from_node(self, db_node):
-        Record = namedtuple('Record', 'attributes, metadata')
-        #split data
+        record = namedtuple('Record', 'attributes, metadata')
+        # split data
         metadata = {k.replace(NEO4J_META_PREFIX, ""): v for k, v in db_node.properties.items() if
                     k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
         attributes = {k: v for k, v in db_node.properties.items() if
                       not k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
 
-        #remove adapter spesific code
+        # remove adapter specific code
         if metadata.get(NEO4J_META_BUNDLE_ID) is not None:
             del metadata[NEO4J_META_BUNDLE_ID]
 
         if metadata.get(NEO4J_META_PARENT_ID) is not None:
             del metadata[NEO4J_META_PARENT_ID]
 
-        record = Record(attributes, metadata)
+        record = record(attributes, metadata)
         return record
 
     def decode_string_value_to_primitive(self, attributes, metadata):
@@ -223,7 +229,7 @@ class Neo4jAdapter(BaseAdapter):
 
     def get_document(self, document_id):
 
-        Document = namedtuple('Document', 'document, bundles')
+        n_document = namedtuple('Document', 'document, bundles')
 
         document = self.get_bundle(document_id)
 
@@ -231,7 +237,7 @@ class Neo4jAdapter(BaseAdapter):
         for bundle_id in self.get_bundle_ids(document_id):
             bundles.append(self.get_bundle(bundle_id))
 
-        return Document(document, bundles)
+        return n_document(document, bundles)
 
     def get_bundle_ids(self, document_id):
         session = self._create_session()
@@ -267,9 +273,9 @@ class Neo4jAdapter(BaseAdapter):
         if raw_record is None and len(records) == 0:
             raise NotFoundException("bundle with the id {} was not found ".format(bundle_id))
 
-        Bundle = namedtuple('Bundle', 'records, bundle_record')
+        bundle = namedtuple('Bundle', 'records, bundle_record')
 
-        return Bundle(records, raw_record)
+        return bundle(records, raw_record)
 
     def get_record(self, record_id):
 
@@ -310,10 +316,10 @@ class Neo4jAdapter(BaseAdapter):
         return self._split_attributes_metadata_from_node(relation)
 
     def delete_document(self, document_id):
-        bundleIds = self.get_bundle_ids(document_id)
+        bundle_ids = self.get_bundle_ids(document_id)
         result_list = list()
-        for id in bundleIds:
-            result_list.append(self.delete_bundle(id))
+        for bundle_id in bundle_ids:
+            result_list.append(self.delete_bundle(bundle_id))
 
         result_list.append(self.delete_bundle(document_id))
 

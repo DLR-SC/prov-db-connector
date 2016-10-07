@@ -1,5 +1,4 @@
 import json
-import logging
 import sys
 from datetime import datetime
 from io import StringIO
@@ -10,6 +9,9 @@ from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTR
 from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime
 
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES
+
+import logging
+log = logging.getLogger(__name__)
 
 
 class SerializerException(Exception):
@@ -31,17 +33,17 @@ if six.integer_types[-1] not in LITERAL_XSDTYPE_MAP:
 
 
 def encode_dict_values_to_primitive(dict_values):
-    dict_values = dict_values.copy()
+    new_dict_values = dict()
     for key, value in dict_values.items():
-        dict_values[key] = encode_string_value_to_primitive(value)
+        key_simple = str(key)
+        new_dict_values.update({key_simple:encode_string_value_to_primitive(value)})
 
-    return dict_values
+    return new_dict_values
 
 
 def encode_string_value_to_primitive(value):
-    if sys.version_info[0] < 3:
-        if type(value) is unicode:
-            return value.encode("utf8")
+    if sys.version_info[0] < 3 and type(value) is unicode:
+        return value.encode("utf8")
     if isinstance(value, Literal):
         return value.value
     elif type(value) is int:
@@ -120,6 +122,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
     :param prov_type: valid prov type like prov:Entry as string
     :param prov_id: valid id as string like <namespace>:<name>
     :param properties: dict{attr_name:attr_value} dict with all properties (prov and additional)
+    :param type_map: dict{attr_name:type_str} Contains the type information for each property (only if type is necessary)
     :return: ProvRecord
     """
     # Parse attributes
@@ -129,7 +132,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
         properties_list = properties
     else:
         raise SerializerException(
-            "please provide properties as list[(key,value)] or dict your provided: %s" % properties.__class__.__name__)
+            "Please provide properties as list[(key,value)] or dict your provided: {}".format(properties.__class__.__name__))
 
     attributes = dict()
     other_attributes = []
@@ -179,7 +182,7 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
         else:
             value_type = None
             if type_map:
-                value_type = type_map.get(attr_name, None)
+                value_type = type_map.get(attr_name)
 
             if isinstance(values, list):
                 other_attributes.extend(
