@@ -119,9 +119,9 @@ def prov_api_record_example():
         "ex:list value"]  # remove dict value because it is not allowed in a prov_record, but for low level adapter tests necessary
     attributes.update({"ex:Qualified name ": doc.valid_qualified_name("custom:qualified name")})
     attributes.update({"ex:Qualified name 2": "ex:unqualified_name"})
-    attributes.update({"ex:Literral": Literal("test literral", langtag="en")})
-    attributes.update({"ex:Literral 2": Literal("test literral with datatype", langtag="en",
-                                                datatype=PROV["InternationalizedString"])})
+    attributes.update({"ex:Literal": Literal("test literal", langtag="en")})
+    attributes.update({"ex:Literal 2": Literal("test literal with datatype", langtag="en",
+                                               datatype=PROV["InternationalizedString"])})
     attributes.update({"ex:identifier type": Identifier("http://example.com/#test")})
 
     expected_attributes = dict()
@@ -145,8 +145,8 @@ def prov_api_record_example():
 
     type_map.update({"ex:Qualified name ": {'type': 'prov:QUALIFIED_NAME'}})
     # type_map.update({"ex:Qualified name 2":{'type': 'prov:QUALIFIED_NAME'}}) #The prov lib don't require to auto convert strings into qualified names
-    type_map.update({"ex:Literral": {'lang': 'en'}})
-    type_map.update({"ex:Literral 2": {'lang': 'en'}})
+    type_map.update({"ex:Literal": {'lang': 'en'}})
+    type_map.update({"ex:Literal 2": {'lang': 'en'}})
     type_map.update({"ex:identifier type": {'type': 'xsd:anyURI'}})
 
     metadata = dict()

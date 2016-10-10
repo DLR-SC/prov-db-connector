@@ -74,7 +74,7 @@ class BaseAdapter(ABC):
         :param from_bundle_id: The database for the from node
         :param from_node: The identifier
         :param to_bundle_id: The database id for the to node
-        :param to_node: The identifier for the destionation node
+        :param to_node: The identifier for the destination node
         :param attributes:  Attributes as dict for the record. Be careful you have to encode the dict
         :param metadata: Metadata as dict for the record. Be careful you have to encode the dict but you can be sure that all meta keys are always there
         :return:
