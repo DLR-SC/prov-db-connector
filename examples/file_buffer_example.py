@@ -1,22 +1,19 @@
-from prov.model import ProvDocument
 from provdbconnector import ProvApi
-from provdbconnector.db_adapters import SimpleInMemoryAdapter
-from prov.tests.examples import primer_example
+from provdbconnector.db_adapters.in_memory import SimpleInMemoryAdapter
 import pkg_resources
 
-#create the api
-prov_api = ProvApi(adapter=SimpleInMemoryAdapter,auth_info=None)
+# create the api
+prov_api = ProvApi(adapter=SimpleInMemoryAdapter, auth_info=None)
 
+# create the prov document from examples
+prov_document_buffer = pkg_resources.resource_stream("examples", "file_buffer_example_primer.json")
 
-#create the prov document from examples
-prov_document_buffer = pkg_resources.resource_stream("examples","file_buffer_example_primer.json")
-
-#Save document
+# Save document
 document_id = prov_api.create_document(prov_document_buffer)
-#This is similar to:
+# This is similar to:
 # prov_api.create_document_from_json(prov_document_buffer)
 
-#get document
+# get document
 print(prov_api.get_document_as_provn(document_id))
 
 # Output:
