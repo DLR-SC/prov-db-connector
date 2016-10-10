@@ -2,7 +2,7 @@ from prov.model import ProvDocument
 from provdbconnector import ProvApi
 from provdbconnector.db_adapters import SimpleInMemoryAdapter
 
-prov_api = ProvApi(adapter=SimpleInMemoryAdapter,authinfo=None)
+prov_api = ProvApi(adapter=SimpleInMemoryAdapter,auth_info=None)
 
 
 

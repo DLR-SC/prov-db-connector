@@ -2,14 +2,15 @@ import unittest
 from uuid import UUID
 
 import pkg_resources
-from prov.model import  ProvDocument
+from prov.model import ProvDocument
 
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvApi
-from provdbconnector.db_adapters import InvalidOptionsException
-from provdbconnector.db_adapters import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP,METADATA_KEY_PROV_TYPE,METADATA_KEY_IDENTIFIER,METADATA_KEY_NAMESPACES
-from provdbconnector.provapi import NoDataBaseAdapterException,InvalidArgumentTypeException
+from provdbconnector.exceptions.database import InvalidOptionsException
+from provdbconnector.db_adapters.neo4j import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP, METADATA_KEY_PROV_TYPE, \
+    METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
+from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException
 
 
 class ProvApiTestTemplate(unittest.TestCase):
@@ -35,7 +36,7 @@ class ProvApiTestTemplate(unittest.TestCase):
             self.run = lambda self, *args, **kwargs: None
 
     def setUp(self):
-        #this function will never be executed !!!!
+        # this function will never be executed !!!!
         self.provapi = ProvApi()
 
     def test_prov_primer_example(self):
@@ -103,29 +104,26 @@ class ProvApiTestTemplate(unittest.TestCase):
 
 
 class ProvApiTests(unittest.TestCase):
-
-
     maxDiff = None
 
     def setUp(self):
-
         self.test_resources = {
             'xml': {'package': 'provdbconnector', 'file': '/tests/resources/primer.provx'},
             'json': {'package': 'provdbconnector', 'file': '/tests/resources/primer.json'},
             'provn': {'package': 'provdbconnector', 'file': '/tests/resources/primer.provn'}
         }
-        self.test_prov_files = dict((key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in self.test_resources.items())
+        self.test_prov_files = dict((key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in
+                                    self.test_resources.items())
         self.auth_info = {"user_name": NEO4J_USER,
-                         "user_password": NEO4J_PASS,
-                         "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
-        }
+                          "user_password": NEO4J_PASS,
+                          "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
+                          }
         self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
     def tearDown(self):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
 
-
-    #Test create instnace
+    # Test create instnace
     def test_provapi_instance(self):
         self.assertRaises(NoDataBaseAdapterException, lambda: ProvApi())
         self.assertRaises(InvalidOptionsException, lambda: ProvApi(api_id=1, adapter=Neo4jAdapter))
@@ -135,9 +133,9 @@ class ProvApiTests(unittest.TestCase):
         self.assertEqual(obj.api_id, 1)
 
         obj = ProvApi(adapter=Neo4jAdapter, auth_info=self.auth_info)
-        self.assertIsInstance(obj.api_id,UUID)
+        self.assertIsInstance(obj.api_id, UUID)
 
-    #Methods that automatically convert to ProvDocument
+    # Methods that automatically convert to ProvDocument
     def test_create_document_from_json(self):
         json_buffer = self.test_prov_files["json"]
         self.provapi.create_document_from_json(json_buffer)
@@ -148,9 +146,9 @@ class ProvApiTests(unittest.TestCase):
 
         prov_str = self.provapi.get_document_as_json(document_id)
         self.assertIsNotNone(prov_str)
-        self.assertIsInstance(prov_str,str)
+        self.assertIsInstance(prov_str, str)
         prov_document_reverse = ProvDocument.deserialize(content=prov_str, format="json")
-        self.assertEqual(prov_document_reverse,example)
+        self.assertEqual(prov_document_reverse, example)
 
     def test_create_document_from_xml(self):
         json_buffer = self.test_prov_files["xml"]
@@ -178,26 +176,24 @@ class ProvApiTests(unittest.TestCase):
 
         prov_str = self.provapi.get_document_as_provn(document_id)
         self.assertIsNotNone(prov_str)
-        self.assertIsInstance(prov_str,str)
+        self.assertIsInstance(prov_str, str)
 
-        #This check throws NotImplementedError, so skip it
+        # This check throws NotImplementedError, so skip it
 
-        #prov_document_reverse = ProvDocument.deserialize(content=prov_str,format="provn")
-        #self.assertEqual(prov_document_reverse, example)
+        # prov_document_reverse = ProvDocument.deserialize(content=prov_str,format="provn")
+        # self.assertEqual(prov_document_reverse, example)
 
-
-    #Methods with ProvDocument input / output
+    # Methods with ProvDocument input / output
     def test_create_document(self):
-        #test prov document input
+        # test prov document input
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
-        #test invalid optoions input
+        # test invalid optoions input
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.create_document(1)
-
 
     def test_create_document_from_prov(self):
         example = examples.primer_example()
@@ -224,10 +220,8 @@ class ProvApiTests(unittest.TestCase):
         self.assertIsInstance(document_id, str)
 
     def test_create_document_from_prov_invalid_arguments(self):
-
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.create_document_from_prov(None)
-
 
     def test_get_document_as_prov(self):
         example = examples.bundles2()
@@ -244,9 +238,8 @@ class ProvApiTests(unittest.TestCase):
             self.provapi.get_document_as_prov()
 
     def test_create_bundle_invalid_arguments(self):
-
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi._create_bundle("xxxx",None)
+            self.provapi._create_bundle("xxxx", None)
 
     def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
         with self.assertRaises(InvalidArgumentTypeException):
@@ -255,8 +248,7 @@ class ProvApiTests(unittest.TestCase):
     def test_get_metadata_and_attributes_for_record(self):
         example = examples.prov_api_record_example()
 
-
-        result  = self.provapi._get_metadata_and_attributes_for_record(example.prov_record)
+        result = self.provapi._get_metadata_and_attributes_for_record(example.prov_record)
         metadata_result = result.metadata
         attributes_result = result.attributes
 
@@ -270,11 +262,11 @@ class ProvApiTests(unittest.TestCase):
         self.assertIsNotNone(metadata_result[METADATA_KEY_NAMESPACES])
         self.assertIsNotNone(metadata_result[METADATA_KEY_TYPE_MAP])
 
-        #check metadata
-        self.assertEqual(example.metadata[METADATA_KEY_PROV_TYPE],metadata_result[METADATA_KEY_PROV_TYPE])
+        # check metadata
+        self.assertEqual(example.metadata[METADATA_KEY_PROV_TYPE], metadata_result[METADATA_KEY_PROV_TYPE])
         self.assertEqual(example.metadata[METADATA_KEY_IDENTIFIER], metadata_result[METADATA_KEY_IDENTIFIER])
-        self.assertEqual(example.metadata[METADATA_KEY_NAMESPACES],metadata_result[METADATA_KEY_NAMESPACES])
-        self.assertEqual(example.metadata[METADATA_KEY_TYPE_MAP],metadata_result[METADATA_KEY_TYPE_MAP])
+        self.assertEqual(example.metadata[METADATA_KEY_NAMESPACES], metadata_result[METADATA_KEY_NAMESPACES])
+        self.assertEqual(example.metadata[METADATA_KEY_TYPE_MAP], metadata_result[METADATA_KEY_TYPE_MAP])
 
-        #check attributes
-        self.assertEqual(example.expected_attributes,attributes_result)
+        # check attributes
+        self.assertEqual(example.expected_attributes, attributes_result)

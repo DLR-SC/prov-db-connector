@@ -10,31 +10,20 @@ from prov.model import ProvDocument, ProvBundle, ProvRecord, ProvElement, ProvRe
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
-from provdbconnector.utils import form_string, to_json, to_provn, to_xml, ParseException
+from provdbconnector.utils.converter import form_string, to_json, to_provn, to_xml
 from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
 
+from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException, \
+    InvalidProvRecordException
+from provdbconnector.exceptions.utils import ParseException
+
 import logging
+
 LOG_LEVEL = os.environ.get('LOG_LEVEL', '')
 NUMERIC_LEVEL = getattr(logging, LOG_LEVEL.upper(), None)
 logging.basicConfig(level=NUMERIC_LEVEL)
 logging.getLogger("prov.model").setLevel(logging.WARN)
 log = logging.getLogger(__name__)
-
-
-class ProvApiException(Exception):
-    pass
-
-
-class NoDataBaseAdapterException(ProvApiException):
-    pass
-
-
-class InvalidArgumentTypeException(ProvApiException):
-    pass
-
-
-class InvalidProvRecordException(ProvApiException):
-    pass
 
 
 class ProvBundleRecord(ProvRecord):
@@ -50,6 +39,7 @@ class ProvApi(object):
     The public api class. This class provide methods to save and get documents or part of ProvDocuments
 
     """
+
     def __init__(self, api_id=None, adapter=None, auth_info=None, *args):
         """
         Create a new instance of ProvAPI
@@ -122,7 +112,7 @@ class ProvApi(object):
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_provn(prov_document)
 
-    def create_document_from_prov(self,content=None):
+    def create_document_from_prov(self, content=None):
         """
         Creates a prov document in the database based on the prov document
         :param content: prov document instnace
@@ -140,7 +130,7 @@ class ProvApi(object):
         :return:Document id as string
         """
 
-        #Try to convert the content into the provDocument, if it is already a ProvDocument instance the function will return this document
+        # Try to convert the content into the provDocument, if it is already a ProvDocument instance the function will return this document
         try:
             content = form_string(content=content)
         except ParseException as e:
@@ -298,7 +288,8 @@ class ProvApi(object):
         :return:
         """
 
-        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None, attributes={PROV_LABEL: "belongsToBundle"})
+        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None,
+                                          attributes={PROV_LABEL: "belongsToBundle"})
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
         to_qualified_name = bundle_identifier
 
