@@ -3,10 +3,10 @@
 The database adapters are the binding class to the actual database. 
 If you are consider to build your own adapter please keep in mind: 
 
-* All adapters **must** enhance of the [BaseAdapter](./../provdbconnector/db_adapters/base_adpter.py) class. 
+* All adapters **must** enhance the [BaseAdapter](./../provdbconnector/db_adapters/baseadpter.py) class. 
 * You **must** implement all specified functions in BaseAdapter
-* You should test it via the [AdapterTestTemplate](./../tests/db_adapters_test_baseadapter.py) class template. 
-* You should test it also via the [ProvApiTestTemplate](./../tests/test_provapi.py) class template. 
+* You **should** test it via the [AdapterTestTemplate](./../provdbconnector/tests/db_adapters_test_baseadapter.py) class template. 
+* You **should** test it also via the [ProvApiTestTemplate](./../provdbconnector/tests/test_provapi.py) class template. 
 
 
 ## Create your own adapter
