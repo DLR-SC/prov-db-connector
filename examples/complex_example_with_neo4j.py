@@ -1,31 +1,29 @@
-from prov.model import ProvDocument
 from provdbconnector import ProvApi
-from provdbconnector.db_adapters import Neo4jAdapter
+from provdbconnector.db_adapters.neo4j import Neo4jAdapter
 from prov.tests.examples import primer_example
-import  os
+import os
 
-#create the api
+# create the api
 
 NEO4J_USER = os.environ.get('NEO4J_USERNAME', 'neo4j')
 NEO4J_PASS = os.environ.get('NEO4J_PASSWORD', 'neo4jneo4j')
 NEO4J_HOST = os.environ.get('NEO4J_HOST', 'localhost')
 NEO4J_BOLT_PORT = os.environ.get('NEO4J_BOLT_PORT', '7687')
 
-auth_info  = {  "user_name": NEO4J_USER,
-                "user_password": NEO4J_PASS,
-                "host": NEO4J_HOST+":"+NEO4J_BOLT_PORT
-        }
+auth_info = {"user_name": NEO4J_USER,
+             "user_password": NEO4J_PASS,
+             "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
+             }
 
-prov_api = ProvApi(adapter=Neo4jAdapter,auth_info=auth_info)
+prov_api = ProvApi(adapter=Neo4jAdapter, auth_info=auth_info)
 
-
-#create the prov document from examples
+# create the prov document from examples
 prov_document = primer_example()
 
-#Save document
+# Save document
 document_id = prov_api.create_document(prov_document)
 
-#get document
+# get document
 print(prov_api.get_document_as_provn(document_id))
 
 # Output:

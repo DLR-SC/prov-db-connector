@@ -12,9 +12,11 @@ from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 def isnamedtupleinstance(x):
     t = type(x)
     b = t.__bases__
-    if len(b) != 1 or b[0] != tuple: return False
+    if len(b) != 1 or b[0] != tuple:
+        return False
     f = getattr(t, '_fields', None)
-    if not isinstance(f, tuple): return False
+    if not isinstance(f, tuple):
+        return False
     return all(type(n) == str for n in f)
 
 
@@ -81,7 +83,7 @@ class AdapterTestTemplate(unittest.TestCase):
         else:
             self.run = lambda self, *args, **kwargs: None
 
-    ### create section ###
+    # create section
     def test_save_document(self):
         id = self.instance.save_document()
         self.assertIsNotNone(id)
@@ -134,7 +136,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
 
-    ### Get section ###
+    # Get section
     def test_get_document(self):
         args = base_connector_record_parameter_example()
 
@@ -145,8 +147,8 @@ class AdapterTestTemplate(unittest.TestCase):
 
         # Return structure...
         # raw_doc = {
-        #     document: {identifer: "undefied if document", records: [{attributes:{},metadata: {}}]}
-        #     bundles: [{identifer: "name bundle", records: [{attributes:{},metadata: {}}]}]
+        #     document: {identifier: "undefined if document", records: [{attributes:{},metadata: {}}]}
+        #     bundles: [{identifier: "name bundle", records: [{attributes:{},metadata: {}}]}]
         # }
 
         self.assertIsNotNone(raw_doc)
@@ -166,7 +168,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_doc.bundles, list)
         self.assertEqual(len(raw_doc.bundles), 0)
 
-    def test_get_document_with_budles(self):
+    def test_get_document_with_bundles(self):
         ids = insert_document_with_bundles(self.instance)
         raw_doc = self.instance.get_document(ids["doc_id"])
 
@@ -203,7 +205,7 @@ class AdapterTestTemplate(unittest.TestCase):
         # Return structure...
         # raw_doc = {
         #     records: []
-        #     identifer: ""
+        #     identifier: ""
         # }
 
         # check bundle
@@ -294,7 +296,7 @@ class AdapterTestTemplate(unittest.TestCase):
         with self.assertRaises(NotFoundException):
             self.instance.get_relation("99999999")
 
-    ## Delete section ###
+    # Delete section
     def test_delete_document(self):
         ids = insert_document_with_bundles(self.instance)
         doc_id = ids["doc_id"]

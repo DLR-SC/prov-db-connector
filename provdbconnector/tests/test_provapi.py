@@ -191,7 +191,7 @@ class ProvApiTests(unittest.TestCase):
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
-        # test invalid optoions input
+        # test invalid options input
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.create_document(1)
 

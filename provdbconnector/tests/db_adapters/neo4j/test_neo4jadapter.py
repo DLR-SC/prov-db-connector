@@ -17,7 +17,7 @@ class Neo4jAdapterTests(AdapterTestTemplate):
         self.instance.connect(auth_info)
 
     @unittest.skip(
-        "Skiped because the server configuration currently is set to 'no password', so the authentication will never fail")
+        "Skipped because the server configuration currently is set to 'no password', so the authentication will never fail")
     def test_connect_fails(self):
         auth_info = {"user_name": NEO4J_USER,
                      "user_password": 'xxxxxx',
