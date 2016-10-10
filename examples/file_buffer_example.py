@@ -5,7 +5,7 @@ from prov.tests.examples import primer_example
 import pkg_resources
 
 #create the api
-prov_api = ProvApi(adapter=SimpleInMemoryAdapter,authinfo=None)
+prov_api = ProvApi(adapter=SimpleInMemoryAdapter,auth_info=None)
 
 
 #create the prov document from examples

@@ -2,36 +2,8 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 
 import logging
+
 log = logging.getLogger(__name__).addHandler(logging.NullHandler())
-
-
-class AdapterException(Exception):
-    pass
-
-
-class InvalidOptionsException(AdapterException):
-    pass
-
-
-class AuthException(AdapterException):
-    pass
-
-
-class DatabaseException(AdapterException):
-    pass
-
-
-class CreateRecordException(DatabaseException):
-    pass
-
-
-class CreateRelationException(DatabaseException):
-    pass
-
-
-class NotFoundException(DatabaseException):
-    pass
-
 
 METADATA_PARENT_ID = "parent_id"
 METADATA_KEY_PROV_TYPE = "prov_type"
@@ -39,9 +11,9 @@ METADATA_KEY_IDENTIFIER = "identifier"
 METADATA_KEY_NAMESPACES = "namespaces"
 METADATA_KEY_TYPE_MAP = "type_map"
 
-#Return types for adapter classes
+# Return types for adapter classes
 DbDocument = namedtuple("DbDocument", "document, bundles")
-DbBundle = namedtuple("DbBundle",  "records, bundle_record")
+DbBundle = namedtuple("DbBundle", "records, bundle_record")
 
 DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
@@ -51,6 +23,7 @@ class BaseAdapter(ABC):
     """
     Interface class for a prov database adapter
     """
+
     @abstractmethod
     def __init__(self, *args, **kwargs):
         pass
