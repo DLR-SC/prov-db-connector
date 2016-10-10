@@ -1,23 +1,12 @@
 from functools import reduce
 from io import BufferedReader
+from provdbconnector.exceptions.utils import ParseException, NoDocumentException
 
 import six
 from prov.model import ProvDocument
 
 import logging
 log = logging.getLogger(__name__)
-
-
-class ConverterException(Exception):
-    pass
-
-
-class ParseException(ConverterException):
-    pass
-
-
-class NoDocumentException(ConverterException):
-    pass
 
 
 def form_string(content):
