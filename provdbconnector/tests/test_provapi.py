@@ -246,7 +246,7 @@ class ProvApiTests(unittest.TestCase):
     def test_create_bundle_invalid_arguments(self):
 
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi._create_bundle("xxxx",None)
+            self.provapi._create_bundle(None)
 
     def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
         with self.assertRaises(InvalidArgumentTypeException):

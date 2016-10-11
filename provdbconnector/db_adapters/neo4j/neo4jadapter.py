@@ -54,6 +54,15 @@ NEO4J_GET_RECORDS_BY_PROPERTY_DICT= """
                             MATCH (a {{{filter_dict}}})
                             RETURN DISTINCT a as re
                         """
+NEO4J_GET_RECORDS_TAIL_BY_FILTER = """
+                            MATCH (x {{{filter_dict}}})-[r *{depth}]-(y)
+                            RETURN  DISTINCT y as re
+                            UNION
+                            MATCH (x {{{filter_dict}}})-[r *{depth}]-(y)
+                            WITH REDUCE(output = [], r IN r | output + r) AS flat
+                            UNWIND flat as re
+                            RETURN DISTINCT re
+                        """
 NEO4J_GET_RECORD_RETURN_NODE = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
 NEO4J_GET_RELATION_RETURN_NODE = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
 
@@ -258,7 +267,23 @@ class Neo4jAdapter(BaseAdapter):
 
         (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
 
-        pass
+        depth_str =""
+        if depth is not None:
+            depth_str = "1..{max}".format(max=depth)
+
+        session = self._create_session()
+        result_set = session.run(NEO4J_GET_RECORDS_TAIL_BY_FILTER.format(filter_dict=cypher_str, depth=depth_str), encoded_params)
+        records = list()
+        for result in result_set:
+            record = result["re"]
+
+            if record is None:
+                raise DatabaseException("Record response should not be None")
+            relation_record = self._split_attributes_metadata_from_node(record)
+            records.append(relation_record)
+
+        return records
+
     def get_record(self, record_id):
 
         session = self._create_session()

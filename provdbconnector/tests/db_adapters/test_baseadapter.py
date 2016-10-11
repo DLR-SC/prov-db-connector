@@ -246,10 +246,42 @@ class AdapterTestTemplate(unittest.TestCase):
         ids = insert_document_with_bundles(self.instance)
 
         from_record = self.instance.get_record(ids["from_record_id"])
+        to_record = self.instance.get_record(ids["to_record_id"])
 
         meta_filter = dict()
-        meta_filter.update({METADATA_KEY_IDENTIFIER: from_record[METADATA_KEY_IDENTIFIER]})
-        tail_records = self.instance.get_records_tail(meta_dict=meta_filter)
+        meta_filter.update({METADATA_KEY_IDENTIFIER: from_record.metadata[METADATA_KEY_IDENTIFIER]})
+        tail_records = self.instance.get_records_tail(metadata_dict=meta_filter)
+
+        self.assertIsNotNone(tail_records)
+        self.assertIsInstance(tail_records,list)
+        self.assertEqual(len(tail_records),2)#1 node and 1 relation
+        self.assertIsNotNone(tail_records[0].attributes)
+        self.assertIsNotNone(tail_records[0].metadata)
+        self.assertIsInstance(tail_records[0].attributes,dict)
+        self.assertIsInstance(tail_records[0].metadata,dict)
+
+        self.assertEqual(tail_records[0].attributes,to_record.attributes)
+        self.assertEqual(tail_records[0].metadata,to_record.metadata)
+
+    def test_get_records_tail_nested(self):
+        ids = insert_document_with_bundles(self.instance)
+        ids2 = insert_document_with_bundles(self.instance)
+
+        from_record = self.instance.get_record(ids["from_record_id"])
+        to_record = self.instance.get_record(ids["to_record_id"])
+
+        meta_filter = dict()
+        meta_filter.update({METADATA_KEY_IDENTIFIER: from_record.metadata[METADATA_KEY_IDENTIFIER]})
+        tail_records = self.instance.get_records_tail(metadata_dict=meta_filter)
+
+        self.assertIsNotNone(tail_records)
+        self.assertIsInstance(tail_records,list)
+        self.assertEqual(len(tail_records),9) #4 Nodes and 5 connections
+        self.assertIsNotNone(tail_records[0].attributes)
+        self.assertIsNotNone(tail_records[0].metadata)
+        self.assertIsInstance(tail_records[0].attributes,dict)
+        self.assertIsInstance(tail_records[0].metadata,dict)
+
 
     def test_get_record(self):
         args = base_connector_record_parameter_example()
