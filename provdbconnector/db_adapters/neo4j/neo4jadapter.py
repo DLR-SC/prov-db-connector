@@ -7,7 +7,7 @@ from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
-from provdbconnector.utils.serializer import encode_string_value_to_primitive
+from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive
 
 import logging
 logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
@@ -32,8 +32,8 @@ NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as I
 NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID """  # args: provType, values
 NEO4J_CREATE_RELATION_RETURN_ID = """
                                 MATCH
-                                    (from{{`meta:bundle_id`:'{from_bundle_id}',`meta:identifier`:'{from_identifier}'}}),
-                                    (to{{`meta:bundle_id`:'{to_bundle_id}', `meta:identifier`:'{to_identifier}'}})
+                                    (from{{`meta:identifier`:'{from_identifier}'}}),
+                                    (to{{`meta:identifier`:'{to_identifier}'}})
                                 CREATE
                                     (from)-[r:{relation_type} {{{property_identifiers}}}]->(to)
                                 RETURN
@@ -46,19 +46,12 @@ NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """
 NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """
                         MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID
                     """
-NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS = """
-                            MATCH (d)-[r]-(x)
-                            WHERE not((d)-[:includeIn]-(x)) and not(d.`meta:prov_type`='prov:Bundle' or x.`meta:prov_type`='prov:Bundle')and (r.`meta:bundle_id`) ={bundle_id}
+NEO4J_GET_RECORDS_BY_PROPERTY_DICT= """
+                            MATCH (d {{{filter_dict}}} )-[r]-(x {{{filter_dict}}})
                             RETURN DISTINCT r as re
-                            //Get all nodes that are alone without connections to other
+                            //Get all nodes that are alone without connections to other nodes
                             UNION
-                            MATCH (a) WHERE (a.`meta:bundle_id`)={bundle_id} and not(a.`meta:prov_type`='prov:Bundle')
-                            RETURN DISTINCT a as re
-                            UNION
-                            //Get all nodes that have only the includeIn connection to the bundle
-                            MATCH (a)-[r:includeIn]->()
-                            WITH a,count(r) as relation_count
-                            WHERE (a.`meta:bundle_id`)={bundle_id} and NOT(a.`meta:prov_type`='prov:Bundle') AND relation_count=1
+                            MATCH (a {{{filter_dict}}})
                             RETURN DISTINCT a as re
                         """
 NEO4J_GET_RECORD_RETURN_NODE = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
@@ -66,7 +59,7 @@ NEO4J_GET_RELATION_RETURN_NODE = """MATCH ()-[relation]-() WHERE ID(relation)={r
 
 # delete
 NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {node_id} DETACH DELETE x """
-NEO4J_DELETE_BUNDLE_BY_ID = """MATCH (d {`meta:bundle_id`:{bundle_id}}) DETACH DELETE d"""
+NEO4J_DELETE_NODE_BY_PROPERTIES = """MATCH (n {{{filter_dict}}}) DETACH DELETE n"""
 NEO4J_DELETE_BUNDLE_NODE_BY_ID = """MATCH (b) WHERE id(b)=toInt({bundle_id}) DELETE b """
 NEO4J_DELETE_RELATION_BY_ID = """MATCH ()-[r]-() WHERE id(r) = {relation_id} DELETE r"""
 
@@ -147,10 +140,9 @@ class Neo4jAdapter(BaseAdapter):
         metadata.update({NEO4J_META_PARENT_ID: document_id})
         return self.save_record(document_id, attributes, metadata)
 
-    def save_record(self, bundle_id, attributes, metadata):
+    def save_record(self, attributes, metadata):
 
         metadata = metadata.copy()
-        metadata.update({NEO4J_META_BUNDLE_ID: bundle_id})
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
@@ -174,10 +166,9 @@ class Neo4jAdapter(BaseAdapter):
 
         return str(record_id)
 
-    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self,  from_node,  to_node, attributes, metadata):
 
         metadata = metadata.copy()
-        metadata.update({NEO4J_META_BUNDLE_ID: from_bundle_id})
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
@@ -189,9 +180,7 @@ class Neo4jAdapter(BaseAdapter):
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_RELATION_RETURN_ID.format(from_bundle_id=from_bundle_id,
-                                                         to_bundle_id=to_bundle_id,
-                                                         from_identifier=from_node,
+        command = NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=from_node,
                                                          to_identifier=to_node,
                                                          relation_type=relationtype,
                                                          property_identifiers=identifier_str)
@@ -227,17 +216,11 @@ class Neo4jAdapter(BaseAdapter):
     def decode_string_value_to_primitive(self, attributes, metadata):
         type_map = metadata[METADATA_KEY_TYPE_MAP]
 
-    def get_document(self, document_id):
+    def get_by_metadata(self, metadata_dict):
 
-        n_document = namedtuple('Document', 'document, bundles')
+        metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
 
-        document = self.get_bundle(document_id)
-
-        bundles = list()
-        for bundle_id in self.get_bundle_ids(document_id):
-            bundles.append(self.get_bundle(bundle_id))
-
-        return n_document(document, bundles)
+        return self.get_by_properties(metadata_dict_prefixed)
 
     def get_bundle_ids(self, document_id):
         session = self._create_session()
@@ -250,11 +233,13 @@ class Neo4jAdapter(BaseAdapter):
 
         return ids
 
-    def get_bundle(self, bundle_id):
-        bundle_id = str(bundle_id)
+    def get_by_properties(self, property_dict):
+
+        encoded_params = encode_dict_values_to_primitive(property_dict)
+        cypher_str = self._get_attributes_identifiers_cypher_string(property_dict)
         session = self._create_session()
         records = list()
-        result_set = session.run(NEO4J_GET_BUNDLE_RETURN_NODES_RELATIONS, {"bundle_id": bundle_id})
+        result_set = session.run(NEO4J_GET_RECORDS_BY_PROPERTY_DICT.format(filter_dict=cypher_str), encoded_params)
         for result in result_set:
             record = result["re"]
 
@@ -263,19 +248,7 @@ class Neo4jAdapter(BaseAdapter):
             relation_record = self._split_attributes_metadata_from_node(record)
             records.append(relation_record)
 
-        # Get bundle node and set identifier if there is a bundle node.
-        bundle_node_result = session.run(NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE, {"bundle_id": bundle_id})
-
-        raw_record = None
-        for bundle in bundle_node_result:
-            raw_record = self._split_attributes_metadata_from_node(bundle["b"])
-
-        if raw_record is None and len(records) == 0:
-            raise NotFoundException("bundle with the id {} was not found ".format(bundle_id))
-
-        bundle = namedtuple('Bundle', 'records, bundle_record')
-
-        return bundle(records, raw_record)
+        return records
 
     def get_record(self, record_id):
 
@@ -315,23 +288,21 @@ class Neo4jAdapter(BaseAdapter):
 
         return self._split_attributes_metadata_from_node(relation)
 
-    def delete_document(self, document_id):
-        bundle_ids = self.get_bundle_ids(document_id)
-        result_list = list()
-        for bundle_id in bundle_ids:
-            result_list.append(self.delete_bundle(bundle_id))
+    def delete_by_properties(self, property_dict):
 
-        result_list.append(self.delete_bundle(document_id))
-
-        return all(result_list)
-
-    def delete_bundle(self, bundle_id):
+        encoded_params = encode_dict_values_to_primitive(property_dict)
+        cypher_str = self._get_attributes_identifiers_cypher_string(property_dict)
         session = self._create_session()
 
-        result_set = session.run(NEO4J_DELETE_BUNDLE_BY_ID, {"bundle_id": bundle_id})
-        result_set = session.run(NEO4J_DELETE_BUNDLE_NODE_BY_ID, {"bundle_id": bundle_id})
+        result = session.run(NEO4J_DELETE_NODE_BY_PROPERTIES.format(filter_dict=cypher_str), encoded_params)
 
         return True
+
+    def delete_by_metadata(self, metadata_dict):
+
+        metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
+
+        return self.delete_by_properties(metadata_dict_prefixed)
 
     def delete_record(self, record_id):
         session = self._create_session()

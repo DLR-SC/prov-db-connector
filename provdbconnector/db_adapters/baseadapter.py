@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from enum import Enum
 
 import logging
 log = logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -32,6 +33,8 @@ class CreateRelationException(DatabaseException):
 class NotFoundException(DatabaseException):
     pass
 
+class MergeException(DatabaseException):
+    pass
 
 METADATA_PARENT_ID = "parent_id"
 METADATA_KEY_PROV_TYPE = "prov_type"
@@ -46,8 +49,18 @@ DbBundle = namedtuple("DbBundle",  "records, bundle_record")
 DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
 
+class MergeBehaviour(Enum):
+    NO_MERGE = 0
+    SOFT = 1
+    OVERRIDE = 2
 
 class BaseAdapter(ABC):
+
+    """
+    :type MergeBehaviour
+    """
+    merge_behaviour = MergeBehaviour.NO_MERGE
+
     """
     Interface class for a prov database adapter
     """
@@ -64,30 +77,11 @@ class BaseAdapter(ABC):
         """
         pass
 
-    @abstractmethod
-    def save_document(self):
-        """
-        Create a new document id, so you only need to return a unique id
-        :return: unique id as string
-        """
-        pass
 
     @abstractmethod
-    def save_bundle(self, document_id, attributes, metadata):
-        """
-        Creates a bundle from the given parameter
-        :param document_id: the parent document id
-        :param attributes: The custom attributes for the bundle, normally empty
-        :param metadata: The metadata for the bundle like the identifier
-        :return: unique bundle id as string
-        """
-        pass
-
-    @abstractmethod
-    def save_record(self, bundle_id, attributes, metadata):
+    def save_record(self, attributes, metadata):
         """
         Creates a database node
-        :param bundle_id: The new record belongs to this bundle
         :param attributes: Attributes as dict for the record. Be careful you have to encode the dict
         :param metadata: Metadata as dict for the record. Be careful you have to encode the dict but you can be sure that all meta keys are always there
         :return: Record id as string
@@ -95,12 +89,10 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self,  from_node,  to_node, attributes, metadata):
         """
         Create a relation between 2 nodes
-        :param from_bundle_id: The database for the from node
         :param from_node: The identifier
-        :param to_bundle_id: The database id for the to node
         :param to_node: The identifier for the destionation node
         :param attributes:  Attributes as dict for the record. Be careful you have to encode the dict
         :param metadata: Metadata as dict for the record. Be careful you have to encode the dict but you can be sure that all meta keys are always there
@@ -109,21 +101,13 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_document(self, document_id):
-        """
-        Returns a DbDocument named tuple
-        :param document_id:
-        :return: DbDocument: A namedtuple of the type DbDocument
-        """
+    def get_by_metadata(self, metadata_dict):
+
         pass
 
     @abstractmethod
-    def get_bundle(self, bundle_id):
-        """
-        Get all bundle records from the database and return a DbBundle record
-        :param bundle_id: The bundle id as str
-        :return: DbBundle: A namedtuple of the type DbBundle
-        """
+    def get_by_properties(self, property_dict):
+
         pass
 
     @abstractmethod
@@ -145,24 +129,11 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def delete_document(self, document_id):
-        """
-        Deletes a complete document with all included bundles
-
-        :param document_id:
-        :return: bool
-        :raise NotFoundException
-        """
+    def delete_by_properties(self, property_dict):
         pass
 
     @abstractmethod
-    def delete_bundle(self, bundle_id):
-        """
-        Delete a complete bundle
-        :param bundle_id:
-        :return:bool
-        :raise NotFoundException
-        """
+    def delete_by_metadata(self, metadata_dict):
         pass
 
     @abstractmethod
@@ -184,3 +155,9 @@ class BaseAdapter(ABC):
         :raise NotFoundException
         """
         pass
+
+    def setMergeBehaviour(self, new_behaviour):
+        if type(new_behaviour) is MergeBehaviour:
+            self.merge_behaviour = new_behaviour
+        else:
+            raise InvalidOptionsException("new_behaviour must be typeof {} but was {}".format(type(MergeBehaviour), type(new_behaviour)))

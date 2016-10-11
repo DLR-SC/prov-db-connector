@@ -34,16 +34,7 @@ class Neo4jAdapterTests(AdapterTestTemplate):
         with self.assertRaises(InvalidOptionsException):
             self.instance.connect(auth_info)
 
-    def test_create_document_id_increment(self):
-        first= self.instance.save_document()
-
-        first= int(first)
-
-        second = self.instance.save_document()
-        second = int(second)
-
-        self.assertEqual(first+1,second)
-
+^
     def tearDown(self):
         session = self.instance._create_session()
         session.run("MATCH (x) DETACH DELETE x")

@@ -1,9 +1,10 @@
 import unittest
 
 from prov.model import ProvDocument
+from prov.constants import PROV_BUNDLE, PROV_TYPE
 
-from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER, NotFoundException
-from provdbconnector.tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example
+from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER, NotFoundException,MergeBehaviour, InvalidOptionsException,MergeException
+from provdbconnector.tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example,base_connector_merge_example
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 
 
@@ -22,11 +23,11 @@ def insert_document_with_bundles(instance):
     doc.add_namespace("ex","http://example.com")
     #document with 1 record
     doc_id = instance.save_document()
-    doc_record_id = instance.save_record(doc_id, args_record["attributes"], args_record["metadata"])
+    doc_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
     #bundle with 1 record
-    bundle_id = instance.save_bundle(doc_id, args_bundle["attributes"], args_bundle["metadata"])
-    bundle_record_id = instance.save_record(bundle_id, args_record["attributes"], args_record["metadata"])
+    bundle_id = instance.save_record(args_bundle["attributes"], args_bundle["metadata"])
+    bundle_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
 
     #add relation
@@ -40,11 +41,11 @@ def insert_document_with_bundles(instance):
     from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_label
     to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_label
 
-    from_record_id = instance.save_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])
-    to_record_id = instance.save_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])
+    from_record_id = instance.save_record(from_record_args["attributes"], from_record_args["metadata"])
+    to_record_id = instance.save_record(to_record_args["attributes"], to_record_args["metadata"])
 
 
-    relation_id = instance.save_relation(doc_id, from_label, doc_id, to_label, relation_args["attributes"], relation_args["metadata"])
+    relation_id = instance.save_relation(from_label, to_label, relation_args["attributes"], relation_args["metadata"])
 
 
 
@@ -84,41 +85,36 @@ class AdapterTestTemplate(unittest.TestCase):
             self.run = lambda self, *args, **kwargs: None
 
     ### create section ###
-    def test_save_document(self):
-        id = self.instance.save_document()
-        self.assertIsNotNone(id)
-        self.assertIs(type(id), str,"id should be a string ")
 
     def test_save_bundle(self):
-        doc_id = self.instance.save_document()
+
         args = base_connector_bundle_parameter_example()
-        id = self.instance.save_bundle(doc_id, args["attributes"], args["metadata"])
+        id = self.instance.save_record(args["attributes"], args["metadata"])
         self.assertIsNotNone(id)
         self.assertIs(type(id), str, "id should be a string ")
 
     def test_save_record(self):
         args = base_connector_record_parameter_example()
 
-        doc_id = self.instance.save_document()
-        record_id  = self.instance.save_record(doc_id, args["attributes"], args["metadata"])
+        record_id  = self.instance.save_record(args["attributes"], args["metadata"])
         self.assertIsNotNone(record_id)
         self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_save_relation(self):
         args_relation = base_connector_relation_parameter_example()
         args_records = base_connector_record_parameter_example()
-        doc_id = self.instance.save_document()
+
 
         from_meta = args_records["metadata"].copy()
         from_meta.update({METADATA_KEY_IDENTIFIER: args_relation["from_node"]})
-        from_node_id  = self.instance.save_record(doc_id, args_records["attributes"], from_meta)
+        from_node_id  = self.instance.save_record( args_records["attributes"], from_meta)
 
         to_meta = args_records["metadata"].copy()
         to_meta.update({METADATA_KEY_IDENTIFIER: args_relation["to_node"]})
-        to_node_id  = self.instance.save_record(doc_id, args_records["attributes"], to_meta)
+        to_node_id  = self.instance.save_record(args_records["attributes"], to_meta)
 
 
-        relation_id = self.instance.save_relation(doc_id, args_relation["from_node"], doc_id, args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+        relation_id = self.instance.save_relation(args_relation["from_node"], args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
 
@@ -137,75 +133,38 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(relation_id), str, "id should be a string ")
 
     ### Get section ###
-    def test_get_document(self):
+    def test_get_metadata(self):
         args = base_connector_record_parameter_example()
 
-        doc_id = self.instance.save_document()
-        record_id = self.instance.save_record(doc_id, args["attributes"], args["metadata"])
 
-        raw_doc = self.instance.get_document(doc_id)
+        record_id = self.instance.save_record(args["attributes"], args["metadata"])
 
-        # Return structure...
-        # raw_doc = {
-        #     document: {identifer: "undefied if document", records: [{attributes:{},metadata: {}}]}
-        #     bundles: [{identifer: "name bundle", records: [{attributes:{},metadata: {}}]}]
-        # }
+        raw_records = self.instance.get_by_metadata(dict())
 
-        self.assertIsNotNone(raw_doc )
-        self.assertIsNotNone(raw_doc.document )
-        self.assertIsInstance(raw_doc.document.records,list)
-        self.assertEqual(len(raw_doc.document.records),1)
-        self.assertIsInstance(raw_doc.document.records[0].attributes,dict)
-        self.assertIsInstance(raw_doc.document.records[0].metadata,dict)
 
+        #Check return raw_records
+        self.assertIsNotNone(raw_records )
+        self.assertIsInstance(raw_records,list)
+        self.assertEqual(len(raw_records),1)
+        self.assertIsInstance(raw_records[0].attributes,dict)
+        self.assertIsInstance(raw_records[0].metadata,dict)
+
+        #check if the metadata of the record equals
         attr_dict = encode_dict_values_to_primitive(args["attributes"])
         meta_dict = encode_dict_values_to_primitive(args["metadata"])
 
-        self.assertEqual(raw_doc.document.records[0].attributes,attr_dict )
-        self.assertEqual(raw_doc.document.records[0].metadata, meta_dict)
+        self.assertEqual(raw_records[0].attributes, attr_dict)
+        self.assertEqual(raw_records[0].metadata, meta_dict)
 
 
-        #check bundle
-        self.assertIsInstance(raw_doc.bundles,list)
-        self.assertEqual(len(raw_doc.bundles),0)
-
-    def test_get_document_with_budles(self):
-        ids = insert_document_with_bundles(self.instance)
-        raw_doc = self.instance.get_document(ids["doc_id"])
-
-
-
-        #check document
-        self.assertIsNotNone(raw_doc)
-        self.assertIsNotNone(raw_doc.document)
-        self.assertIsInstance(raw_doc.document.records, list)
-        self.assertIsInstance(raw_doc.document.records[0].attributes, dict)
-        self.assertIsInstance(raw_doc.document.records[0].metadata, dict)
-        #3 records + 1 relation
-        self.assertEqual(len(raw_doc.document.records), 4)
-
-        # check bundle
-        self.assertIsInstance(raw_doc.bundles, list)
-        self.assertEqual(len(raw_doc.bundles), 1)
-        #1 record
-        self.assertEqual(len(raw_doc.bundles[0].records), 1)
-
-
-
-    def test_get_document_not_found(self):
-        with self.assertRaises(NotFoundException):
-            self.instance.get_document("99999999")
-
-    def test_get_bundle(self):
+    def test_get_by_properties(self):
         args = base_connector_record_parameter_example()
         args_bundle = base_connector_bundle_parameter_example()
 
-        doc_id = self.instance.save_document()
-        bundle_id= self.instance.save_bundle(doc_id, args_bundle["attributes"], args_bundle["metadata"])
 
-        record_id = self.instance.save_record(bundle_id, args["attributes"], args["metadata"])
+        record_id = self.instance.save_record(args["attributes"], args["metadata"])
 
-        raw_bundle = self.instance.get_bundle(bundle_id)
+        raw_result = self.instance.get_by_properties(dict())
 
         # Return structure...
         # raw_doc = {
@@ -214,39 +173,80 @@ class AdapterTestTemplate(unittest.TestCase):
         # }
 
         # check bundle
-        self.assertIsNotNone(raw_bundle)
-        self.assertIsNotNone(raw_bundle.bundle_record)
-        self.assertIsNotNone(raw_bundle.bundle_record.metadata)
-        self.assertIsNotNone(raw_bundle.bundle_record.attributes)
-        self.assertIsInstance(raw_bundle.records, list)
-        self.assertIsInstance(raw_bundle.bundle_record.attributes, dict)
-        self.assertIsInstance(raw_bundle.bundle_record.metadata, dict)
-        self.assertEqual(len(raw_bundle.records), 1)
-
-
-        args_simple = encode_dict_values_to_primitive(args_bundle["metadata"])
-        self.assertEqual(raw_bundle.bundle_record.metadata,args_simple )
-
+        self.assertIsNotNone(raw_result)
+        self.assertIsInstance(raw_result, list)
+        self.assertEqual(len(raw_result), 1)
+        self.assertIsNotNone(raw_result[0].metadata)
+        self.assertIsNotNone(raw_result[0].attributes)
 
 
         #check if the metadata of the record equals
         attr_dict = encode_dict_values_to_primitive(args["attributes"])
         meta_dict = encode_dict_values_to_primitive(args["metadata"])
 
-        self.assertEqual(raw_bundle.records[0].attributes, attr_dict)
-        self.assertEqual(raw_bundle.records[0].metadata, meta_dict)
+        self.assertEqual(raw_result[0].attributes, attr_dict)
+        self.assertEqual(raw_result[0].metadata, meta_dict)
 
         # check bundle
 
-    def test_get_bundle_not_found(self):
-        with self.assertRaises(NotFoundException):
-            self.instance.get_bundle("99999999")
+    def test_get_by_properties_with_filter(self):
+        ids = insert_document_with_bundles(self.instance)
+
+
+        #test get single node
+        bundle_filter = dict()
+        bundle_filter.update({PROV_TYPE: "prov:Bundle"})
+
+        raw_bundle_nodes = self.instance.get_by_properties(bundle_filter)
+        self.assertIsNotNone(raw_bundle_nodes)
+        self.assertIsInstance(raw_bundle_nodes,list)
+        self.assertEqual(len(raw_bundle_nodes),1)
+
+        self.assertIsNotNone(raw_bundle_nodes[0].attributes)
+        self.assertIsNotNone(raw_bundle_nodes[0].metadata)
+        self.assertIsNotNone(raw_bundle_nodes[0].attributes[str(PROV_TYPE)] )
+        self.assertEqual(raw_bundle_nodes[0].attributes[str(PROV_TYPE)],bundle_filter[PROV_TYPE] )
+
+        #test get rest of the nodes
+        #Use the same attributes as the insert_document_with_bundles() method
+        node_filter = base_connector_record_parameter_example()["attributes"]
+
+        #remove date value because this is individual for each node
+        del node_filter ["ex:date value"]
+
+        raw_nodes = self.instance.get_by_properties(node_filter )
+        self.assertIsNotNone(raw_nodes)
+        self.assertIsInstance(raw_nodes,list)
+        self.assertEqual(len(raw_nodes),5)#5 because the relation is also in the restults
+
+        self.assertIsNotNone(raw_nodes[0].attributes)
+        self.assertIsNotNone(raw_nodes[0].metadata)
+
+        #check if the metadata of the record equals
+
+        args = base_connector_record_parameter_example()
+
+        #Remvoe date because it can't be the same
+        del args["attributes"]["ex:date value"]
+        del raw_nodes[2].attributes["ex:date value"]
+
+        #Delete metdata prov:type because it can be different
+        #del args["metadata"]["prov:type"]
+        #del raw_nodes[0].metadata["prov:type"]
+
+        attr_dict = encode_dict_values_to_primitive(args["attributes"])
+        meta_dict = encode_dict_values_to_primitive(args["metadata"])
+
+        self.assertEqual(raw_nodes[2].attributes, attr_dict)
+        self.assertEqual(raw_nodes[2].metadata, meta_dict)
+
+
+
 
     def test_get_record(self):
         args = base_connector_record_parameter_example()
 
-        doc_id = self.instance.save_document()
-        record_id = self.instance.save_record(doc_id, args["attributes"], args["metadata"])#
+        record_id = self.instance.save_record( args["attributes"], args["metadata"])#
 
         record_raw = self.instance.get_record(record_id)
 
@@ -279,11 +279,10 @@ class AdapterTestTemplate(unittest.TestCase):
         from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_identifier
         to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_identifier
 
-        doc_id = self.instance.save_document()
-        from_record_id = self.instance.save_record(doc_id, from_record_args["attributes"], from_record_args["metadata"])  #
-        to_record_id = self.instance.save_record(doc_id, to_record_args["attributes"], to_record_args["metadata"])  #
+        from_record_id = self.instance.save_record(from_record_args["attributes"], from_record_args["metadata"])  #
+        to_record_id = self.instance.save_record(to_record_args["attributes"], to_record_args["metadata"])  #
 
-        relation_id = self.instance.save_relation(doc_id, from_identifier, doc_id, to_identifier, relation_args["attributes"], relation_args["metadata"])
+        relation_id = self.instance.save_relation(from_identifier, to_identifier, relation_args["attributes"], relation_args["metadata"])
 
         relation_raw = self.instance.get_relation(relation_id)
 
@@ -304,25 +303,92 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_relation("99999999")
 
     ##Delete section ###
-    def test_delete_document(self):
+    def test_delete_by_property_map(self):
         ids = insert_document_with_bundles(self.instance)
-        doc_id  = ids["doc_id"]
-        result = self.instance.delete_document(doc_id)
+        result = self.instance.delete_by_properties(dict())
         self.assertIsInstance(result,bool)
         self.assertTrue(result)
 
         with self.assertRaises(NotFoundException):
-            self.instance.get_document(doc_id)
+            from_record_id  = ids["from_record_id"]
+            self.instance.get_record(from_record_id)
 
-    def test_delete_bundle(self):
+
+        raw_results = self.instance.get_by_properties(dict())
+        self.assertIsNotNone(raw_results)
+        self.assertIsInstance(raw_results,list)
+        self.assertEqual(len(raw_results),0)
+
+    def test_delete_by_property_map_with_filter(self):
         ids = insert_document_with_bundles(self.instance)
-        bundle_id  = ids["bundle_id"]
-        result = self.instance.delete_bundle(bundle_id)
+
+        #Use the same attributes as the insert_document_with_bundles() method
+        property_filter= base_connector_record_parameter_example()["attributes"]
+
+        #remove date value because this is individual for each node
+        del property_filter["ex:date value"]
+
+        result = self.instance.delete_by_properties(property_filter)
         self.assertIsInstance(result,bool)
         self.assertTrue(result)
 
         with self.assertRaises(NotFoundException):
-            self.instance.get_bundle(bundle_id)
+            from_record_id  = ids["from_record_id"]
+            self.instance.get_record(from_record_id)
+
+        with self.assertRaises(NotFoundException):
+            to_record_id  = ids["to_record_id"]
+            self.instance.get_record(from_record_id)
+
+
+        #Bundle node should be there because not all attributes are match the filter
+        bundle_id = self.instance.get_record(ids["bundle_id"])
+        self.assertIsNotNone(bundle_id)
+
+        #After the delete it should be only one node in the database
+        raw_results = self.instance.get_by_properties(dict())
+        self.assertIsNotNone(raw_results)
+        self.assertIsInstance(raw_results, list)
+        self.assertEqual(len(raw_results), 1)
+
+    def test_delete_by_metadata_map(self):
+        ids = insert_document_with_bundles(self.instance)
+        result = self.instance.delete_by_metadata(dict())
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            from_record_id = ids["from_record_id"]
+            self.instance.get_record(from_record_id)
+
+    def test_delete_by_metadata_map_with_filter(self):
+        ids = insert_document_with_bundles(self.instance)
+
+        from_record_id = ids["from_record_id"]
+
+        all_records = self.instance.get_by_properties(dict())
+        from_record = self.instance.get_record(from_record_id)
+
+        # Use the same attributes as the insert_document_with_bundles() method
+        property_filter = dict()
+        #Get identifier from record and add the identifer to the filter
+        property_filter.update({METADATA_KEY_IDENTIFIER: from_record.metadata[METADATA_KEY_IDENTIFIER]})
+
+
+        #Try to delete only the from node
+        result = self.instance.delete_by_metadata(property_filter)
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+        with self.assertRaises(NotFoundException):
+            from_record_id = ids["from_record_id"]
+            self.instance.get_record(from_record_id)
+
+        # After the delete it should be one less in the db
+        raw_results = self.instance.get_by_properties(dict())
+        self.assertIsNotNone(raw_results)
+        self.assertIsInstance(raw_results, list)
+        self.assertEqual(len(raw_results), 4)
 
     def test_delete_record(self):
         ids = insert_document_with_bundles(self.instance)
@@ -343,6 +409,52 @@ class AdapterTestTemplate(unittest.TestCase):
 
         with self.assertRaises(NotFoundException):
             self.instance.get_relation(relation_id)
+
+    ### Merge documents ###
+
+    def test_set_merge_behaviour(self):
+
+        self.instance.setMergeBehaviour(MergeBehaviour.NO_MERGE)
+        self.assertEqual(self.instance.merge_behaviour, MergeBehaviour.NO_MERGE)
+        self.instance.setMergeBehaviour(MergeBehaviour.SOFT)
+        self.assertEqual(self.instance.merge_behaviour, MergeBehaviour.SOFT)
+        self.instance.setMergeBehaviour(MergeBehaviour.OVERRIDE)
+        self.assertEqual(self.instance.merge_behaviour, MergeBehaviour.OVERRIDE)
+
+        #Test fail
+        with self.assertRaises(InvalidOptionsException):
+            self.instance.setMergeBehaviour(None)
+
+    def test_merge_no_merge(self):
+        example = base_connector_merge_example()
+        #set to no_merge
+        self.instance.setMergeBehaviour(MergeBehaviour.NO_MERGE)
+
+
+        def test_save_duplicate_record():
+            #save record test
+            self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
+            with self.assertRaises(MergeException):
+                self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+
+        def test_save_duplicate_relation():
+            #save relation test
+            self.instance.save_record(example.to_node)
+            self.instance.save_relation(example.relation)
+
+            with self.assertRaises(MergeException):
+                self.instance.save_relation(example.relation)
+
+        test_save_duplicate_record()
+        test_save_duplicate_relation()
+
+
+
+    def test_merge_strict_merge(self):
+        pass
+
+    def test_merge_override_merge(self):
+        pass
 
 
 class BaseConnectorTests(unittest.TestCase):
