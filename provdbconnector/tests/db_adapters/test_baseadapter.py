@@ -142,7 +142,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         record_id = self.instance.save_record(args["attributes"], args["metadata"])
 
-        raw_result = self.instance.get_by_properties(dict())
+        raw_result = self.instance.get_records_by_filter()
 
         # Return structure...
         # raw_doc = {
@@ -175,7 +175,7 @@ class AdapterTestTemplate(unittest.TestCase):
         bundle_filter = dict()
         bundle_filter.update({PROV_TYPE: "prov:Bundle"})
 
-        raw_bundle_nodes = self.instance.get_by_properties(bundle_filter)
+        raw_bundle_nodes = self.instance.get_records_by_filter(properties_dict=bundle_filter)
         self.assertIsNotNone(raw_bundle_nodes)
         self.assertIsInstance(raw_bundle_nodes,list)
         self.assertEqual(len(raw_bundle_nodes),1)
@@ -192,7 +192,7 @@ class AdapterTestTemplate(unittest.TestCase):
         #remove date value because this is individual for each node
         del node_filter ["ex:date value"]
 
-        raw_nodes = self.instance.get_by_properties(node_filter )
+        raw_nodes = self.instance.get_records_by_filter(properties_dict=node_filter)
         self.assertIsNotNone(raw_nodes)
         self.assertIsInstance(raw_nodes,list)
         self.assertEqual(len(raw_nodes),5)#5 because the relation is also in the restults
@@ -242,6 +242,14 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(raw_records[0].metadata, meta_dict)
 
 
+    def test_get_records_tail(self):
+        ids = insert_document_with_bundles(self.instance)
+
+        from_record = self.instance.get_record(ids["from_record_id"])
+
+        meta_filter = dict()
+        meta_filter.update({METADATA_KEY_IDENTIFIER: from_record[METADATA_KEY_IDENTIFIER]})
+        tail_records = self.instance.get_records_tail(meta_dict=meta_filter)
 
     def test_get_record(self):
         args = base_connector_record_parameter_example()
@@ -305,7 +313,7 @@ class AdapterTestTemplate(unittest.TestCase):
     ##Delete section ###
     def test_delete_by_filter(self):
         ids = insert_document_with_bundles(self.instance)
-        result = self.instance.delete_records_by_filter(dict())
+        result = self.instance.delete_records_by_filter()
         self.assertIsInstance(result,bool)
         self.assertTrue(result)
 
@@ -314,7 +322,7 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_record(from_record_id)
 
 
-        raw_results = self.instance.get_by_properties(dict())
+        raw_results = self.instance.get_records_by_filter()
         self.assertIsNotNone(raw_results)
         self.assertIsInstance(raw_results,list)
         self.assertEqual(len(raw_results),0)
@@ -346,7 +354,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsNotNone(bundle_id)
 
         #After the delete it should be only one node in the database
-        raw_results = self.instance.get_by_properties(dict())
+        raw_results = self.instance.get_records_by_filter(dict())
         self.assertIsNotNone(raw_results)
         self.assertIsInstance(raw_results, list)
         self.assertEqual(len(raw_results), 1)
@@ -375,7 +383,7 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_record(from_record_id)
 
         # After the delete it should be one less in the db
-        raw_results = self.instance.get_by_properties(dict())
+        raw_results = self.instance.get_records_by_filter()
         self.assertIsNotNone(raw_results)
         self.assertIsInstance(raw_results, list)
         self.assertEqual(len(raw_results), 4)

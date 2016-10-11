@@ -107,6 +107,10 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
+    def get_records_tail(self,properties_dict=dict(), metadata_dict=dict(), depth=None):
+        pass
+
+    @abstractmethod
     def get_record(self, record_id):
         """
         Return a single record
