@@ -4,8 +4,8 @@ from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
 
-from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL
-from prov.model import ProvDocument, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, ProvAssociation
+from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE
+from prov.model import ProvDocument,ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, ProvAssociation
 
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
@@ -35,11 +35,6 @@ class InvalidArgumentTypeException(ProvApiException):
 
 class InvalidProvRecordException(ProvApiException):
     pass
-
-
-class ProvBundleRecord(ProvRecord):
-    def get_type(self):
-        return PROV_BUNDLE
 
 
 PROV_API_BUNDLE_IDENTIFIER_PREFIX = "prov:bundle:{}"
@@ -148,26 +143,23 @@ class ProvApi(object):
 
         prov_document = content
 
-        doc_id = self._adapter.save_document()
+        doc_id = str(uuid4())
 
-        self._create_bundle(doc_id, prov_document)
+        self._create_bundle(prov_document)
 
         bundle_id_map = dict()
         for bundle in prov_document.bundles:
-            custom_bundle_identifier = bundle.valid_qualified_name(
-                PROV_API_BUNDLE_IDENTIFIER_PREFIX.format(bundle.identifier))
-            bundle_record = ProvBundleRecord(bundle, identifier=custom_bundle_identifier,
-                                             attributes={"prov:bundle_name": bundle.identifier})
-            (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
-            bundle_id = self._adapter.save_bundle(document_id=doc_id, attributes=attributes, metadata=metadata)
-            bundle_id_map.update({bundle.identifier: bundle_id})
 
-            self._create_bundle(bundle_id, bundle)
-            self._create_bundle_association(document_id=doc_id, bundle_id=bundle_id,
-                                            bundle_identifier=custom_bundle_identifier, prov_bundle=bundle)
+            bundle_record = ProvEntity(bundle, identifier=bundle.identifier)
+            (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
+            bundle_id = self._adapter.save_record(attributes=attributes, metadata=metadata)
+
+
+            self._create_bundle(bundle)
+            self._create_bundle_association(prov_bundle=bundle)
 
         for bundle in prov_document.bundles:
-            self._create_bundle_links(bundle, bundle_id_map)
+            self._create_bundle_links(bundle)
 
         return doc_id
 
@@ -180,22 +172,34 @@ class ProvApi(object):
         if type(document_id) is not str:
             raise InvalidArgumentTypeException()
 
-        raw_doc = self._adapter.get_document(document_id)
+        filter_meta = dict()
+        filter_prop = dict()
+        #filter_meta.update({document_id: True})
+        filter_prop.update({PROV_TYPE: PROV_BUNDLE})
+
+        bundle_entities = self._adapter.get_records_by_filter(metadata_dict=filter_meta,properties_dict=filter_prop)
+        document_records = self._adapter.get_records_by_filter(metadata_dict=filter_meta)
 
         # parse document
         prov_document = ProvDocument()
-        for record in raw_doc.document.records:
+        for record in document_records:
             self._parse_record(prov_document, record)
 
-        for bundle in raw_doc.bundles:
-            prefixed_identifier = bundle.bundle_record.metadata[METADATA_KEY_IDENTIFIER]
-            # remove prefix
-            identifier = prefixed_identifier[len(PROV_API_BUNDLE_IDENTIFIER_PREFIX) - 2:]
+        for bundle_record in bundle_entities:
+            identifier = bundle_record.metadata[METADATA_KEY_IDENTIFIER]
             prov_bundle = prov_document.bundle(identifier=identifier)
 
-            for record in bundle.records:
+            filter_meta = dict()
+            filter_meta.update({document_id: True})
+            filter_prop = dict()
+            filter_prop.update({PROV_TYPE: PROV_BUNDLE})
+
+            bundle_records = self._adapter.get_records_tail(metadata_dict=filter_meta,properties_dict=filter_prop)
+
+            for record in bundle_records:
                 self._parse_record(prov_bundle, record)
         return prov_document
+
 
     def _parse_record(self, prov_bundle, raw_record):
         """
@@ -239,20 +243,20 @@ class ProvApi(object):
         add_namespaces_to_bundle(prov_bundle, raw_record.metadata)
         create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
 
-    def _create_bundle(self, bundle_id, prov_bundle):
+    def _create_bundle(self, prov_bundle):
         """
         Private method to create a bundle in the database
         :param bundle_id: The bundle from the databasedatapter
         :param prov_bundle: the ProvBundle
         :return:None
         """
-        if not isinstance(prov_bundle, ProvBundle) or type(bundle_id) is not str:
+        if not isinstance(prov_bundle, ProvBundle):
             raise InvalidArgumentTypeException()
 
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
-            self._adapter.save_record(bundle_id, attributes, metadata)
+            self._adapter.save_record(attributes, metadata)
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
@@ -260,14 +264,11 @@ class ProvApi(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
-            self._create_relation(bundle_id, bundle_id, relation)
+            self._create_relation(relation)
 
-    def _create_relation(self, from_bundle_id, to_bundle_id, prov_relation):
+    def _create_relation(self,prov_relation):
         """
         Creates a relation between 2 nodes that are already in the database.
-
-        :param from_bundle_id: The database id for the start bundle
-        :param to_bundle_id: The database id for the target bundle (important for bundle-links)
         :param prov_relation: The ProvRelation instance
         :return:Relation id as string
         """
@@ -278,40 +279,38 @@ class ProvApi(object):
 
         # if target or origin record is unknown, create node "Unknown"
         if from_qualified_name is None:
-            from_qualified_name = self._create_unknown_node(from_bundle_id)
+            from_qualified_name = self._create_unknown_node()
 
         if to_qualified_name is None:
-            to_qualified_name = self._create_unknown_node(to_bundle_id)
+            to_qualified_name = self._create_unknown_node()
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
-        return self._adapter.save_relation(from_bundle_id, from_qualified_name, to_bundle_id, to_qualified_name,
+        return self._adapter.save_relation( from_qualified_name, to_qualified_name,
                                            attributes, metadata)
 
-    def _create_bundle_association(self, document_id, bundle_id, bundle_identifier, prov_bundle):
+    def _create_bundle_association(self,  prov_bundle):
         """
         This method creates a relation between the bundle entity and all nodes in the bundle
         :param document_id: The database document id
         :param bundle_id: The database bundle id
-        :param bundle_identifier: The identifier of the target bundle
         :param prov_bundle: The instance of ProvBundle
         :return:
         """
 
         belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None, attributes={PROV_LABEL: "belongsToBundle"})
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
-        to_qualified_name = bundle_identifier
+        to_qualified_name = prov_bundle.identifier
 
         for record in prov_bundle.get_records(ProvElement):
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
             from_qualified_name = metadata[METADATA_KEY_IDENTIFIER]
-            self._adapter.save_relation(bundle_id, from_qualified_name, document_id, to_qualified_name,
+            self._adapter.save_relation(from_qualified_name, to_qualified_name,
                                         belong_attributes, belong_metadata)
 
-    def _create_unknown_node(self, bundle_id):
+    def _create_unknown_node(self):
         """
         If a relation end or start is "Unknown" (yes this is allowed in PROV) we create a specific node to create the relation
-        :param bundle_id: The database bundle id
         :return: The identifier of the Unknown node
         """
         uid = uuid4()
@@ -320,27 +319,22 @@ class ProvApi(object):
         record = ProvRecord(bundle=doc, identifier=identifier)
 
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
-        self._adapter.save_record(bundle_id, attributes, metadata)
+        self._adapter.save_record(attributes, metadata)
         return identifier
 
-    def _create_bundle_links(self, prov_bundle, bundle_id_map):
+    def _create_bundle_links(self, prov_bundle):
         """
         This function creates the links between nodes in bundles, see https://www.w3.org/TR/prov-links/
         :param prov_bundle: For this bundle we will create the links
-        :param bundle_id_map: A map for the relation between {IDENTIFIER: DATABASE_ID}
         :return: None
         """
 
-        from_bundle_id = bundle_id_map[prov_bundle.identifier]
 
         for mention in prov_bundle.get_records(ProvRelation):
             if mention.get_type() is not PROV_MENTION:
                 continue
 
-            to_bundle = mention.formal_attributes[2][1]
-            to_bundle_id = bundle_id_map[to_bundle]
-
-            self._create_relation(from_bundle_id, to_bundle_id, mention)
+            self._create_relation(mention)
 
     def _get_metadata_and_attributes_for_record(self, prov_record):
         """
