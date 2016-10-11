@@ -34,7 +34,6 @@ class Neo4jAdapterTests(AdapterTestTemplate):
         with self.assertRaises(InvalidOptionsException):
             self.instance.connect(auth_info)
 
-^
     def tearDown(self):
         session = self.instance._create_session()
         session.run("MATCH (x) DETACH DELETE x")
