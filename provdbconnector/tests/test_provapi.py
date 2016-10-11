@@ -123,6 +123,9 @@ class ProvApiTests(unittest.TestCase):
 
     def tearDown(self):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
+        session = self.provapi._adapter._create_session()
+        session.run("MATCH (x) DETACH DELETE x")
+        del self.provapi
 
 
     #Test create instnace
