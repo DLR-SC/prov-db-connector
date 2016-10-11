@@ -133,31 +133,9 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(relation_id), str, "id should be a string ")
 
     ### Get section ###
-    def test_get_metadata(self):
-        args = base_connector_record_parameter_example()
 
 
-        record_id = self.instance.save_record(args["attributes"], args["metadata"])
-
-        raw_records = self.instance.get_by_metadata(dict())
-
-
-        #Check return raw_records
-        self.assertIsNotNone(raw_records )
-        self.assertIsInstance(raw_records,list)
-        self.assertEqual(len(raw_records),1)
-        self.assertIsInstance(raw_records[0].attributes,dict)
-        self.assertIsInstance(raw_records[0].metadata,dict)
-
-        #check if the metadata of the record equals
-        attr_dict = encode_dict_values_to_primitive(args["attributes"])
-        meta_dict = encode_dict_values_to_primitive(args["metadata"])
-
-        self.assertEqual(raw_records[0].attributes, attr_dict)
-        self.assertEqual(raw_records[0].metadata, meta_dict)
-
-
-    def test_get_by_properties(self):
+    def test_get_records_by_filter(self):
         args = base_connector_record_parameter_example()
         args_bundle = base_connector_bundle_parameter_example()
 
@@ -189,7 +167,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         # check bundle
 
-    def test_get_by_properties_with_filter(self):
+    def test_get_records_by_filter_with_properties(self):
         ids = insert_document_with_bundles(self.instance)
 
 
@@ -240,6 +218,28 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(raw_nodes[2].attributes, attr_dict)
         self.assertEqual(raw_nodes[2].metadata, meta_dict)
 
+    def test_get_records_by_filter_with_metadata(self):
+        args = base_connector_record_parameter_example()
+
+
+        record_id = self.instance.save_record(args["attributes"], args["metadata"])
+
+        raw_records = self.instance.get_records_by_filter()
+
+
+        #Check return raw_records
+        self.assertIsNotNone(raw_records )
+        self.assertIsInstance(raw_records,list)
+        self.assertEqual(len(raw_records),1)
+        self.assertIsInstance(raw_records[0].attributes,dict)
+        self.assertIsInstance(raw_records[0].metadata,dict)
+
+        #check if the metadata of the record equals
+        attr_dict = encode_dict_values_to_primitive(args["attributes"])
+        meta_dict = encode_dict_values_to_primitive(args["metadata"])
+
+        self.assertEqual(raw_records[0].attributes, attr_dict)
+        self.assertEqual(raw_records[0].metadata, meta_dict)
 
 
 
@@ -303,9 +303,9 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_relation("99999999")
 
     ##Delete section ###
-    def test_delete_by_property_map(self):
+    def test_delete_by_filter(self):
         ids = insert_document_with_bundles(self.instance)
-        result = self.instance.delete_by_properties(dict())
+        result = self.instance.delete_records_by_filter(dict())
         self.assertIsInstance(result,bool)
         self.assertTrue(result)
 
@@ -319,7 +319,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_results,list)
         self.assertEqual(len(raw_results),0)
 
-    def test_delete_by_property_map_with_filter(self):
+    def test_delete_by_filter_with_properties(self):
         ids = insert_document_with_bundles(self.instance)
 
         #Use the same attributes as the insert_document_with_bundles() method
@@ -328,7 +328,7 @@ class AdapterTestTemplate(unittest.TestCase):
         #remove date value because this is individual for each node
         del property_filter["ex:date value"]
 
-        result = self.instance.delete_by_properties(property_filter)
+        result = self.instance.delete_records_by_filter(property_filter)
         self.assertIsInstance(result,bool)
         self.assertTrue(result)
 
@@ -351,22 +351,12 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(raw_results, list)
         self.assertEqual(len(raw_results), 1)
 
-    def test_delete_by_metadata_map(self):
-        ids = insert_document_with_bundles(self.instance)
-        result = self.instance.delete_by_metadata(dict())
-        self.assertIsInstance(result, bool)
-        self.assertTrue(result)
 
-        with self.assertRaises(NotFoundException):
-            from_record_id = ids["from_record_id"]
-            self.instance.get_record(from_record_id)
-
-    def test_delete_by_metadata_map_with_filter(self):
+    def test_delete_by_filter_with_metadata(self):
         ids = insert_document_with_bundles(self.instance)
 
         from_record_id = ids["from_record_id"]
 
-        all_records = self.instance.get_by_properties(dict())
         from_record = self.instance.get_record(from_record_id)
 
         # Use the same attributes as the insert_document_with_bundles() method
@@ -376,7 +366,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
         #Try to delete only the from node
-        result = self.instance.delete_by_metadata(property_filter)
+        result = self.instance.delete_records_by_filter(metadata_dict=property_filter)
         self.assertIsInstance(result, bool)
         self.assertTrue(result)
 

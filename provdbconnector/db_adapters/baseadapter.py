@@ -100,13 +100,9 @@ class BaseAdapter(ABC):
         """
         pass
 
-    @abstractmethod
-    def get_by_metadata(self, metadata_dict):
-
-        pass
 
     @abstractmethod
-    def get_by_properties(self, property_dict):
+    def get_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
 
         pass
 
@@ -129,11 +125,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def delete_by_properties(self, property_dict):
-        pass
-
-    @abstractmethod
-    def delete_by_metadata(self, metadata_dict):
+    def delete_records_by_filter(self, properties_dict, metadata_dict):
         pass
 
     @abstractmethod

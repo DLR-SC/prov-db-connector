@@ -216,12 +216,6 @@ class Neo4jAdapter(BaseAdapter):
     def decode_string_value_to_primitive(self, attributes, metadata):
         type_map = metadata[METADATA_KEY_TYPE_MAP]
 
-    def get_by_metadata(self, metadata_dict):
-
-        metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
-
-        return self.get_by_properties(metadata_dict_prefixed)
-
     def get_bundle_ids(self, document_id):
         session = self._create_session()
 
@@ -233,10 +227,16 @@ class Neo4jAdapter(BaseAdapter):
 
         return ids
 
-    def get_by_properties(self, property_dict):
+    def get_records_by_filter(self,properties_dict=dict(),metadata_dict=dict()):
 
-        encoded_params = encode_dict_values_to_primitive(property_dict)
-        cypher_str = self._get_attributes_identifiers_cypher_string(property_dict)
+        metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
+
+        #Merge the 2 dicts into one
+        filter = properties_dict.copy()
+        filter.update(metadata_dict_prefixed)
+
+        encoded_params = encode_dict_values_to_primitive(filter)
+        cypher_str = self._get_attributes_identifiers_cypher_string(filter)
         session = self._create_session()
         records = list()
         result_set = session.run(NEO4J_GET_RECORDS_BY_PROPERTY_DICT.format(filter_dict=cypher_str), encoded_params)
@@ -247,7 +247,6 @@ class Neo4jAdapter(BaseAdapter):
                 raise DatabaseException("Record response should not be None")
             relation_record = self._split_attributes_metadata_from_node(record)
             records.append(relation_record)
-
         return records
 
     def get_record(self, record_id):
@@ -288,21 +287,22 @@ class Neo4jAdapter(BaseAdapter):
 
         return self._split_attributes_metadata_from_node(relation)
 
-    def delete_by_properties(self, property_dict):
+    def delete_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
 
-        encoded_params = encode_dict_values_to_primitive(property_dict)
-        cypher_str = self._get_attributes_identifiers_cypher_string(property_dict)
+        metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
+
+        # Merge the 2 dicts into one
+        filter = properties_dict.copy()
+        filter.update(metadata_dict_prefixed)
+
+        encoded_params = encode_dict_values_to_primitive(filter)
+        cypher_str = self._get_attributes_identifiers_cypher_string(filter)
         session = self._create_session()
 
         result = session.run(NEO4J_DELETE_NODE_BY_PROPERTIES.format(filter_dict=cypher_str), encoded_params)
 
         return True
 
-    def delete_by_metadata(self, metadata_dict):
-
-        metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
-
-        return self.delete_by_properties(metadata_dict_prefixed)
 
     def delete_record(self, record_id):
         session = self._create_session()
