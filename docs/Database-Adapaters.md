@@ -19,7 +19,19 @@ First you must create a class that extend from BaseAdapter and implement all fun
 
 ```python 
 
-from provdbconnector.db_adapters.baseadapter import BaseAdapter
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbBundle, DbRecord, DbRelation
+from provdbconnector.exceptions.database import InvalidOptionsException, NotFoundException
+from provdbconnector.utils.serializer import encode_dict_values_to_primitive
+from uuid import uuid4
+import logging
+
+log = logging.getLogger(__name__)
+
+document_bundle_ids = dict()
+
+bundles = dict() #dict for alle bundles including record and relation information
+
+all_records = dict() # separate dict for records only (to get them by id)
 
 class SimpleInMemoryAdapter(BaseAdapter):
 
@@ -83,23 +95,7 @@ class SimpleInMemoryAdapterProvApiTests(ProvApiTestTemplate):
 The last step is to create your logic inside the adapter for example the create and get bundle functions: 
 
 
-```python 
-
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbBundle, DbRecord, DbRelation
-from provdbconnector.exceptions.database import InvalidOptionsException, NotFoundException
-from provdbconnector.utils.serializer import encode_dict_values_to_primitive
-from uuid import uuid4
-import logging
-
-log = logging.getLogger(__name__)
-
-document_bundle_ids = dict()
-
-bundles = dict() #dict for alle bundles including record and relation information
-
-all_records = dict() # separate dict for records only (to get them by id)
-
-
+```python
 def create_bundle(self, document_id, attributes, metadata):
     #save the bundle information and return id as string
     document_id = document_id
