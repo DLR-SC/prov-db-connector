@@ -143,11 +143,9 @@ class ProvApi(object):
 
         prov_document = content
 
-        doc_id = str(uuid4())
+        doc_id = self._create_bundle(prov_document)
 
-        self._create_bundle(prov_document)
 
-        bundle_id_map = dict()
         for bundle in prov_document.bundles:
 
             bundle_record = ProvEntity(bundle, identifier=bundle.identifier)
@@ -174,7 +172,7 @@ class ProvApi(object):
 
         filter_meta = dict()
         filter_prop = dict()
-        #filter_meta.update({document_id: True})
+        filter_meta.update({document_id: True})
         filter_prop.update({PROV_TYPE: PROV_BUNDLE})
 
         bundle_entities = self._adapter.get_records_by_filter(metadata_dict=filter_meta,properties_dict=filter_prop)
@@ -250,12 +248,14 @@ class ProvApi(object):
         :param prov_bundle: the ProvBundle
         :return:None
         """
+        bundle_id = str(uuid4())
+
         if not isinstance(prov_bundle, ProvBundle):
             raise InvalidArgumentTypeException()
 
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
-            (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
+            (metadata, attributes) = self._get_metadata_and_attributes_for_record(record,bundle_id)
             self._adapter.save_record(attributes, metadata)
 
         # create relations
@@ -264,9 +264,11 @@ class ProvApi(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
-            self._create_relation(relation)
+            self._create_relation(relation,bundle_id)
 
-    def _create_relation(self,prov_relation):
+        return bundle_id
+
+    def _create_relation(self,prov_relation,bundle_id=None):
         """
         Creates a relation between 2 nodes that are already in the database.
         :param prov_relation: The ProvRelation instance
@@ -279,10 +281,10 @@ class ProvApi(object):
 
         # if target or origin record is unknown, create node "Unknown"
         if from_qualified_name is None:
-            from_qualified_name = self._create_unknown_node()
+            from_qualified_name = self._create_unknown_node(bundle_id)
 
         if to_qualified_name is None:
-            to_qualified_name = self._create_unknown_node()
+            to_qualified_name = self._create_unknown_node(bundle_id)
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
@@ -308,7 +310,7 @@ class ProvApi(object):
             self._adapter.save_relation(from_qualified_name, to_qualified_name,
                                         belong_attributes, belong_metadata)
 
-    def _create_unknown_node(self):
+    def _create_unknown_node(self,bundle_id=None):
         """
         If a relation end or start is "Unknown" (yes this is allowed in PROV) we create a specific node to create the relation
         :return: The identifier of the Unknown node
@@ -318,7 +320,7 @@ class ProvApi(object):
         identifier = doc.valid_qualified_name("prov:Unknown-{}".format(uid))
         record = ProvRecord(bundle=doc, identifier=identifier)
 
-        (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
+        (metadata, attributes) = self._get_metadata_and_attributes_for_record(record,bundle_id)
         self._adapter.save_record(attributes, metadata)
         return identifier
 
@@ -336,7 +338,7 @@ class ProvApi(object):
 
             self._create_relation(mention)
 
-    def _get_metadata_and_attributes_for_record(self, prov_record):
+    def _get_metadata_and_attributes_for_record(self, prov_record, bundle_id= None):
         """
         This function generate some meta data for the record for example:
 
@@ -344,7 +346,10 @@ class ProvApi(object):
             * Type_Map: The type map is important to get exactly the same document back, you have to save this information (like what attribute is a datetime)
 
         :param prov_record: The ProvRecord (ProvRelation or ProvElement)
-        :return:
+        :type ProvDocument
+        :param bundle_id: The id of the document
+        :type str
+        :return: Tuple (metadata, attributes)
         """
         if not isinstance(prov_record, ProvRecord):
             raise InvalidArgumentTypeException()
@@ -422,6 +427,10 @@ class ProvApi(object):
             METADATA_KEY_NAMESPACES: used_namespaces,
             METADATA_KEY_TYPE_MAP: types_dict
         }
+
+        #Add document id to metadata, to restore the
+        if bundle_id:
+            metadata.update({bundle_id:True})
         meta_and_attributes = namedtuple("MetaAndAttributes", "metadata, attributes")
 
         return meta_and_attributes(metadata, attributes)
