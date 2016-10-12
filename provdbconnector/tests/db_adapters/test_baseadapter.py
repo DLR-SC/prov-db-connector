@@ -3,6 +3,10 @@ import unittest
 from prov.model import ProvDocument
 from prov.constants import PROV_BUNDLE, PROV_TYPE
 
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER
+from provdbconnector.exceptions.database import NotFoundException
+from provdbconnector.tests.examples import base_connector_record_parameter_example, \
+    base_connector_relation_parameter_example, base_connector_bundle_parameter_example
 from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER, NotFoundException,MergeBehaviour, InvalidOptionsException,MergeException
 from provdbconnector.tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example,base_connector_merge_example
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
@@ -11,17 +15,20 @@ from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 def isnamedtupleinstance(x):
     t = type(x)
     b = t.__bases__
-    if len(b) != 1 or b[0] != tuple: return False
+    if len(b) != 1 or b[0] != tuple:
+        return False
     f = getattr(t, '_fields', None)
-    if not isinstance(f, tuple): return False
-    return all(type(n)==str for n in f)
+    if not isinstance(f, tuple):
+        return False
+    return all(type(n) == str for n in f)
+
 
 def insert_document_with_bundles(instance):
     args_record = base_connector_record_parameter_example()
     args_bundle = base_connector_bundle_parameter_example()
     doc = ProvDocument()
-    doc.add_namespace("ex","http://example.com")
-    #document with 1 record
+    doc.add_namespace("ex", "http://example.com")
+    # document with 1 record
     doc_id = instance.save_document()
     doc_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
@@ -29,8 +36,7 @@ def insert_document_with_bundles(instance):
     bundle_id = instance.save_record(args_bundle["attributes"], args_bundle["metadata"])
     bundle_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
-
-    #add relation
+    # add relation
 
     from_record_args = base_connector_record_parameter_example()
     to_record_args = base_connector_record_parameter_example()
@@ -61,8 +67,6 @@ def insert_document_with_bundles(instance):
 
 
 class AdapterTestTemplate(unittest.TestCase):
-
-
     def __init__(self, *args, **kwargs):
         """
         Prevent from execute the test case directly see:
@@ -118,16 +122,16 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
 
-
     @unittest.skip("We should discuss the possibility of relations that are create automatically nodes")
     def test_save_relation_with_unknown_records(self):
         args_relation = base_connector_relation_parameter_example()
 
         doc_id = self.instance.save_document()
 
-        #Skip the part that creates the from and to node
+        # Skip the part that creates the from and to node
 
-        relation_id = self.instance.save_relation(doc_id, args_relation["from_node"], doc_id, args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
+        relation_id = self.instance.save_relation(doc_id, args_relation["from_node"], doc_id, args_relation["to_node"],
+                                                  args_relation["attributes"], args_relation["metadata"])
 
         self.assertIsNotNone(relation_id)
         self.assertIs(type(relation_id), str, "id should be a string ")
@@ -147,7 +151,7 @@ class AdapterTestTemplate(unittest.TestCase):
         # Return structure...
         # raw_doc = {
         #     records: []
-        #     identifer: ""
+        #     identifier: ""
         # }
 
         # check bundle
@@ -293,15 +297,14 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsNotNone(record_raw)
         self.assertIsNotNone(record_raw.attributes)
         self.assertIsNotNone(record_raw.metadata)
-        self.assertIsInstance(record_raw.metadata,dict)
-        self.assertIsInstance(record_raw.attributes,dict)
+        self.assertIsInstance(record_raw.metadata, dict)
+        self.assertIsInstance(record_raw.attributes, dict)
 
+        attributes_primitive = encode_dict_values_to_primitive(args["attributes"])
+        metadata_primitive = encode_dict_values_to_primitive(args["metadata"])
 
-        attributes_primitive= encode_dict_values_to_primitive(args["attributes"])
-        metadata_primitive= encode_dict_values_to_primitive(args["metadata"])
-
-        self.assertEqual(record_raw.attributes,attributes_primitive)
-        self.assertEqual(record_raw.metadata,metadata_primitive)
+        self.assertEqual(record_raw.attributes, attributes_primitive)
+        self.assertEqual(record_raw.metadata, metadata_primitive)
 
         self.assertIs(type(record_id), str, "id should be a string ")
 
@@ -488,7 +491,6 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
 class BaseConnectorTests(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -496,7 +498,5 @@ class BaseConnectorTests(unittest.TestCase):
         pass
 
     def test_instance_abstract_class(self):
-
         with self.assertRaises(TypeError):
             instance = BaseAdapter()
-

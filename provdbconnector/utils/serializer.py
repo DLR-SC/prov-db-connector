@@ -9,14 +9,11 @@ from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTR
 from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime
 
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES
+from provdbconnector.exceptions.utils import SerializerException
 
 import logging
+
 log = logging.getLogger(__name__)
-
-
-class SerializerException(Exception):
-    pass
-
 
 logger = logging.getLogger(__name__)
 # Reverse map for prov.model.XSD_DATATYPE_PARSERS
@@ -36,7 +33,7 @@ def encode_dict_values_to_primitive(dict_values):
     new_dict_values = dict()
     for key, value in dict_values.items():
         key_simple = str(key)
-        new_dict_values.update({key_simple:encode_string_value_to_primitive(value)})
+        new_dict_values.update({key_simple: encode_string_value_to_primitive(value)})
 
     return new_dict_values
 
@@ -119,6 +116,7 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
 def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
     """
 
+    :param bundle:
     :param prov_type: valid prov type like prov:Entry as string
     :param prov_id: valid id as string like <namespace>:<name>
     :param properties: dict{attr_name:attr_value} dict with all properties (prov and additional)
@@ -132,7 +130,8 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
         properties_list = properties
     else:
         raise SerializerException(
-            "Please provide properties as list[(key,value)] or dict your provided: {}".format(properties.__class__.__name__))
+            "Please provide properties as list[(key,value)] or dict your provided: {}".format(
+                properties.__class__.__name__))
 
     attributes = dict()
     other_attributes = []
