@@ -26,6 +26,19 @@ def attributes_dict_example():
 
     return attributes
 
+def base_connector_merge_example():
+
+    ReturnData = namedtuple("base_connector_merge_example_return_data", "from_node,relation,to_node")
+    example_relation = base_connector_relation_parameter_example()
+
+    example_node_a = base_connector_record_parameter_example()
+    example_node_b = base_connector_record_parameter_example()
+
+    example_node_a["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["from_node"]
+    example_node_b["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["to_node"]
+
+    return ReturnData(example_node_a,example_relation,example_node_b)
+
 
 def base_connector_bundle_parameter_example():
     doc = ProvDocument()
