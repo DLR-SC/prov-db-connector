@@ -3,12 +3,10 @@ import unittest
 from prov.model import ProvDocument
 from prov.constants import PROV_BUNDLE, PROV_TYPE
 
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER
-from provdbconnector.exceptions.database import NotFoundException
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER, MergeBehaviour
+from provdbconnector.exceptions.database import NotFoundException, InvalidOptionsException,MergeException
 from provdbconnector.tests.examples import base_connector_record_parameter_example, \
-    base_connector_relation_parameter_example, base_connector_bundle_parameter_example
-from provdbconnector.db_adapters.baseadapter import BaseAdapter,METADATA_KEY_IDENTIFIER, NotFoundException,MergeBehaviour, InvalidOptionsException,MergeException
-from provdbconnector.tests.examples import base_connector_record_parameter_example,base_connector_relation_parameter_example,base_connector_bundle_parameter_example,base_connector_merge_example
+    base_connector_relation_parameter_example, base_connector_bundle_parameter_example, base_connector_merge_example
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 
 
