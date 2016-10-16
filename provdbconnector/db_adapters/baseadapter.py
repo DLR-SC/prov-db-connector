@@ -24,6 +24,11 @@ class MergeBehaviour(Enum):
     SOFT = 1
     OVERRIDE = 2
 
+class AdapterFeatures(Enum):
+    FEATURE_MERGE_NO_MERGE = 0
+    FEATURE_MERGE_SOFT = 1
+    FEATURE_MERGE_OVERRIDE = 2
+
 class BaseAdapter(ABC):
 
     """

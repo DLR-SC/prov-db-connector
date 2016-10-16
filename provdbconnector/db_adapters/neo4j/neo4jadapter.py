@@ -1,5 +1,5 @@
 import os
-from provdbconnector.db_adapters.baseadapter import BaseAdapter
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, AdapterFeatures
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP
 
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
@@ -80,6 +80,8 @@ class Neo4jAdapter(BaseAdapter):
         super(Neo4jAdapter, self).__init__()
         self.driver = None
         pass
+
+    SUPPORTED_FEATURES = {AdapterFeatures.FEATURE_MERGE_SOFT}
 
     def _create_session(self):
 
