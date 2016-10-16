@@ -15,6 +15,8 @@ class Neo4jAdapterTests(AdapterTestTemplate):
                      "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
                      }
         self.instance.connect(auth_info)
+        session = self.instance._create_session()
+        session.run("MATCH (x) DETACH DELETE x")
 
     @unittest.skip(
         "Skipped because the server configuration currently is set to 'no password', so the authentication will never fail")
