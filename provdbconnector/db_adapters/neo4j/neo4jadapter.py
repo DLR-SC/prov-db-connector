@@ -132,24 +132,6 @@ class Neo4jAdapter(BaseAdapter):
         db_attributes_identifiers = map(lambda key: "`{}`: {{`{}`}}".format(key, key), list(db_attributes.keys()))
         return ",".join(db_attributes_identifiers)
 
-    def save_document(self):
-        session = self._create_session()
-        result = session.run(NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID)
-        record_id = None
-        for record in result:
-            record_id = record["ID"]
-
-        result_delete = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": record_id})
-
-        if record_id is None:
-            raise DatabaseException("Could not get a valid ID result back")
-
-        return str(record_id + 1)
-
-    def save_bundle(self, document_id, attributes, metadata):
-        metadata = metadata.copy()
-        metadata.update({NEO4J_META_PARENT_ID: document_id})
-        return self.save_record(document_id, attributes, metadata)
 
     def save_record(self, attributes, metadata):
 
