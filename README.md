@@ -99,7 +99,7 @@ You find all examples in the [examples](./examples) folder
 
 ## Create your own database adapter 
 
-It is also possible that you create your own custom pro-database adapater. To do this please follow the instrcutions in [Database-Adapters.md](./docs/Database-Adapaters.md)
+It is also possible that you create your own custom pro-database adapater. To do this please follow the instrcutions in [Database-Adapters.md](./docs/Database-Adapters.md)
 
 ## Contribute
 
