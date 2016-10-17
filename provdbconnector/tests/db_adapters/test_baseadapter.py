@@ -27,7 +27,7 @@ def insert_document_with_bundles(instance):
     doc = ProvDocument()
     doc.add_namespace("ex", "http://example.com")
     # document with 1 record
-    doc_id = instance.save_document()
+
     doc_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
     #bundle with 1 record
@@ -59,7 +59,6 @@ def insert_document_with_bundles(instance):
         "to_record_id": to_record_id,
         "bundle_id": bundle_id,
         "bundle_record_id": bundle_record_id,
-        "doc_id": doc_id,
         "doc_record_id": doc_record_id
     }
 
@@ -124,11 +123,10 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_save_relation_with_unknown_records(self):
         args_relation = base_connector_relation_parameter_example()
 
-        doc_id = self.instance.save_document()
 
         # Skip the part that creates the from and to node
 
-        relation_id = self.instance.save_relation(doc_id, args_relation["from_node"], doc_id, args_relation["to_node"],
+        relation_id = self.instance.save_relation( args_relation["from_node"],  args_relation["to_node"],
                                                   args_relation["attributes"], args_relation["metadata"])
 
         self.assertIsNotNone(relation_id)
@@ -506,11 +504,11 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(attr, db_record.attributes)
         self.assertEqual(meta, db_record.metadata)
 
-        prim = primer_example()
-        self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
 
     def test_merge_relation(self):
         example = base_connector_merge_example()
+        prim = primer_example()
+        self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
         #save relation test
         self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
         self.instance.save_record(example.to_node["attributes"],example.from_node["metadata"])
