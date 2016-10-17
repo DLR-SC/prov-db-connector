@@ -19,22 +19,8 @@ DbBundle = namedtuple("DbBundle", "records, bundle_record")
 DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
 
-class MergeBehaviour(Enum):
-    NO_MERGE = 0
-    SOFT = 1
-    OVERRIDE = 2
-
-class AdapterFeatures(Enum):
-    FEATURE_MERGE_NO_MERGE = 0
-    FEATURE_MERGE_SOFT = 1
-    FEATURE_MERGE_OVERRIDE = 2
-
 class BaseAdapter(ABC):
 
-    """
-    :type MergeBehaviour
-    """
-    merge_behaviour = MergeBehaviour.NO_MERGE
 
     """
     Interface class for a prov database adapter
@@ -129,9 +115,3 @@ class BaseAdapter(ABC):
         :raise NotFoundException
         """
         pass
-
-    def setMergeBehaviour(self, new_behaviour):
-        if type(new_behaviour) is MergeBehaviour:
-            self.merge_behaviour = new_behaviour
-        else:
-            raise InvalidOptionsException("new_behaviour must be typeof {} but was {}".format(type(MergeBehaviour), type(new_behaviour)))

@@ -1,5 +1,5 @@
 import os
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, AdapterFeatures
+from provdbconnector.db_adapters.baseadapter import BaseAdapter
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP
 
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
@@ -31,7 +31,7 @@ NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 
 # create
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
-NEO4J_CREATE_NODE_RETURN_ID = """CREATE (node:%s { %s}) RETURN ID(node) as ID """  # args: provType, values
+NEO4J_CREATE_NODE_RETURN_ID = """MERGE (node:{label} {{{formal_attributes}}}) RETURN ID(node) as ID """  # args: provType, values
 NEO4J_CREATE_RELATION_RETURN_ID = """
                                 MATCH
                                     (from{{`meta:identifier`:'{from_identifier}'}}),
@@ -80,8 +80,6 @@ class Neo4jAdapter(BaseAdapter):
         super(Neo4jAdapter, self).__init__()
         self.driver = None
         pass
-
-    SUPPORTED_FEATURES = {AdapterFeatures.FEATURE_MERGE_SOFT}
 
     def _create_session(self):
 
@@ -167,7 +165,7 @@ class Neo4jAdapter(BaseAdapter):
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_NODE_RETURN_ID % (provtype.localpart, identifier_str)
+        command = NEO4J_CREATE_NODE_RETURN_ID.format(label=provtype.localpart, formal_attributes=identifier_str)
         result = session.run(command, dict(db_attributes))
 
         record_id = None

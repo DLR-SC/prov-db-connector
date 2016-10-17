@@ -3,9 +3,9 @@ import unittest
 from prov.model import ProvDocument
 from prov.constants import PROV_BUNDLE, PROV_TYPE
 
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER, MergeBehaviour
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER
 from provdbconnector.exceptions.database import NotFoundException, InvalidOptionsException,MergeException
-from provdbconnector.tests.examples import base_connector_record_parameter_example, \
+from provdbconnector.tests.examples import base_connector_record_parameter_example, primer_example,\
     base_connector_relation_parameter_example, base_connector_bundle_parameter_example, base_connector_merge_example
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 
@@ -443,49 +443,96 @@ class AdapterTestTemplate(unittest.TestCase):
 
     ### Merge documents ###
 
-    def test_set_merge_behaviour(self):
 
-        self.instance.setMergeBehaviour(MergeBehaviour.NO_MERGE)
-        self.assertEqual(self.instance.merge_behaviour, MergeBehaviour.NO_MERGE)
-        self.instance.setMergeBehaviour(MergeBehaviour.SOFT)
-        self.assertEqual(self.instance.merge_behaviour, MergeBehaviour.SOFT)
-        self.instance.setMergeBehaviour(MergeBehaviour.OVERRIDE)
-        self.assertEqual(self.instance.merge_behaviour, MergeBehaviour.OVERRIDE)
-
-        #Test fail
-        with self.assertRaises(InvalidOptionsException):
-            self.instance.setMergeBehaviour(None)
-
+    @unittest.skip("Not supportet")
     def test_merge_no_merge(self):
         example = base_connector_merge_example()
+        #Skip test if this merge mode is not supported
+
+
         #set to no_merge
         self.instance.setMergeBehaviour(MergeBehaviour.NO_MERGE)
 
+        #save record test
+        self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
+        with self.assertRaises(MergeException):
+            self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
 
-        def test_save_duplicate_record():
-            #save record test
-            self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
-            with self.assertRaises(MergeException):
-                self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        #save relation test
+        self.instance.save_record(example.to_node)
+        self.instance.save_relation(example.relation)
 
-        def test_save_duplicate_relation():
-            #save relation test
-            self.instance.save_record(example.to_node)
+        with self.assertRaises(MergeException):
             self.instance.save_relation(example.relation)
 
-            with self.assertRaises(MergeException):
-                self.instance.save_relation(example.relation)
+    def test_merge_record(self):
+        example = base_connector_merge_example()
+        #Skip test if this merge mode is not supported
 
-        test_save_duplicate_record()
-        test_save_duplicate_relation()
+        #save record test
+        rec_id1 = self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
+        rec_id2 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
 
+        self.assertEqual(rec_id1,rec_id2)
 
+        # Test merge result of save record
 
-    def test_merge_strict_merge(self):
-        pass
+        db_record = self.instance.get_record(rec_id2) # The id's are equal so it makes no difference
 
-    def test_merge_override_merge(self):
-        pass
+        attr = encode_dict_values_to_primitive(example.from_node["attributes"])
+        meta = encode_dict_values_to_primitive(example.from_node["metadata"])
+        self.assertEqual(attr,db_record.attributes)
+        self.assertEqual(meta,db_record.metadata)
+
+        prim = primer_example()
+        self.assertEqual(len(prim.get_records()),len(prim.unified().get_records()))
+
+    def test_merge_record_complex(self):
+        example = base_connector_merge_example()
+        # Skip test if this merge mode is not supported
+
+        # save record test
+        rec_id1 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        rec_id2 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+
+        self.assertEqual(rec_id1, rec_id2)
+
+        # Test merge result of save record
+
+        db_record = self.instance.get_record(rec_id2)  # The id's are equal so it makes no difference
+
+        attr = encode_dict_values_to_primitive(example.from_node["attributes"])
+        meta = encode_dict_values_to_primitive(example.from_node["metadata"])
+        self.assertEqual(attr, db_record.attributes)
+        self.assertEqual(meta, db_record.metadata)
+
+        prim = primer_example()
+        self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
+
+    def test_merge_relation(self):
+        example = base_connector_merge_example()
+        #save relation test
+        self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
+        self.instance.save_record(example.to_node["attributes"],example.from_node["metadata"])
+
+        from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
+        to_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
+
+        rel_id1 = self.instance.save_relation(from_label,to_label,example.relation["attributes"], example.relation["metadata"])
+        rel_id2 = self.instance.save_relation(from_label,to_label,example.relation["attributes"], example.relation["metadata"])
+
+        self.assertEqual(rel_id1,rel_id2)
+
+        # Test merge result of save relation
+
+        db_record = self.instance.get_relation(rel_id2)  # The id's are equal so it makes no difference
+
+        attr = encode_dict_values_to_primitive(example.relation["attributes"])
+        meta = encode_dict_values_to_primitive(example.relation["metadata"])
+
+        self.assertEqual(attr, db_record.attributes)
+        self.assertEqual(meta, db_record.metadata)
+
 
 
 class BaseConnectorTests(unittest.TestCase):
