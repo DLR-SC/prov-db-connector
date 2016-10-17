@@ -1,15 +1,15 @@
 import os
 from provdbconnector.db_adapters.baseadapter import BaseAdapter
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_IDENTIFIER
 
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
-    DatabaseException, CreateRecordException, NotFoundException, CreateRelationException
+    DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, MergeException
 
 from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
-from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive
+from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive,split_into_formal_and_other_attributes
 
 import logging
 logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
@@ -31,7 +31,13 @@ NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 
 # create
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
-NEO4J_CREATE_NODE_RETURN_ID = """MERGE (node:{label} {{{formal_attributes}}}) RETURN ID(node) as ID """  # args: provType, values
+NEO4J_CREATE_NODE_SET_PART = "SET node.`{attr_name}` = {{`{attr_name}`}}"
+NEO4J_CREATE_NODE_MERGE_CHECK_PART = """WITH CASE WHEN check = 0 THEN (CASE  WHEN EXISTS(node.`{attr_name}`) AND node.`{attr_name}` <> {{`{attr_name}`}} THEN 1 ELSE 0 END) ELSE 1 END as check , node """
+NEO4J_CREATE_NODE_RETURN_ID = """MERGE (node:{label} {{{formal_attributes}}})
+                                WITH 0 as check, node
+                                {merge_check_statement}
+                                {set_statement}
+                                RETURN ID(node) as ID, check """  # args: provType, values
 NEO4J_CREATE_RELATION_RETURN_ID = """
                                 MATCH
                                     (from{{`meta:identifier`:'{from_identifier}'}}),
@@ -128,34 +134,67 @@ class Neo4jAdapter(BaseAdapter):
 
         return db_attributes
 
-    def _get_attributes_identifiers_cypher_string(self, db_attributes):
-        db_attributes_identifiers = map(lambda key: "`{}`: {{`{}`}}".format(key, key), list(db_attributes.keys()))
+    def _get_attributes_identifiers_cypher_string(self, key_list):
+        db_attributes_identifiers = map(lambda key: "`{}`: {{`{}`}}".format(key, key), key_list)
         return ",".join(db_attributes_identifiers)
 
+    def _get_attributes_set_cypher_string(self,key_list, CYPHER_TEMPLATE = NEO4J_CREATE_NODE_SET_PART):
+        statements = list()
+        for key in key_list:
+            statements.append(CYPHER_TEMPLATE.format(attr_name=key))
 
+        return " ".join(statements)
     def save_record(self, attributes, metadata):
 
         metadata = metadata.copy()
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
+        #setup header
+        (formal_attributes, other_attributes) = split_into_formal_and_other_attributes(attributes,metadata)
+
+        merge_relevant_keys = list()
+        merge_relevant_keys.append("meta:{}".format(METADATA_KEY_IDENTIFIER))
+        merge_relevant_keys = merge_relevant_keys + list(formal_attributes.keys())
+
+        other_db_attribute_keys = list()
+        other_db_attribute_keys = other_db_attribute_keys + list(other_attributes.keys())
+        other_db_attribute_keys = other_db_attribute_keys + list(prefixed_metadata.keys())
+
+
         db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
 
         provtype = metadata[METADATA_KEY_PROV_TYPE]
 
-        identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes)
+        cypher_merge_relevant_str = self._get_attributes_identifiers_cypher_string(merge_relevant_keys)
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_NODE_RETURN_ID.format(label=provtype.localpart, formal_attributes=identifier_str)
-        result = session.run(command, dict(db_attributes))
+        cypher_set_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys)
+        cypher_merge_check_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys,NEO4J_CREATE_NODE_MERGE_CHECK_PART)
 
-        record_id = None
-        for record in result:
-            record_id = record["ID"]
+        command = NEO4J_CREATE_NODE_RETURN_ID.format(label=provtype.localpart,
+                                                     formal_attributes=cypher_merge_relevant_str,
+                                                     set_statement=cypher_set_statement,
+                                                     merge_check_statement=cypher_merge_check_statement)
+        with session.begin_transaction() as tx:
 
-        if record_id is None:
-            raise CreateRecordException("No ID property returned by database for the command {}".format(command))
+            result = tx.run(command, dict(db_attributes))
+
+            record_id = None
+            merge_success = 0
+            for record in result:
+                record_id = record["ID"]
+                merge_success = record["check"]
+
+
+            if record_id is None:
+                raise CreateRecordException("No ID property returned by database for the command {}".format(command))
+            if merge_success == 0:
+                tx.success = True
+            else:
+                tx.success = False
+                raise MergeException("The attributes {other} could not merged into the existing node ".format(other=other_db_attribute_keys))
 
         return str(record_id)
 
@@ -169,7 +208,7 @@ class Neo4jAdapter(BaseAdapter):
 
         relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
-        identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes)
+        identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes.keys())
 
         session = self._create_session()
 
@@ -228,7 +267,7 @@ class Neo4jAdapter(BaseAdapter):
         filter.update(metadata_dict_prefixed)
 
         encoded_params = encode_dict_values_to_primitive(filter)
-        cypher_str = self._get_attributes_identifiers_cypher_string(filter)
+        cypher_str = self._get_attributes_identifiers_cypher_string(filter.keys())
         return (encoded_params,cypher_str)
 
     def get_records_by_filter(self,properties_dict=dict(),metadata_dict=dict()):

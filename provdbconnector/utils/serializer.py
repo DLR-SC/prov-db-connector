@@ -4,18 +4,23 @@ from datetime import datetime
 from io import StringIO
 
 import six
+
 from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTRIBUTES, PROV_MEMBERSHIP, \
     PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI
-from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime
+from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime,PROV_REC_CLS
 
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE
 from provdbconnector.exceptions.utils import SerializerException
+from collections import namedtuple
 
 import logging
 
 log = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
+
+FormalAndOtherAttributes = namedtuple("formal_and_other_attributes", "formal, other")
+
 # Reverse map for prov.model.XSD_DATATYPE_PARSERS
 LITERAL_XSDTYPE_MAP = {
     float: 'xsd:double',
@@ -230,3 +235,14 @@ def decode_json_representation(value, type, bundle):
     else:
         # simple type, just return it
         return value
+
+def split_into_formal_and_other_attributes(attributes,metadata):
+    prov_type = metadata[METADATA_KEY_PROV_TYPE]
+
+    class_type = PROV_REC_CLS[prov_type]
+    formal_qualified_names = class_type.FORMAL_ATTRIBUTES
+
+    formal_attributes = {key: attributes[key] for key in attributes.keys() if key in formal_qualified_names}
+    other_attributes = {key: attributes[key] for key in attributes.keys() if key not in formal_qualified_names}
+
+    return FormalAndOtherAttributes(formal_attributes,other_attributes )

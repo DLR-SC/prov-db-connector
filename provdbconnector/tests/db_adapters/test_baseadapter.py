@@ -1,7 +1,7 @@
 import unittest
 
 from prov.model import ProvDocument
-from prov.constants import PROV_BUNDLE, PROV_TYPE
+from prov.constants import PROV_ENTITY, PROV_TYPE
 
 from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER
 from provdbconnector.exceptions.database import NotFoundException, InvalidOptionsException,MergeException
@@ -489,9 +489,14 @@ class AdapterTestTemplate(unittest.TestCase):
         example = base_connector_merge_example()
         # Skip test if this merge mode is not supported
 
-        # save record test
+        # Save record with different attributes
         rec_id1 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
-        rec_id2 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+
+        attr_modified = dict()
+        attr_modified.update({"ex:a other attribute": True})
+        metadata_modified = example.from_node["metadata"].copy()
+
+        rec_id2 = self.instance.save_record(attr_modified, metadata_modified)
 
         self.assertEqual(rec_id1, rec_id2)
 
@@ -500,9 +505,26 @@ class AdapterTestTemplate(unittest.TestCase):
         db_record = self.instance.get_record(rec_id2)  # The id's are equal so it makes no difference
 
         attr = encode_dict_values_to_primitive(example.from_node["attributes"])
+        attr.update(attr_modified) # add additional attr to check dict
         meta = encode_dict_values_to_primitive(example.from_node["metadata"])
+
         self.assertEqual(attr, db_record.attributes)
         self.assertEqual(meta, db_record.metadata)
+
+    def test_merge_record_complex_fail(self):
+        example = base_connector_merge_example()
+        # Skip test if this merge mode is not supported
+
+        # Save record with different attributes
+        rec_id1 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+
+        attr_modified = dict()
+        attr_modified.update({"ex:int value": 1}) # set int value to 1 instead of 99, should throw exception
+        metadata_modified = example.from_node["metadata"].copy()
+
+        #should raise exception because otherwise the attribute would be overridden
+        with self.assertRaises(MergeException):
+            self.instance.save_record(attr_modified, metadata_modified)
 
 
     def test_merge_relation(self):

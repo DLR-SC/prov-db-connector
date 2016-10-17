@@ -55,7 +55,7 @@ def base_connector_bundle_parameter_example():
 
     metadata = dict()
 
-    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Bundle")})
+    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Entity")})
     metadata.update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("ex:bundle name")})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
