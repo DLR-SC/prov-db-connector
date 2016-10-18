@@ -239,8 +239,11 @@ def decode_json_representation(value, type, bundle):
 def split_into_formal_and_other_attributes(attributes,metadata):
     prov_type = metadata[METADATA_KEY_PROV_TYPE]
 
-    class_type = PROV_REC_CLS[prov_type]
-    formal_qualified_names = class_type.FORMAL_ATTRIBUTES
+    if str(prov_type) == "prov:Unknown":
+        formal_qualified_names = set()
+    else:
+        class_type = PROV_REC_CLS[prov_type]
+        formal_qualified_names = class_type.FORMAL_ATTRIBUTES
 
     formal_attributes = {key: attributes[key] for key in attributes.keys() if key in formal_qualified_names}
     other_attributes = {key: attributes[key] for key in attributes.keys() if key not in formal_qualified_names}
