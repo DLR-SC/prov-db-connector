@@ -88,8 +88,10 @@ class Neo4jAdapter(BaseAdapter):
         pass
 
     def _create_session(self):
-
-        session = self.driver.session()
+        try:
+            session = self.driver.session()
+        except OSError as e:
+            raise AuthException(e)
 
         if not session.healthy:
             raise AuthException()
