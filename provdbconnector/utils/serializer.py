@@ -104,9 +104,18 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
         namespaces = json.load(io)
     elif type(namespace_str) is dict:
         namespaces = namespace_str
+    elif type(namespace_str) is list:
+        for entry in namespace_str:
+            if type(entry) is str:
+                io = StringIO(entry)
+                namespaces.update(json.load(io))
+            else:
+                raise SerializerException(
+                    "Namespaces metadata should returned as json string dict or list of json strings not as {}".format(type(namespace_str)))
+
     else:
         raise SerializerException(
-            "Namespaces metadata should returned as json string or dict not as {}".format(type(namespace_str)))
+            "Namespaces metadata should returned as json string dict or list of json strings not as  {}".format(type(namespace_str)))
 
     for prefix, uri in namespaces.items():
         if prefix is not None and uri is not None:

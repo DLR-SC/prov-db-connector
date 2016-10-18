@@ -225,6 +225,14 @@ class ProvApi(object):
             io = StringIO(type_map)
             type_map = json.load(io)
 
+        elif type(type_map) is list:
+            type_map = dict()
+            for type_str in type_map:
+                if type(type_str) is not str:
+                    raise InvalidArgumentTypeException("The type_map must be a string got: {}".format(type_str))
+                io = StringIO(type_map)
+                type_map.update(json.load(io))
+
         elif type(type_map) is not dict:
             raise InvalidArgumentTypeException("The type_map must be a dict or json string got: {}".format(type_map))
 
