@@ -21,18 +21,19 @@ def isnamedtupleinstance(x):
     return all(type(n) == str for n in f)
 
 
-def insert_document_with_bundles(instance):
+def insert_document_with_bundles(instance, identifier_prefix=""):
     args_record = base_connector_record_parameter_example()
     args_bundle = base_connector_bundle_parameter_example()
     doc = ProvDocument()
     doc.add_namespace("ex", "http://example.com")
     # document with 1 record
 
+    args_record["metadata"].update({METADATA_KEY_IDENTIFIER: identifier_prefix + args_record["metadata"][METADATA_KEY_IDENTIFIER]})
     doc_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
     #bundle with 1 record
+    args_bundle["metadata"].update({METADATA_KEY_IDENTIFIER: args_bundle["metadata"][METADATA_KEY_IDENTIFIER]})
     bundle_id = instance.save_record(args_bundle["attributes"], args_bundle["metadata"])
-    bundle_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
     # add relation
 
@@ -40,8 +41,8 @@ def insert_document_with_bundles(instance):
     to_record_args = base_connector_record_parameter_example()
     relation_args = base_connector_relation_parameter_example()
 
-    from_label = doc.valid_qualified_name("ex:FROM NODE")
-    to_label = doc.valid_qualified_name("ex:TO NODE")
+    from_label = doc.valid_qualified_name("ex:{}FROM NODE".format(identifier_prefix))
+    to_label = doc.valid_qualified_name("ex:{}TO NODE".format(identifier_prefix))
     from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_label
     to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_label
 
@@ -58,7 +59,6 @@ def insert_document_with_bundles(instance):
         "from_record_id": from_record_id,
         "to_record_id": to_record_id,
         "bundle_id": bundle_id,
-        "bundle_record_id": bundle_record_id,
         "doc_record_id": doc_record_id
     }
 
@@ -195,7 +195,7 @@ class AdapterTestTemplate(unittest.TestCase):
         raw_nodes = self.instance.get_records_by_filter(properties_dict=node_filter)
         self.assertIsNotNone(raw_nodes)
         self.assertIsInstance(raw_nodes,list)
-        self.assertEqual(len(raw_nodes),5)#5 because the relation is also in the restults
+        self.assertEqual(len(raw_nodes),4)#4 because the relation is also in the restults and 3 nodes, exclude the bundle node
 
         self.assertIsNotNone(raw_nodes[0].attributes)
         self.assertIsNotNone(raw_nodes[0].metadata)
@@ -214,6 +214,9 @@ class AdapterTestTemplate(unittest.TestCase):
 
         attr_dict = encode_dict_values_to_primitive(args["attributes"])
         meta_dict = encode_dict_values_to_primitive(args["metadata"])
+
+        del meta_dict[METADATA_KEY_IDENTIFIER]
+        del raw_nodes[2].metadata[METADATA_KEY_IDENTIFIER]
 
         self.assertEqual(raw_nodes[2].attributes, attr_dict)
         self.assertEqual(raw_nodes[2].metadata, meta_dict)
@@ -265,10 +268,17 @@ class AdapterTestTemplate(unittest.TestCase):
 
     def test_get_records_tail_nested(self):
         ids = insert_document_with_bundles(self.instance)
-        ids2 = insert_document_with_bundles(self.instance)
+        ids2 = insert_document_with_bundles(self.instance,"second_")
 
         from_record = self.instance.get_record(ids["from_record_id"])
         to_record = self.instance.get_record(ids["to_record_id"])
+        second_from_record = self.instance.get_record(ids2["from_record_id"])
+        second_to_record = self.instance.get_record(ids2["to_record_id"])
+
+        relation_params = base_connector_relation_parameter_example()
+
+        self.instance.save_relation(to_record.metadata[METADATA_KEY_IDENTIFIER], second_to_record.metadata[METADATA_KEY_IDENTIFIER],relation_params["attributes"],relation_params["metadata"])
+        self.instance.save_relation(second_from_record.metadata[METADATA_KEY_IDENTIFIER], from_record.metadata[METADATA_KEY_IDENTIFIER],relation_params["attributes"],relation_params["metadata"])
 
         meta_filter = dict()
         meta_filter.update({METADATA_KEY_IDENTIFIER: from_record.metadata[METADATA_KEY_IDENTIFIER]})
@@ -276,7 +286,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         self.assertIsNotNone(tail_records)
         self.assertIsInstance(tail_records,list)
-        self.assertEqual(len(tail_records),9) #4 Nodes and 5 connections
+        self.assertEqual(len(tail_records),8) #4 Nodes and 4 connections
         self.assertIsNotNone(tail_records[0].attributes)
         self.assertIsNotNone(tail_records[0].metadata)
         self.assertIsInstance(tail_records[0].attributes,dict)
@@ -417,7 +427,7 @@ class AdapterTestTemplate(unittest.TestCase):
         raw_results = self.instance.get_records_by_filter()
         self.assertIsNotNone(raw_results)
         self.assertIsInstance(raw_results, list)
-        self.assertEqual(len(raw_results), 4)
+        self.assertEqual(len(raw_results), 3)
 
     def test_delete_record(self):
         ids = insert_document_with_bundles(self.instance)
