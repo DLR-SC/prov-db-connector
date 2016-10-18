@@ -543,10 +543,10 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
         #save relation test
         self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
-        self.instance.save_record(example.to_node["attributes"],example.from_node["metadata"])
+        self.instance.save_record(example.to_node["attributes"],example.to_node["metadata"])
 
         from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
-        to_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
+        to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
 
         rel_id1 = self.instance.save_relation(from_label,to_label,example.relation["attributes"], example.relation["metadata"])
         rel_id2 = self.instance.save_relation(from_label,to_label,example.relation["attributes"], example.relation["metadata"])
