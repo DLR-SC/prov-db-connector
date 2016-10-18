@@ -152,7 +152,7 @@ class Neo4jAdapter(BaseAdapter):
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
-        #setup header
+        #setup merge attributes
         (formal_attributes, other_attributes) = split_into_formal_and_other_attributes(attributes,metadata)
 
         merge_relevant_keys = list()
@@ -163,17 +163,24 @@ class Neo4jAdapter(BaseAdapter):
         other_db_attribute_keys = other_db_attribute_keys + list(other_attributes.keys())
         other_db_attribute_keys = other_db_attribute_keys + list(prefixed_metadata.keys())
 
+        #get set statement for non formal attributes
+        cypher_set_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys)
 
-        db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
+        #get CASE WHEN ... statement to check if a attribute is different
+        cypher_merge_check_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys,NEO4J_CREATE_NODE_MERGE_CHECK_PART)
 
+        #get cypher string for the merge relevant attributes
+        cypher_merge_relevant_str = self._get_attributes_identifiers_cypher_string(merge_relevant_keys)
+
+        #get prov type
         provtype = metadata[METADATA_KEY_PROV_TYPE]
 
-        cypher_merge_relevant_str = self._get_attributes_identifiers_cypher_string(merge_relevant_keys)
+
+        #get db_attributes as dict
+        db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
 
         session = self._create_session()
 
-        cypher_set_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys)
-        cypher_merge_check_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys,NEO4J_CREATE_NODE_MERGE_CHECK_PART)
 
         command = NEO4J_CREATE_NODE_RETURN_ID.format(label=provtype.localpart,
                                                      formal_attributes=cypher_merge_relevant_str,
