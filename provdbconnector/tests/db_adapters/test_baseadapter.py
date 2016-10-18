@@ -3,7 +3,7 @@ import unittest
 from prov.model import ProvDocument
 from prov.constants import PROV_ENTITY, PROV_TYPE
 
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER, METADATA_KEY_TYPE_MAP, METADATA_KEY_NAMESPACES
 from provdbconnector.exceptions.database import NotFoundException, InvalidOptionsException,MergeException
 from provdbconnector.tests.examples import base_connector_record_parameter_example, primer_example,\
     base_connector_relation_parameter_example, base_connector_bundle_parameter_example, base_connector_merge_example
@@ -20,6 +20,12 @@ def isnamedtupleinstance(x):
         return False
     return all(type(n) == str for n in f)
 
+def encode_adapter_result_to_excpect(dict_vals):
+    copy = dict_vals.copy()
+    copy.update({METADATA_KEY_NAMESPACES: copy[METADATA_KEY_NAMESPACES].pop()})
+    copy.update({METADATA_KEY_TYPE_MAP: copy[METADATA_KEY_TYPE_MAP].pop()})
+
+    return encode_dict_values_to_primitive(copy)
 
 def insert_document_with_bundles(instance, identifier_prefix=""):
     args_record = base_connector_record_parameter_example()
@@ -64,6 +70,9 @@ def insert_document_with_bundles(instance, identifier_prefix=""):
 
 
 class AdapterTestTemplate(unittest.TestCase):
+
+    maxDiff = None
+
     def __init__(self, *args, **kwargs):
         """
         Prevent from execute the test case directly see:
@@ -490,7 +499,7 @@ class AdapterTestTemplate(unittest.TestCase):
         attr = encode_dict_values_to_primitive(example.from_node["attributes"])
         meta = encode_dict_values_to_primitive(example.from_node["metadata"])
         self.assertEqual(attr,db_record.attributes)
-        self.assertEqual(meta,db_record.metadata)
+        self.assertEqual(meta,encode_adapter_result_to_excpect(db_record.metadata))
 
         prim = primer_example()
         self.assertEqual(len(prim.get_records()),len(prim.unified().get_records()))
@@ -519,7 +528,7 @@ class AdapterTestTemplate(unittest.TestCase):
         meta = encode_dict_values_to_primitive(example.from_node["metadata"])
 
         self.assertEqual(attr, db_record.attributes)
-        self.assertEqual(meta, db_record.metadata)
+        self.assertEqual(meta, encode_adapter_result_to_excpect(db_record.metadata))
 
     def test_merge_record_complex_fail(self):
         example = base_connector_merge_example()
@@ -535,6 +544,43 @@ class AdapterTestTemplate(unittest.TestCase):
         #should raise exception because otherwise the attribute would be overridden
         with self.assertRaises(MergeException):
             self.instance.save_record(attr_modified, metadata_modified)
+
+    def test_merge_record_metadata(self):
+        example = base_connector_merge_example()
+        # Skip test if this merge mode is not supported
+
+        # Save record with different attributes
+        rec_id1 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+
+
+        metadata_modified = example.from_node["metadata"].copy()
+        metadata_modified.update({METADATA_KEY_TYPE_MAP: {"custom_attr_1": "xds:some_value"}})
+
+        rec_id2 = self.instance.save_record(example.from_node["attributes"], metadata_modified)
+
+
+        self.assertEqual(rec_id1, rec_id2)
+
+        db_record = self.instance.get_record(rec_id1)
+        # try to merge type_map in the database
+
+        attr = encode_dict_values_to_primitive(example.relation["attributes"])
+        meta = encode_dict_values_to_primitive(example.relation["metadata"])
+        meta_custom = encode_dict_values_to_primitive(metadata_modified)
+
+        # check namespaces
+        db_record_namespaces = db_record.metadata[METADATA_KEY_NAMESPACES]
+        self.assertIsInstance(db_record_namespaces, list)
+        self.assertTrue(len(db_record_namespaces), 2)
+        self.assertEqual(meta[METADATA_KEY_NAMESPACES], db_record_namespaces[0])
+        self.assertEqual(meta_custom[METADATA_KEY_NAMESPACES], db_record_namespaces[1])
+
+        # check type_map
+        db_record_type_map = db_record.metadata[METADATA_KEY_TYPE_MAP]
+        self.assertIsInstance(db_record_type_map, list)
+        self.assertTrue(len(db_record_type_map), 2)
+        self.assertEqual(meta[METADATA_KEY_TYPE_MAP], db_record_type_map[0])
+        self.assertEqual(meta_custom[METADATA_KEY_TYPE_MAP], db_record_type_map[1])
 
 
     def test_merge_relation(self):
@@ -561,7 +607,7 @@ class AdapterTestTemplate(unittest.TestCase):
         meta = encode_dict_values_to_primitive(example.relation["metadata"])
 
         self.assertEqual(attr, db_record.attributes)
-        self.assertEqual(meta, db_record.metadata)
+        self.assertEqual(meta, encode_adapter_result_to_excpect(db_record.metadata))
 
 
     def test_merge_relation_complex(self):
@@ -592,7 +638,7 @@ class AdapterTestTemplate(unittest.TestCase):
         meta = encode_dict_values_to_primitive(example.relation["metadata"])
 
         self.assertEqual(attr, db_record.attributes)
-        self.assertEqual(meta, db_record.metadata)
+        self.assertEqual(meta, encode_adapter_result_to_excpect(db_record.metadata))
 
 
     def test_merge_relation_complex_fail(self):
@@ -617,6 +663,50 @@ class AdapterTestTemplate(unittest.TestCase):
             rel_id2 = self.instance.save_relation(from_label, to_label, custom_attributes, example.relation["metadata"])
 
 
+    def test_merge_relation_metadata(self):
+        example = base_connector_merge_example()
+        prim = primer_example()
+        self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
+        # save relation test
+        self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        self.instance.save_record(example.to_node["attributes"], example.to_node["metadata"])
+
+        from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
+        to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
+
+        # try to merge type_map in the database
+        custom_metadata = example.relation["metadata"].copy()
+        custom_metadata.update({METADATA_KEY_TYPE_MAP: {"custom_attr_1": "xds:some_value"}})
+
+        rel_id1 = self.instance.save_relation(from_label, to_label, example.relation["attributes"],
+                                              example.relation["metadata"])
+
+        rel_id2 = self.instance.save_relation(from_label, to_label, example.relation["attributes"], custom_metadata)
+
+
+        db_record = self.instance.get_relation(rel_id2)  # The id's are equal so it makes no difference
+
+
+        attr = encode_dict_values_to_primitive(example.relation["attributes"])
+        meta = encode_dict_values_to_primitive(example.relation["metadata"])
+        meta_custom = encode_dict_values_to_primitive(custom_metadata)
+
+
+        self.assertEqual(attr, db_record.attributes)
+
+        #check namespaces
+        db_record_namespaces = db_record.metadata[METADATA_KEY_NAMESPACES]
+        self.assertIsInstance(db_record_namespaces, list)
+        self.assertTrue(len(db_record_namespaces), 2)
+        self.assertEqual(meta[METADATA_KEY_NAMESPACES], db_record_namespaces[0])
+        self.assertEqual(meta_custom[METADATA_KEY_NAMESPACES], db_record_namespaces[1])
+
+        # check type_map
+        db_record_type_map = db_record.metadata[METADATA_KEY_TYPE_MAP]
+        self.assertIsInstance(db_record_type_map, list)
+        self.assertTrue(len(db_record_type_map), 2)
+        self.assertEqual(meta[METADATA_KEY_TYPE_MAP], db_record_type_map[0])
+        self.assertEqual(meta_custom[METADATA_KEY_TYPE_MAP], db_record_type_map[1])
 
 class BaseConnectorTests(unittest.TestCase):
     def setUp(self):

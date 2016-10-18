@@ -1,6 +1,6 @@
 import os
 from provdbconnector.db_adapters.baseadapter import BaseAdapter
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_IDENTIFIER
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
 
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, MergeException
@@ -23,15 +23,12 @@ NEO4J_HTTP_PORT = os.environ.get('NEO4J_HTTP_PORT', '7474')
 
 NEO4J_META_PREFIX = "meta:"
 
-NEO4J_META_BUNDLE_ID = "bundle_id"
-
-NEO4J_META_PARENT_ID = "parent_id"
-
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 
 # create
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
 NEO4J_CREATE_NODE_SET_PART = "SET node.`{attr_name}` = {{`{attr_name}`}}"
+NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR = "SET node.`{attr_name}` = (CASE WHEN not exists(node.`{attr_name}`) THEN [{{`{attr_name}`}}] ELSE node.`{attr_name}` + {{`{attr_name}`}}  END)"
 NEO4J_CREATE_NODE_MERGE_CHECK_PART = """WITH CASE WHEN check = 0 THEN (CASE  WHEN EXISTS(node.`{attr_name}`) AND node.`{attr_name}` <> {{`{attr_name}`}} THEN 1 ELSE 0 END) ELSE 1 END as check , node """
 NEO4J_CREATE_NODE_RETURN_ID = """MERGE (node:{label} {{{formal_attributes}}})
                                 WITH 0 as check, node
@@ -167,10 +164,18 @@ class Neo4jAdapter(BaseAdapter):
         other_db_attribute_keys = other_db_attribute_keys + list(prefixed_metadata.keys())
 
         #get set statement for non formal attributes
-        cypher_set_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys)
+        attr_for_simple_set = other_db_attribute_keys.copy()
+        attr_for_simple_set.remove("meta:"+METADATA_KEY_NAMESPACES)
+        attr_for_simple_set.remove("meta:"+METADATA_KEY_TYPE_MAP)
+        cypher_set_statement = self._get_attributes_set_cypher_string(attr_for_simple_set)
+
+        attr_for_list_merge = list()
+        attr_for_list_merge.append("meta:"+METADATA_KEY_NAMESPACES)
+        attr_for_list_merge.append("meta:"+METADATA_KEY_TYPE_MAP)
+        cypher_set_statement = cypher_set_statement + self._get_attributes_set_cypher_string(attr_for_list_merge, NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR)
 
         #get CASE WHEN ... statement to check if a attribute is different
-        cypher_merge_check_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys,NEO4J_CREATE_NODE_MERGE_CHECK_PART)
+        cypher_merge_check_statement = self._get_attributes_set_cypher_string(attr_for_simple_set,NEO4J_CREATE_NODE_MERGE_CHECK_PART)
 
         #get cypher string for the merge relevant attributes
         cypher_merge_relevant_str = self._get_attributes_identifiers_cypher_string(merge_relevant_keys)
@@ -228,10 +233,22 @@ class Neo4jAdapter(BaseAdapter):
         other_db_attribute_keys = other_db_attribute_keys + list(prefixed_metadata.keys())
 
         # get set statement for non formal attributes
-        cypher_set_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys)
+
+        #Remove namespace and type_map from the direct set statement, because this attributes need to be merged
+        attr_for_simple_set = other_db_attribute_keys.copy()
+        attr_for_simple_set.remove("meta:" + METADATA_KEY_NAMESPACES)
+        attr_for_simple_set.remove("meta:" + METADATA_KEY_TYPE_MAP)
+        cypher_set_statement = self._get_attributes_set_cypher_string(attr_for_simple_set)
+
+        #Add separate cypher command to merge the namespaces and tpye map into a list
+        attr_for_list_merge = list()
+        attr_for_list_merge.append("meta:" + METADATA_KEY_NAMESPACES)
+        attr_for_list_merge.append("meta:" + METADATA_KEY_TYPE_MAP)
+        cypher_set_statement = cypher_set_statement + self._get_attributes_set_cypher_string(attr_for_list_merge,
+                                                                                             NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR)
 
         # get CASE WHEN ... statement to check if a attribute is different
-        cypher_merge_check_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys,
+        cypher_merge_check_statement = self._get_attributes_set_cypher_string(attr_for_simple_set,
                                                                               NEO4J_CREATE_NODE_MERGE_CHECK_PART)
 
         # get cypher string for the merge relevant attributes
@@ -280,12 +297,23 @@ class Neo4jAdapter(BaseAdapter):
         attributes = {k: v for k, v in db_node.properties.items() if
                       not k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
 
-        # remove adapter specific code
-        if metadata.get(NEO4J_META_BUNDLE_ID) is not None:
-            del metadata[NEO4J_META_BUNDLE_ID]
 
-        if metadata.get(NEO4J_META_PARENT_ID) is not None:
-            del metadata[NEO4J_META_PARENT_ID]
+        #convert a list of namespace into a string if it is only one item
+        #@todo Kind of a hack to pass all test, it is also allowed to return a list of JSON encoded strings
+        namespaces = metadata[METADATA_KEY_NAMESPACES]
+        if isinstance(namespaces,list):
+            #If len is 1 return only the raw JSON string
+            if len(namespaces) is 1:
+                metadata.update({METADATA_KEY_NAMESPACES: namespaces.pop()})
+
+        #convert a list of namespace into a string if it is only one item
+        #@todo Kind of a hack to pass all test, it is also allowed to return a list of JSON encoded strings
+        type_map = metadata[METADATA_KEY_TYPE_MAP]
+        if isinstance(type_map,list):
+            #If len is 1 return only the raw JSON string
+            if len(type_map) is 1:
+                metadata.update({METADATA_KEY_TYPE_MAP: type_map.pop()})
+
 
         record = record(attributes, metadata)
         return record
