@@ -206,7 +206,7 @@ class Neo4jAdapter(BaseAdapter):
                 tx.success = True
             else:
                 tx.success = False
-                raise MergeException("The attributes {other} could not merged into the existing node ".format(other=other_db_attribute_keys))
+                raise MergeException("The attributes {other} could not merged into the existing node, All attributes: {all} ".format(other=other_db_attribute_keys,all=db_attributes))
 
         return str(record_id)
 
