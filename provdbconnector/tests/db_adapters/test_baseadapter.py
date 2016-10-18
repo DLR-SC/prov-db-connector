@@ -564,6 +564,59 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(meta, db_record.metadata)
 
 
+    def test_merge_relation_complex(self):
+        example = base_connector_merge_example()
+        prim = primer_example()
+        self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
+        #save relation test
+        self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
+        self.instance.save_record(example.to_node["attributes"],example.to_node["metadata"])
+
+        from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
+        to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
+
+        custom_attributes = dict()
+        custom_attributes.update({"My custom value": "value"})
+
+        rel_id1 = self.instance.save_relation(from_label,to_label,example.relation["attributes"], example.relation["metadata"])
+        rel_id2 = self.instance.save_relation(from_label,to_label,custom_attributes, example.relation["metadata"])
+
+        self.assertEqual(rel_id1,rel_id2)
+
+        # Test merge result of save relation
+
+        db_record = self.instance.get_relation(rel_id2)  # The id's are equal so it makes no difference
+
+        example.relation["attributes"].update(custom_attributes)
+        attr = encode_dict_values_to_primitive(example.relation["attributes"])
+        meta = encode_dict_values_to_primitive(example.relation["metadata"])
+
+        self.assertEqual(attr, db_record.attributes)
+        self.assertEqual(meta, db_record.metadata)
+
+
+    def test_merge_relation_complex_fail(self):
+        example = base_connector_merge_example()
+        prim = primer_example()
+        self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
+        # save relation test
+        self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        self.instance.save_record(example.to_node["attributes"], example.to_node["metadata"])
+
+        from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
+        to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
+
+        #try ot override a propertie in the database
+        custom_attributes = dict()
+        custom_attributes.update({"ex:int value": 1})
+
+        rel_id1 = self.instance.save_relation(from_label, to_label, example.relation["attributes"],
+                                              example.relation["metadata"])
+
+        with self.assertRaises(MergeException):
+            rel_id2 = self.instance.save_relation(from_label, to_label, custom_attributes, example.relation["metadata"])
+
+
 
 class BaseConnectorTests(unittest.TestCase):
     def setUp(self):

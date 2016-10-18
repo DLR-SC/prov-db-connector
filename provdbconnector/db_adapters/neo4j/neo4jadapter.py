@@ -42,10 +42,13 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                 MATCH
                                     (from{{`meta:identifier`:'{from_identifier}'}}),
                                     (to{{`meta:identifier`:'{to_identifier}'}})
-                                CREATE
-                                    (from)-[r:{relation_type} {{{property_identifiers}}}]->(to)
+                                MERGE
+                                    (from)-[r:{relation_type} {{{formal_attributes}}}]->(to)
+                                    WITH 0 as check, r as node
+                                    {merge_check_statement}
+                                    {set_statement}
                                 RETURN
-                                    ID(r) as ID
+                                    ID(node) as ID, check
                                 """  # args: provType, values
 # get
 NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """
@@ -213,26 +216,59 @@ class Neo4jAdapter(BaseAdapter):
 
         prefixed_metadata = self._prefix_metadata(metadata)
 
+        # setup merge attributes
+        (formal_attributes, other_attributes) = split_into_formal_and_other_attributes(attributes, metadata)
+
+        merge_relevant_keys = list()
+        merge_relevant_keys.append("meta:{}".format(METADATA_KEY_IDENTIFIER))
+        merge_relevant_keys = merge_relevant_keys + list(formal_attributes.keys())
+
+        other_db_attribute_keys = list()
+        other_db_attribute_keys = other_db_attribute_keys + list(other_attributes.keys())
+        other_db_attribute_keys = other_db_attribute_keys + list(prefixed_metadata.keys())
+
+        # get set statement for non formal attributes
+        cypher_set_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys)
+
+        # get CASE WHEN ... statement to check if a attribute is different
+        cypher_merge_check_statement = self._get_attributes_set_cypher_string(other_db_attribute_keys,
+                                                                              NEO4J_CREATE_NODE_MERGE_CHECK_PART)
+
+        # get cypher string for the merge relevant attributes
+        cypher_merge_relevant_str = self._get_attributes_identifiers_cypher_string(merge_relevant_keys)
+
+
+        # get db_attributes as dict
         db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
-
-        relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
-
-        identifier_str = self._get_attributes_identifiers_cypher_string(db_attributes.keys())
 
         session = self._create_session()
 
-        command = NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=from_node,
-                                                         to_identifier=to_node,
-                                                         relation_type=relationtype,
-                                                         property_identifiers=identifier_str)
-        result = session.run(command, dict(db_attributes))
+        relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
-        record_id = None
-        for record in result:
-            record_id = record["ID"]
+        command = NEO4J_CREATE_RELATION_RETURN_ID.format( from_identifier=from_node,
+                                                          to_identifier=to_node,
+                                                          relation_type=relationtype,
+                                                          formal_attributes=cypher_merge_relevant_str,
+                                                          merge_check_statement=cypher_merge_check_statement,
+                                                          set_statement=cypher_set_statement
+                                                         )
+        with session.begin_transaction() as tx:
+            result = tx.run(command, dict(db_attributes))
 
-        if record_id is None:
-            raise CreateRelationException("No ID property returned by database for the command {}".format(command))
+            record_id = None
+            merge_success = 0
+            for record in result:
+                record_id = record["ID"]
+                merge_success = record["check"]
+
+            if record_id is None:
+                raise CreateRelationException("No ID property returned by database for the command {}".format(command))
+            if merge_success == 0:
+                tx.success = True
+            else:
+                tx.success = False
+                raise MergeException("The attributes {other} could not merged into the existing node ".format(
+                    other=other_db_attribute_keys))
 
         return str(record_id)
 
