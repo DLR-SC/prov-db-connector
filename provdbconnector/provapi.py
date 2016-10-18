@@ -138,7 +138,7 @@ class ProvApi(object):
 
         for bundle in prov_document.bundles:
 
-            bundle_record = ProvEntity(bundle, identifier=bundle.identifier)
+            bundle_record = ProvEntity(bundle, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
             bundle_id = self._adapter.save_record(attributes=attributes, metadata=metadata)
 
