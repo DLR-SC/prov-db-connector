@@ -29,6 +29,7 @@ setup(
         "lxml==3.6.4",
         "six==1.10.0"
     ],
+    zip_safe = False,
     license="Apache License 2.0",
     test_suite='provdbconnector.tests',
     classifiers=[
