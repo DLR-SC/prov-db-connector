@@ -144,7 +144,7 @@ class ProvApi(object):
 
 
             self._create_bundle(bundle)
-            self._create_bundle_association(prov_bundle=bundle)
+            self._create_bundle_association(prov_elements=bundle.get_records(ProvElement), prov_bundle_identifier=bundle.identifier)
 
         for bundle in prov_document.bundles:
             self._create_bundle_links(bundle)
@@ -262,11 +262,11 @@ class ProvApi(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
-            self._create_relation(relation,bundle_id)
+            self._create_relation(relation,bundle_id, prov_bundle.identifier)
 
         return bundle_id
 
-    def _create_relation(self,prov_relation,bundle_id=None):
+    def _create_relation(self,prov_relation,bundle_id=None, bundle_identifier=None):
         """
         Creates a relation between 2 nodes that are already in the database.
         :param prov_relation: The ProvRelation instance
@@ -279,17 +279,17 @@ class ProvApi(object):
 
         # if target or origin record is unknown, create node "Unknown"
         if from_qualified_name is None:
-            from_qualified_name = self._create_unknown_node(bundle_id)
+            from_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier,bundle_id=bundle_id)
 
         if to_qualified_name is None:
-            to_qualified_name = self._create_unknown_node(bundle_id)
+            to_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier,bundle_id=bundle_id)
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
         return self._adapter.save_relation( from_qualified_name, to_qualified_name,
                                            attributes, metadata)
 
-    def _create_bundle_association(self,  prov_bundle):
+    def _create_bundle_association(self,  prov_elements, prov_bundle_identifier):
         """
         This method creates a relation between the bundle entity and all nodes in the bundle
         :param document_id: The database document id
@@ -298,17 +298,17 @@ class ProvApi(object):
         :return:
         """
 
-        belong_relation = ProvAssociation(bundle=prov_bundle, identifier=None)
+        belong_relation = ProvAssociation(bundle=None, identifier=None)
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
-        to_qualified_name = prov_bundle.identifier
+        to_qualified_name = prov_bundle_identifier
 
-        for record in prov_bundle.get_records(ProvElement):
+        for record in prov_elements:
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
             from_qualified_name = metadata[METADATA_KEY_IDENTIFIER]
             self._adapter.save_relation(from_qualified_name, to_qualified_name,
                                         belong_attributes, belong_metadata)
 
-    def _create_unknown_node(self,bundle_id=None):
+    def _create_unknown_node(self,bundle_identifier=None,bundle_id=None):
         """
         If a relation end or start is "Unknown" (yes this is allowed in PROV) we create a specific node to create the relation
         :return: The identifier of the Unknown node
@@ -320,6 +320,12 @@ class ProvApi(object):
 
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(record,bundle_id)
         self._adapter.save_record(attributes, metadata)
+
+        # Create bundle association for unknown node if this node is for a bundle, ugly but working
+        if bundle_identifier is not None:
+            self._create_bundle_association([record],bundle_identifier)
+
+
         return identifier
 
     def _create_bundle_links(self, prov_bundle):
