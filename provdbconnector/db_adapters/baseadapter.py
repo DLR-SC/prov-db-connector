@@ -121,7 +121,6 @@ class BaseAdapter(ABC):
     def delete_document(self, document_id):
         """
         Deletes a complete document with all included bundles
-
         :param document_id:
         :return: bool
         :raise NotFoundException
