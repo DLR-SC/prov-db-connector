@@ -4,13 +4,14 @@
 
 
 
-This python module provides a general interface to save [W3C-Prov](https://www.w3.org/TR/prov-overview/)-Documents into a database. 
-Currently we support the [Neo4j](https://neo4j.com/)-Graph database.  
+This python module provides a general interface to save W3C [PROV](https://www.w3.org/TR/prov-overview/) documents into databases. 
+Currently we support the [Neo4j](https://neo4j.com/) graph database.  
 
-We transform a prov document into a graph structure and the result looks like this: 
+We transform a PROV document into a graph structure and the result looks like this: 
 
 ![SVG-File of neo4j-graph](https://cdn.rawgit.com/DLR-SC/prov-db-connector/master/examples/complex_example_with_neo4j_graph.svg)
 
+See full documentation at: [prov-db-connector.readthedocs.io](http://prov-db-connector.readthedocs.io)
 
 ## Installation
 
