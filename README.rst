@@ -14,12 +14,10 @@ Introduction
   :target: https://www.quantifiedcode.com/app/project/3ee099c99b0340728ca4d54392caae83
   :alt: Code Issues
 
-This python module provides a general interface to save `W3C-Prov <https://www.w3.org/TR/prov-overview/>`_-Documents into a database.
-Currently we support the `Neo4j <https://neo4j.com/>`_-Graph database.
+This python module provides a general interface to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into databases.
+Currently we support the `Neo4j <https://neo4j.com/>`_ graph database.
 
-Read the full documentation at: `prov-db-connector.readthedocs.io <http://prov-db-connector.readthedocs.io/en/latest/>`_
-
-We transform a prov document into a graph structure and the result looks like this:
+We transform a PROV document into a graph structure and the result looks like this:
 
 .. figure:: _images/complex_example_with_neo4j_graph.png
    :align: center
@@ -28,12 +26,10 @@ We transform a prov document into a graph structure and the result looks like th
 
    Complex example in Neo4j
 
+See full documentation at: `prov-db-connector.readthedocs.io <http://prov-db-connector.readthedocs.io>`_
+
 Installation
 ------------
-
-.. note::
-
-    We assume a working `virtual enviroment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ to work with.
 
 PyPi
 ~~~~
@@ -51,18 +47,24 @@ You can view `prov-db-connector on PyPi's package index <https://pypi.python.org
 Source
 ~~~~~~
 
-1. Clone source from `project site <https://github.com/DLR-SC/prov-db-connector>`_
-2. Change into the new directory
-
 .. code:: sh
 
+    # Clone project
+    git clone git@github.com:DLR-SC/prov-db-connector.git
+    cd prov-db-connector
+
+    # Setup virtual environment
+    virtualenv -p /usr/bin/python3.4 env
+    source env/bin/activate
+
+    # Install dependencies and package into virtual enviroment
     make setup
 
 Usage
 -----
 
-Example: Save/Get prov document
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Save and get prov document example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 

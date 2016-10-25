@@ -1,15 +1,11 @@
 Development
 ===========
 
-.. note::
-
-    We assume a working `virtual enviroment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ to work with.
-
 Contribute
 ----------
 
-Please, fork your the code on github and develop your feature in a new branch split from develop branch.
-Commit to the main project by sending a pull request onto the develop branch
+Please, fork the code on Github and develop your feature in a new branch split from the develop branch.
+Commit your code to the main project by sending a pull request onto the develop branch
 
 * Issue Tracker: https://github.com/DLR-SC/prov-db-connector/issues
 * Source Code: https://github.com/DLR-SC/prov-db-connector
@@ -17,11 +13,17 @@ Commit to the main project by sending a pull request onto the develop branch
 Setup
 -----
 
-1. Clone source from `project site <https://github.com/DLR-SC/prov-db-connector>`_
-2. Change into the new directory
-
 .. code:: sh
 
+    # Clone project
+    git clone git@github.com:DLR-SC/prov-db-connector.git
+    cd prov-db-connector
+
+    # Setup virtual environment
+    virtualenv -p /usr/bin/python3.4 env
+    source env/bin/activate
+
+    # Install dependencies
     make dev-setup
 
 Execute tests
@@ -91,12 +93,14 @@ First you must create a class that extend from BaseAdapter and implement all fun
 
 2. - Create test suites
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 To test your adapter you should create two test suits:
 
- * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterTest` : Unit test for the low level functions in your adapter, **start here to develop and fulfill this tests first**.
+ * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterTest` : Unit test for the low level functions in your adapter.
+ * For further introduction on testing your database adapter have a look at the :ref:`test_howto`.
  * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterProvApiTests` : Integration test for the adapter with the api.
 
- See this example tests for the :py:class:`~provdbconnector.db_adapters.in_memory.simple_in_memory.SimpleInMemoryAdapter`.
+See this example tests for the :py:class:`~provdbconnector.db_adapters.in_memory.simple_in_memory.SimpleInMemoryAdapter`
 
 .. code:: python
 
@@ -134,7 +138,6 @@ To test your adapter you should create two test suits:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The last step is to create your logic inside the adapter for example the create and get bundle functions:
-
 
 .. code:: python
 
