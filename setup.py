@@ -6,6 +6,7 @@ except ImportError:
 
 tests_require = [
     'coverage',
+    'coveralls'
 ]
 
 docs_require = [
