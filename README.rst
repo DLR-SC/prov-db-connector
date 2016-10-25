@@ -19,35 +19,44 @@ Currently we support the `Neo4j <https://neo4j.com/>`_-Graph database.
 
 Read the full documentation at: `prov-db-connector.readthedocs.io <http://prov-db-connector.readthedocs.io/en/latest/>`_
 
-We transform a prov document into a graph structure and the result looks like this: 
+We transform a prov document into a graph structure and the result looks like this:
 
-.. figure:: images/complex_example_with_neo4j_graph.svg
+.. figure:: _images/complex_example_with_neo4j_graph.png
    :align: center
+   :scale: 50 %
    :alt: Complex example in Neo4j
 
    Complex example in Neo4j
 
-
-Current status
---------------
-
-Todos / Next steps
-~~~~~~~~~~~~~~~~~~
-
-* Documentation of classes and functions
-* Implement low-level functions in ProvApi like *create_record()*
-* `Implement Tests: validator and validator class <https://github.com/DLR-SC/prov-db-connector/issues/1>`_
-
-
 Installation
 ------------
 
-Install by running (**Not published yet**)::
+.. note::
+
+    We assume a working `virtual enviroment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ to work with.
+
+PyPi
+~~~~
+
+.. warning::
+
+    Not published, yet.
+
+Install it by running::
 
     pip install prov-db-connector
 
 You can view `prov-db-connector on PyPi's package index <https://pypi.python.org/pypi/prov-db-connector/>`_
 
+Source
+~~~~~~
+
+1. Clone source from `project site <https://github.com/DLR-SC/prov-db-connector>`_
+2. Change into the new directory
+
+.. code:: sh
+
+    make setup
 
 Usage
 -----
@@ -115,13 +124,6 @@ File Buffer example
     ...
 
 You find all examples in the `examples <https://github.com/DLR-SC/prov-db-connector/tree/master/examples>`_ folder
-
-Contribute
-----------
-
-* Issue Tracker: https://github.com/DLR-SC/prov-db-connector/issues
-* Source Code: https://github.com/DLR-SC/prov-db-connector
-
 
 License
 -------

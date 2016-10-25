@@ -1,11 +1,49 @@
 Development
 ===========
 
+.. note::
+
+    We assume a working `virtual enviroment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ to work with.
+
+Contribute
+----------
+
+Please, fork your the code on github and develop your feature in a new branch split from develop branch.
+Commit to the main project by sending a pull request onto the develop branch
+
+* Issue Tracker: https://github.com/DLR-SC/prov-db-connector/issues
+* Source Code: https://github.com/DLR-SC/prov-db-connector
+
 Setup
 -----
 
+1. Clone source from `project site <https://github.com/DLR-SC/prov-db-connector>`_
+2. Change into the new directory
 
+.. code:: sh
 
+    make dev-setup
+
+Execute tests
+-------------
+
+.. code:: sh
+
+    make test
+
+Coverage report
+---------------
+
+.. code:: sh
+
+    make coverage
+
+Compile documentation
+---------------------
+
+.. code:: sh
+
+    make docs
 
 Create new database adapters
 ----------------------------
@@ -13,10 +51,10 @@ Create new database adapters
 The database adapters are the binding class to the actual database.
 If you are consider to build your own adapter please keep in mind:
 
-* All adapters **must** enhance the :py:class:`provdbconnector.db_adapters.baseadapter.Baseadapter` class.
+* All adapters **must** enhance the :py:class:`~provdbconnector.db_adapters.baseadapter.Baseadapter` class.
 * You **must** implement all specified functions in BaseAdapter
-* You **should** test it via the :py:class:`provdbconnector.tests.db_adapters.test_baseadapter.AdapterTestTemplate` class template.
-* You **should** test it also via the :py:class:`provdbconnector.tests.test_provapi.ProvApiTestTemplate` class template.
+* You **should** test it via the :py:class:`~provdbconnector.tests.db_adapters.test_baseadapter.AdapterTestTemplate` class template.
+* You **should** test it also via the :py:class:`~provdbconnector.tests.test_provapi.ProvApiTestTemplate` class template.
 
 1. - Create your database adapter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,10 +93,10 @@ First you must create a class that extend from BaseAdapter and implement all fun
 ~~~~~~~~~~~~~~~~~~~~~~~
 To test your adapter you should create two test suits:
 
- * :py:class:`provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterTest` : Unit test for the low level functions in your adapter, **start here to develop and fulfill this tests first**
- * :py:class:`provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterProvApiTests` : Integration test for the adapter with the api
+ * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterTest` : Unit test for the low level functions in your adapter, **start here to develop and fulfill this tests first**.
+ * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterProvApiTests` : Integration test for the adapter with the api.
 
- See this example tests for the :py:class:`provdbconnector.db_adapters.in_memory.simple_in_memory.SimpleInMemoryAdapter` adapter
+ See this example tests for the :py:class:`~provdbconnector.db_adapters.in_memory.simple_in_memory.SimpleInMemoryAdapter`.
 
 .. code:: python
 
@@ -98,7 +136,7 @@ To test your adapter you should create two test suits:
 The last step is to create your logic inside the adapter for example the create and get bundle functions:
 
 
-.. code::python
+.. code:: python
 
     def create_bundle(self, document_id, attributes, metadata):
         #save the bundle information and return id as string

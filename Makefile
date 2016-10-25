@@ -16,6 +16,7 @@ setup:
 	pip install '.'
 
 dev-setup:
+	mkdir docs/source/_static
 	pip install -U pip setuptools
 	pip install -e '.[dev]'
 
