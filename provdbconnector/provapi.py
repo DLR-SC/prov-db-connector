@@ -4,7 +4,7 @@ from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
 
-from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE
+from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE, PROV_ASSOCIATION
 from prov.model import ProvDocument,ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, ProvAssociation
 
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
@@ -178,11 +178,12 @@ class ProvApi(object):
             prov_bundle = prov_document.bundle(identifier=identifier)
 
             filter_meta = dict()
-            filter_meta.update({document_id: True})
-            filter_prop = dict()
-            filter_prop.update({PROV_TYPE: PROV_BUNDLE})
+            filter_meta.update({METADATA_KEY_PROV_TYPE: PROV_ASSOCIATION})
 
-            bundle_records = self._adapter.get_records_tail(metadata_dict=filter_meta,properties_dict=filter_prop)
+            filter_prop = dict()
+            filter_prop.update({PROV_TYPE: "prov:bundleAssociation"})
+
+            bundle_records = self._adapter.get_records_tail(start_identifier=identifier,metadata_filter_relations_dict=filter_meta, properties_filter_relations_dict=filter_prop,depth=1)
 
             for record in bundle_records:
                 self._parse_record(prov_bundle, record)
@@ -297,8 +298,8 @@ class ProvApi(object):
         :param prov_bundle: The instance of ProvBundle
         :return:
         """
-
-        belong_relation = ProvAssociation(bundle=None, identifier=None)
+        bundle = ProvBundle()
+        belong_relation = ProvAssociation(bundle=bundle, identifier=None, attributes={PROV_TYPE: "prov:bundleAssociation"})
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
         to_qualified_name = prov_bundle_identifier
 
