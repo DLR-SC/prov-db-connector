@@ -6,11 +6,12 @@ from io import StringIO
 import six
 
 from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTRIBUTES, PROV_MEMBERSHIP, \
-    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI
+    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI, PROV_ACTIVITY, PROV_ENTITY, PROV_AGENT
 from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime,PROV_REC_CLS
 
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, METADATA_KEY_TYPE_MAP
 from provdbconnector.exceptions.utils import SerializerException
+from provdbconnector.exceptions.database import MergeException
 from collections import namedtuple
 
 import logging
@@ -258,3 +259,33 @@ def split_into_formal_and_other_attributes(attributes,metadata):
     other_attributes = {key: attributes[key] for key in attributes.keys() if key not in formal_qualified_names}
 
     return FormalAndOtherAttributes(formal_attributes,other_attributes )
+
+
+def merge_record(attributes,metadata, other_attributes, other_metadata):
+
+    attributes_merged = attributes.copy()
+    attributes_merged.update(other_attributes)
+
+    if metadata[METADATA_KEY_PROV_TYPE] != other_metadata[METADATA_KEY_PROV_TYPE]:
+        raise MergeException("Prov type should be the same but is: {}:{}".format(METADATA_KEY_PROV_TYPE, METADATA_KEY_PROV_TYPE))
+
+    for (key,value) in attributes.items():
+        if attributes_merged[key] != value:
+            raise MergeException("Invalid data, it is not allowed to override existing attributes key:{}, value:{} with value:{}".format(key,value,attributes_merged[key]  ))
+
+
+    merged_metadata_namespaces = metadata[METADATA_KEY_NAMESPACES].copy()
+    merged_metadata_namespaces.update(other_metadata[METADATA_KEY_NAMESPACES])
+
+
+    merged_metadata_type_map = metadata[METADATA_KEY_NAMESPACES].copy()
+    merged_metadata_type_map.update(other_metadata[METADATA_KEY_NAMESPACES])
+
+    merged_metadata = metadata.copy()
+    merged_metadata.update(other_metadata)
+    merged_metadata.update({METADATA_KEY_NAMESPACES: merged_metadata_namespaces})
+    merged_metadata.update({METADATA_KEY_TYPE_MAP: merged_metadata_type_map})
+
+
+    return (attributes_merged,merged_metadata)
+
