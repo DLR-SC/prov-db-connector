@@ -71,8 +71,9 @@ class ProvApiTestTemplate(unittest.TestCase):
         prov_document = examples.bundles1()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
-
-        self.assertEqual(stored_document, prov_document)
+        stored_document_unified = stored_document.flattened().unified()
+        prov_document_unified= prov_document.flattened().unified()
+        self.assertEqual(stored_document_unified, prov_document_unified)
 
     def test_bundles2(self):
         prov_document = examples.bundles2()

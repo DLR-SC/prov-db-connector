@@ -77,9 +77,19 @@ NEO4J_GET_BUNDLE_RECORDS = """ 
                             WHERE ALL (rel in r WHERE rel.`prov:type` = 'prov:bundleAssociation')
                             RETURN  DISTINCT y as re
                             UNION
+                            //get all relations between the nodes
                             MATCH (origin {`meta:identifier`: {`meta:identifier`}})-[r *1]-(x)-[r_return *1]-(y)-[r_2 *1]-(origin {`meta:identifier`: {`meta:identifier`}})
                             WHERE ALL (rel in r WHERE rel.`prov:type` = 'prov:bundleAssociation')
                             AND ALL (rel in r_2 WHERE rel.`prov:type` = 'prov:bundleAssociation')
+                            WITH REDUCE(output = [], r IN r_return | output + r) AS flat
+                            UNWIND flat as re
+                            RETURN DISTINCT re
+                            //get all mentionof relations
+                            UNION
+                            MATCH (bundle_1 {`meta:identifier`: {`meta:identifier`}})-[r *1]-(x)-[r_return *1]-(y)-[r_2 *1]-(bundle_2)
+                            WHERE ALL (rel in r WHERE rel.`prov:type` = 'prov:bundleAssociation')
+                            AND ALL (rel in r_2 WHERE rel.`prov:type` = 'prov:bundleAssociation')
+                            AND ALL (rel in r_return WHERE rel.`meta:prov_type` = 'prov:Mention'  and startNode(rel) = x)
                             WITH REDUCE(output = [], r IN r_return | output + r) AS flat
                             UNWIND flat as re
                             RETURN DISTINCT re
