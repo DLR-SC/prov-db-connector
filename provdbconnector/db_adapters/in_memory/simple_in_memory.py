@@ -1,6 +1,6 @@
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbBundle, DbRecord, DbRelation
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbBundle, DbRecord, DbRelation, METADATA_KEY_IDENTIFIER
 from provdbconnector.exceptions.database import InvalidOptionsException, NotFoundException
-from provdbconnector.utils.serializer import encode_dict_values_to_primitive
+from provdbconnector.utils.serializer import encode_dict_values_to_primitive,split_into_formal_and_other_attributes,merge_record
 from uuid import uuid4
 import logging
 
@@ -8,11 +8,16 @@ log = logging.getLogger(__name__)
 
 
 class SimpleInMemoryAdapter(BaseAdapter):
+
     document_bundle_ids = dict()
 
     bundles = dict()  # dict for all bundles including record and relation information
 
-    all_records = dict()  # separate dict for records only (to get them by id)
+    all_nodes = dict()  # separate dict for records only (to get them by id)
+
+    all_relations = dict()
+
+    all_relations_id_map = dict()
 
     def __init__(self, *args):
         super(SimpleInMemoryAdapter, self).__init__()
@@ -24,99 +29,69 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-    def save_document(self):
-        # create new document id and return this is as string
-        doc_id = str(uuid4())
+    def save_record(self, attributes, metadata):
+        # save all record information and return record id as string
+        identifier = metadata[METADATA_KEY_IDENTIFIER]
+        if str(identifier)in self.all_nodes:
+            #try to merge nodes
+            (old_attributes,old_metadata) = self.all_nodes[str(identifier)]
+            (merged_attributes,merged_metadata) = merge_record(old_attributes,old_metadata, attributes,metadata)
 
-        self.document_bundle_ids.update({doc_id: list()})
+            self.all_nodes.update({str(identifier): (merged_attributes,merged_metadata)})
 
-        # encode attributes and metadata
-        attr = encode_dict_values_to_primitive(dict())
-        meta = encode_dict_values_to_primitive(dict())
+        else:
 
-        doc_record = DbRecord(attr, meta)
+            #encode your variables, based on your database architecture
+            # (in this case it is not really necessary but for demonstration propose I saved the encoded vars )
+            #attr = encode_dict_values_to_primitive(attributes)
+            #meta = encode_dict_values_to_primitive(metadata)
 
-        self.bundles.update({doc_id: DbBundle(list(), doc_record)})
+            self.all_nodes.update({str(identifier): (attributes,metadata)})
 
-        return doc_id
+        return str(identifier)
 
-    def save_bundle(self, document_id, attributes, metadata):
-        # save the bundle information and return id as string
-        document_id = document_id
-        bundle_id = str(uuid4())
-
-        # transform the attributes and metadata to primitive data types
-        attr = encode_dict_values_to_primitive(attributes)
-        meta = encode_dict_values_to_primitive(metadata)
-
-        self.bundles.update({bundle_id: DbBundle(list(), DbRecord(attr, meta))})
-
-        doc = self.document_bundle_ids.get(document_id)
-        doc.append(bundle_id)
-
-        return bundle_id
-
-    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self,  from_node,  to_node, attributes, metadata):
         # save all relation information and return the relation id as string
 
-        from_bundle = self.bundles.get(from_bundle_id)
-        to_bundle = self.bundles.get(to_bundle_id)
+        #add dict if it is the first relation
+        if str(from_node) not in self.all_relations:
+            self.all_relations.update({str(from_node): dict()})
 
-        if from_bundle is None or to_bundle is None:
-            raise NotFoundException()
 
-        new_rel_id = str(uuid4())
+        #check merge for relations
+        id = str(uuid4())
 
-        from_bundle.records.append(new_rel_id)
+        relations = self.all_relations[str(from_node)]
+        relations.update({id: (str(to_node), attributes,metadata)})
 
-        # transform the attributes and metadata to primitive data types
-        attr = encode_dict_values_to_primitive(attributes)
-        meta = encode_dict_values_to_primitive(metadata)
+        #self.all_records.update({new_rel_id: db_relations})
 
-        db_relations = DbRelation(attr, meta)
+        return id
 
-        self.all_records.update({new_rel_id: db_relations})
-
-        return new_rel_id
-
-    def save_record(self, bundle_id, attributes, metadata):
-        # save all record information and return record id as string
-
-        bundle_id = bundle_id
-        bundle = self.bundles.get(bundle_id)
-
-        new_rec_id = str(uuid4())
-
-        bundle.records.append(new_rec_id)
-
-        attr = encode_dict_values_to_primitive(attributes)
-        meta = encode_dict_values_to_primitive(metadata)
-
-        db_record = DbRecord(attr, meta)
-
-        self.all_records.update({new_rec_id: db_record})
-
-        return new_rec_id
-
-    def get_document(self, document_id):
-        # Should return a namedtuple of type DbDocument
-        bundle_ids = self.document_bundle_ids.get(document_id)
-        doc_bundle = self.get_bundle(document_id)
-
-        db_bundles = list()
-        for bundle_id in bundle_ids:
-            db_bundles.append(self.get_bundle(bundle_id))
-
-        return DbDocument(doc_bundle, db_bundles)
 
     def get_record(self, record_id):
-        db_record = self.all_records.get(record_id)
-        if db_record is None:
+        if record_id not in self.all_nodes:
             raise NotFoundException()
+
+        (attributes, metadata)= self.all_nodes.get(record_id)
+        attributes = encode_dict_values_to_primitive(attributes)
+        metadata = encode_dict_values_to_primitive(metadata)
+        db_record = DbRecord(attributes, metadata)
+
         return db_record
 
     def get_relation(self, relation_id):
-        return self.get_record(relation_id)
+
+        for (from_uri, relations) in self.all_relations.items():
+            if relation_id in relations:
+
+                (to_uri,  attributes, metadata) = relations[relation_id]
+
+                attributes = encode_dict_values_to_primitive(attributes)
+                metadata = encode_dict_values_to_primitive(metadata)
+
+                return DbRelation(attributes, metadata)
+        raise NotFoundException("could't find the relation with id {}".format(relation_id))
 
     def get_bundle(self, bundle_id):
         bundle = self.bundles.get(bundle_id)
@@ -130,56 +105,111 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return DbBundle(records, bundle.bundle_record)
 
-    def delete_document(self, document_id):
-        bundle_ids = self.document_bundle_ids.get(document_id)
-
-        if bundle_ids is None:
-            raise NotFoundException()
-
-        self.delete_bundle(document_id)
-        for bundle_id in bundle_ids:
-            self.delete_bundle(bundle_id)
-
-        return True
-
     def delete_relation(self, relation_id):
 
-        return self.delete_record(relation_id)
+        for (from_key, relations) in self.all_relations.items():
+            if relation_id in relations:
+                del relations[relation_id]
+                break
 
-    def delete_bundle(self, bundle_id):
-        bundle = self.bundles.get(bundle_id)
-        if bundle is None:
-            raise NotFoundException()
-
-        for record_id in bundle.records:
-            record = self.all_records.get(record_id)
-
-            if record is None:
-                raise NotFoundException()
-
-            del self.all_records[record_id]
-            del record
-
-        del self.bundles[bundle_id]
-        del bundle
         return True
+
 
     def delete_record(self, record_id):
-        for bundle_id, bundle in self.bundles.items():
-            relation_index = -1
-            try:
-                relation_index = bundle.records.index(record_id)
-            except ValueError as e:
-                pass
 
-            if relation_index is not -1:
-                del bundle.records[relation_index]
 
-        record = self.all_records.get(record_id)
-
-        if record is None:
+        if record_id not in self.all_nodes:
             raise NotFoundException()
 
-        del self.all_records[record_id]
+        del self.all_nodes[record_id]
 
         return True
+
+
+    def get_records_tail(self, properties_dict=dict(), metadata_dict=dict(), depth=None):
+        pass
+
+
+    def delete_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
+        #erase all if no filter set
+        if len(properties_dict) == 0 and len(metadata_dict) == 0:
+            del self.all_nodes
+            self.all_nodes = dict()
+            return True
+
+        #erase only matching nodes
+        records_to_delete = self.get_records_by_filter(properties_dict,metadata_dict)
+
+        for record in records_to_delete:
+            if not isinstance(record, DbRecord):
+                continue
+            identifier = record.metadata[METADATA_KEY_IDENTIFIER]
+
+            if identifier not in self.all_nodes:
+                raise  NotFoundException("We cant find the id ")
+            del self.all_nodes[identifier]
+
+        return True
+
+
+    def get_bundle_records(self, bundle_identifier):
+        pass
+
+
+    def get_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
+
+        return_records = list()
+        return_keys = set()
+        properties_filter_dict = encode_dict_values_to_primitive(properties_dict.copy())
+        metadata_filter_dict = encode_dict_values_to_primitive(metadata_dict.copy())
+        for (identifier,(attributes, metadata)) in self.all_nodes.items():
+
+            match = True
+
+            meta_encoded = encode_dict_values_to_primitive(metadata)
+            attr_encoded = encode_dict_values_to_primitive(attributes)
+
+            #check properties
+            for (key,value) in properties_filter_dict.items():
+                if key not in attr_encoded:
+                    match = False
+                    break
+                elif attr_encoded[key] != value:
+                    match = False
+                    break
+
+            #skip if already not match
+            if match is False:
+                continue
+
+            #check metadata
+            for (key,value) in metadata_filter_dict.items():
+                if key not in meta_encoded:
+                    match = False
+                    break
+                elif meta_encoded[key] != value:
+                    match = False
+                    break
+
+            if match:
+
+                return_records.append(DbRecord(attr_encoded,meta_encoded))
+                return_keys.add(identifier)
+
+            else:
+                #not match so dont add
+                pass
+
+        #get relations
+        for (from_id,relations) in self.all_relations.items():
+
+            if from_id in return_keys:
+
+                for (relation_id, (to_id, attributes, metadata)) in relations.items():
+
+                    attributes = encode_dict_values_to_primitive(attributes)
+                    metadata = encode_dict_values_to_primitive(metadata)
+
+                    return_records.append(DbRelation(attributes,metadata))
+
+        return  return_records
