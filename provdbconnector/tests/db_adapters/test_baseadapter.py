@@ -34,7 +34,7 @@ def insert_document_with_bundles(instance, identifier_prefix=""):
     doc.add_namespace("ex", "http://example.com")
     # document with 1 record
 
-    args_record["metadata"].update({METADATA_KEY_IDENTIFIER: identifier_prefix + args_record["metadata"][METADATA_KEY_IDENTIFIER]})
+    args_record["metadata"].update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("ex:" + identifier_prefix + str(args_record["metadata"][METADATA_KEY_IDENTIFIER]))})
     doc_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
 
     #bundle with 1 record
@@ -93,17 +93,19 @@ class AdapterTestTemplate(unittest.TestCase):
             self.run = unittest.TestCase.run.__get__(self, self.__class__)
         else:
             self.run = lambda self, *args, **kwargs: None
-
+    def clear_database(self):
+        pass
     ### create section ###
 
     def test_save_bundle(self):
-
+        self.clear_database()
         args = base_connector_bundle_parameter_example()
         id = self.instance.save_record(args["attributes"], args["metadata"])
         self.assertIsNotNone(id)
         self.assertIs(type(id), str, "id should be a string ")
 
     def test_save_record(self):
+        self.clear_database()
         args = base_connector_record_parameter_example()
 
         record_id  = self.instance.save_record(args["attributes"], args["metadata"])
@@ -111,6 +113,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_save_relation(self):
+        self.clear_database()
         args_relation = base_connector_relation_parameter_example()
         args_records = base_connector_record_parameter_example()
 
@@ -130,6 +133,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
     @unittest.skip("We should discuss the possibility of relations that are create automatically nodes")
     def test_save_relation_with_unknown_records(self):
+        self.clear_database()
         args_relation = base_connector_relation_parameter_example()
 
 
@@ -145,6 +149,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_get_records_by_filter(self):
+        self.clear_database()
         args = base_connector_record_parameter_example()
         args_bundle = base_connector_bundle_parameter_example()
 
@@ -177,6 +182,7 @@ class AdapterTestTemplate(unittest.TestCase):
         # check bundle
 
     def test_get_records_by_filter_with_properties(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
 
@@ -231,6 +237,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(raw_nodes[2].metadata, meta_dict)
 
     def test_get_records_by_filter_with_metadata(self):
+        self.clear_database()
         args = base_connector_record_parameter_example()
 
 
@@ -255,6 +262,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_get_records_tail(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
         from_record = self.instance.get_record(ids["from_record_id"])
@@ -276,6 +284,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(tail_records[0].metadata,to_record.metadata)
 
     def test_get_records_tail_nested(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         ids2 = insert_document_with_bundles(self.instance,"second_")
 
@@ -302,7 +311,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(tail_records[0].metadata,dict)
 
     def test_get_bundle_records(self):
-
+        self.clear_database()
         #create relation in database
         doc = ProvDocument()
 
@@ -350,6 +359,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_get_record(self):
+        self.clear_database()
         args = base_connector_record_parameter_example()
 
         record_id = self.instance.save_record( args["attributes"], args["metadata"])#
@@ -371,10 +381,12 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_get_record_not_found(self):
+        self.clear_database()
         with self.assertRaises(NotFoundException):
             self.instance.get_record("99999999")
 
     def test_get_relation(self):
+        self.clear_database()
         from_record_args = base_connector_record_parameter_example()
         to_record_args = base_connector_record_parameter_example()
         relation_args = base_connector_relation_parameter_example()
@@ -404,11 +416,13 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(relation_raw.metadata, metadata_primitive)
 
     def test_get_relation_not_found(self):
+        self.clear_database()
         with self.assertRaises(NotFoundException):
             self.instance.get_relation("99999999")
 
     ##Delete section ###
     def test_delete_by_filter(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         result = self.instance.delete_records_by_filter()
         self.assertIsInstance(result,bool)
@@ -425,6 +439,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(len(raw_results),0)
 
     def test_delete_by_filter_with_properties(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
         #Use the same attributes as the insert_document_with_bundles() method
@@ -458,6 +473,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_delete_by_filter_with_metadata(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
         from_record_id = ids["from_record_id"]
@@ -486,6 +502,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(len(raw_results), 3)
 
     def test_delete_record(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         from_record_id = ids["from_record_id"]
         result = self.instance.delete_record(from_record_id)
@@ -496,6 +513,7 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_record(from_record_id)
 
     def test_delete_relation(self):
+        self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         relation_id = ids["relation_id"]
         result = self.instance.delete_relation(relation_id)
@@ -510,6 +528,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
     @unittest.skip("Not supportet")
     def test_merge_no_merge(self):
+        self.clear_database()
         example = base_connector_merge_example()
         #Skip test if this merge mode is not supported
 
@@ -530,6 +549,7 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.save_relation(example.relation)
 
     def test_merge_record(self):
+        self.clear_database()
         example = base_connector_merge_example()
         #Skip test if this merge mode is not supported
 
@@ -552,6 +572,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(len(prim.get_records()),len(prim.unified().get_records()))
 
     def test_merge_record_complex(self):
+        self.clear_database()
         example = base_connector_merge_example()
         # Skip test if this merge mode is not supported
 
@@ -578,6 +599,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(meta, encode_adapter_result_to_excpect(db_record.metadata))
 
     def test_merge_record_complex_fail(self):
+        self.clear_database()
         example = base_connector_merge_example()
         # Skip test if this merge mode is not supported
 
@@ -593,6 +615,7 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.save_record(attr_modified, metadata_modified)
 
     def test_merge_record_metadata(self):
+        self.clear_database()
         example = base_connector_merge_example()
         # Skip test if this merge mode is not supported
 
@@ -631,6 +654,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation(self):
+        self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
@@ -658,6 +682,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation_complex(self):
+        self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
@@ -689,6 +714,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation_complex_fail(self):
+        self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
@@ -711,6 +737,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation_metadata(self):
+        self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))

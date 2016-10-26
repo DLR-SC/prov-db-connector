@@ -15,6 +15,9 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
         with self.assertRaises(InvalidOptionsException):
             self.instance.connect(auth_info)
 
+    def clear_database(self):
+        self.instance.all_nodes = dict()
+        self.instance.all_relations= dict()
     def tearDown(self):
         del self.instance
 
