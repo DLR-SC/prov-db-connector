@@ -71,6 +71,22 @@ NEO4J_GET_RECORDS_TAIL_BY_FILTER = """
                             UNWIND flat as re
                             RETURN DISTINCT re
                         """
+
+NEO4J_GET_BUNDLE_RECORDS = """ 
+                            MATCH (x {`meta:identifier`: {`meta:identifier`}})-[r *1]-(y)
+                            WHERE ALL (rel in r WHERE rel.`prov:type` = 'prov:bundleAssociation')
+                            RETURN  DISTINCT y as re
+                            UNION
+                            MATCH (origin {`meta:identifier`: {`meta:identifier`}})-[r *1]-(x)-[r_return *1]-(y)-[r_2 *1]-(origin {`meta:identifier`: {`meta:identifier`}})
+                            WHERE ALL (rel in r WHERE rel.`prov:type` = 'prov:bundleAssociation')
+                            AND ALL (rel in r_2 WHERE rel.`prov:type` = 'prov:bundleAssociation')
+                            WITH REDUCE(output = [], r IN r_return | output + r) AS flat
+                            UNWIND flat as re
+                            RETURN DISTINCT re
+
+ """
+
+
 NEO4J_GET_RECORD_RETURN_NODE = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
 NEO4J_GET_RELATION_RETURN_NODE = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
 
@@ -379,6 +395,24 @@ class Neo4jAdapter(BaseAdapter):
             records.append(relation_record)
 
         return records
+
+    def get_bundle_records(self,bundle_identifier):
+
+
+        session = self._create_session()
+        result_set = session.run(NEO4J_GET_BUNDLE_RECORDS, {'meta:{}'.format(METADATA_KEY_IDENTIFIER): bundle_identifier})
+        records = list()
+        for result in result_set:
+            record = result["re"]
+
+            if record is None:
+                raise DatabaseException("Record response should not be None")
+            relation_record = self._split_attributes_metadata_from_node(record)
+            records.append(relation_record)
+
+        return records
+
+
 
     def get_record(self, record_id):
 

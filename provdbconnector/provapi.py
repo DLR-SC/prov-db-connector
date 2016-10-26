@@ -177,13 +177,7 @@ class ProvApi(object):
             identifier = bundle_record.metadata[METADATA_KEY_IDENTIFIER]
             prov_bundle = prov_document.bundle(identifier=identifier)
 
-            filter_meta = dict()
-            filter_meta.update({METADATA_KEY_PROV_TYPE: PROV_ASSOCIATION})
-
-            filter_prop = dict()
-            filter_prop.update({PROV_TYPE: "prov:bundleAssociation"})
-
-            bundle_records = self._adapter.get_records_tail(start_identifier=identifier,metadata_filter_relations_dict=filter_meta, properties_filter_relations_dict=filter_prop,depth=1)
+            bundle_records = self._adapter.get_bundle_records(identifier)
 
             for record in bundle_records:
                 self._parse_record(prov_bundle, record)

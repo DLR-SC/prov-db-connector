@@ -1,9 +1,9 @@
 import unittest
 
 from prov.model import ProvDocument
-from prov.constants import PROV_ENTITY, PROV_TYPE
+from prov.constants import PROV_ENTITY, PROV_TYPE,PROV_RECORD_IDS_MAP
 
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER, METADATA_KEY_TYPE_MAP, METADATA_KEY_NAMESPACES
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER, METADATA_KEY_TYPE_MAP, METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE
 from provdbconnector.exceptions.database import NotFoundException, InvalidOptionsException,MergeException
 from provdbconnector.tests.examples import base_connector_record_parameter_example, primer_example,\
     base_connector_relation_parameter_example, base_connector_bundle_parameter_example, base_connector_merge_example
@@ -300,6 +300,53 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsNotNone(tail_records[0].metadata)
         self.assertIsInstance(tail_records[0].attributes,dict)
         self.assertIsInstance(tail_records[0].metadata,dict)
+
+    def test_get_bundle_records(self):
+
+        #create relation in database
+        doc = ProvDocument()
+
+        from_record_args = base_connector_record_parameter_example()
+        to_record_args = base_connector_record_parameter_example()
+        relation_args = base_connector_relation_parameter_example()
+
+        from_identifier = relation_args["from_node"]
+        to_identifier = relation_args["to_node"]
+
+        #set up bundle
+        relation_args["metadata"][METADATA_KEY_PROV_TYPE] = PROV_RECORD_IDS_MAP["wasAssociatedWith"]
+        relation_args["attributes"][PROV_TYPE] = doc.valid_qualified_name("prov:bundleAssociation")
+        from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_identifier
+        to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_identifier
+
+        from_record_id = self.instance.save_record(from_record_args["attributes"], from_record_args["metadata"])  #
+        to_record_id = self.instance.save_record(to_record_args["attributes"], to_record_args["metadata"])  #
+
+        relation_id = self.instance.save_relation(from_identifier, to_identifier, relation_args["attributes"], relation_args["metadata"])
+
+        # add one more
+        args = base_connector_record_parameter_example()
+        identifier   = doc.valid_qualified_name("prov:anotherNode")
+        args["metadata"][METADATA_KEY_IDENTIFIER] =identifier
+
+        relation_args["metadata"][METADATA_KEY_PROV_TYPE] = PROV_RECORD_IDS_MAP["wasAssociatedWith"]
+
+        record_id = self.instance.save_record(args["attributes"], args["metadata"])
+        relation_id = self.instance.save_relation(from_identifier, identifier, relation_args["attributes"], relation_args["metadata"])
+
+
+        relation_args["metadata"][METADATA_KEY_PROV_TYPE] = PROV_RECORD_IDS_MAP["wasGeneratedBy"]
+        relation_args["attributes"][PROV_TYPE] = PROV_RECORD_IDS_MAP["wasGeneratedBy"]
+        relation_id = self.instance.save_relation(identifier, to_identifier, relation_args["attributes"], relation_args["metadata"])
+
+
+        #Test the get
+
+
+        result_records = self.instance.get_bundle_records("ex:Yoda")
+        self.assertIsNotNone(result_records)
+        self.assertIsInstance(result_records,list)
+        self.assertTrue(len(result_records),2)# 2 x node (another node) ,  1 x relation (was informed by )
 
 
     def test_get_record(self):

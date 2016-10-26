@@ -75,6 +75,12 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
+    def get_bundle_records(self,bundle_identifier):
+        pass
+
+
+
+    @abstractmethod
     def get_record(self, record_id):
         """
         Return a single record
