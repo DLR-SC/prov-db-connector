@@ -44,6 +44,7 @@ class ProvApiTestTemplate(unittest.TestCase):
 
 
     def test_prov_primer_example(self):
+        self.clear_database()
         prov_document = examples.primer_example()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
@@ -51,6 +52,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_primer_example_alternate(self):
+        self.clear_database()
         prov_document = examples.primer_example_alternate()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
@@ -58,6 +60,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_w3c_publication_1(self):
+        self.clear_database()
         prov_document = examples.w3c_publication_1()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
@@ -65,6 +68,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_w3c_publication_2(self):
+        self.clear_database()
         prov_document = examples.w3c_publication_2()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
@@ -72,6 +76,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_bundles1(self):
+        self.clear_database()
         prov_document = examples.bundles1()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
@@ -80,6 +85,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document_unified, prov_document_unified)
 
     def test_bundles2(self):
+        self.clear_database()
         prov_document = examples.bundles2()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
@@ -87,6 +93,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_collections(self):
+        self.clear_database()
         prov_document = examples.collections()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
@@ -102,6 +109,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_datatypes(self):
+        self.clear_database()
         prov_document = examples.datatypes()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)

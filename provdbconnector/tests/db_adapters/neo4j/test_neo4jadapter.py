@@ -51,6 +51,10 @@ class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
                           }
         self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
+    def clear_database(self):
+        session = self.provapi._adapter._create_session()
+        session.run("MATCH (x) DETACH DELETE x")
+
     def tearDown(self):
         session = self.provapi._adapter._create_session()
         session.run("MATCH (x) DETACH DELETE x")
