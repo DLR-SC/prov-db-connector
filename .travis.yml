@@ -14,6 +14,8 @@ before_install:
 # Install packages
 install:
   - python setup.py install
+  - pip install coverage
+  - pip install coveralls
 
 # Run test
 script:
