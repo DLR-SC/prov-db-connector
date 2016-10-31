@@ -390,7 +390,12 @@ class Neo4jAdapter(BaseAdapter):
             records.append(relation_record)
         return records
 
-    def get_records_tail(self,properties_dict=dict(), metadata_dict=dict(), depth=None):
+    def get_records_tail(self,properties_dict=None, metadata_dict=None, depth=None):
+
+        if properties_dict is None:
+            properties_dict = dict()
+        if metadata_dict  is None:
+            metadata_dict = dict()
 
         (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
 
@@ -467,7 +472,13 @@ class Neo4jAdapter(BaseAdapter):
 
         return self._split_attributes_metadata_from_node(relation)
 
-    def delete_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
+    def delete_records_by_filter(self, properties_dict=None, metadata_dict=None):
+
+        if properties_dict is None:
+            properties_dict = dict()
+        if metadata_dict is None:
+            metadata_dict = dict()
+
 
         (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
         session = self._create_session()

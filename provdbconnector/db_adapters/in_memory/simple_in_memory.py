@@ -160,11 +160,18 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return True
 
 
-    def get_records_tail(self, properties_dict=dict(), metadata_dict=dict(), depth=None):
+    def get_records_tail(self, properties_dict=None, metadata_dict=None, depth=None):
         #only transform dict into list
         return list(self._get_records_tail_internal(properties_dict,metadata_dict).values())
 
-    def _get_records_tail_internal(self, properties_dict=dict(), metadata_dict=dict(), max_depth=None, current_depth=0, result_records = None):
+    def _get_records_tail_internal(self, properties_dict=None, metadata_dict=None, max_depth=None, current_depth=0, result_records = None):
+
+        if properties_dict is None:
+            properties_dict = dict()
+        if metadata_dict is None:
+            metadata_dict = dict()
+
+
         origin_records = self.get_records_by_filter(properties_dict, metadata_dict)
 
         if result_records is None:
@@ -189,7 +196,13 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return result_records
 
 
-    def delete_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
+    def delete_records_by_filter(self, properties_dict=None, metadata_dict=None):
+
+        if properties_dict is None:
+            properties_dict = dict()
+        if metadata_dict is None:
+            metadata_dict = dict()
+
         #erase all if no filter set
         if len(properties_dict) == 0 and len(metadata_dict) == 0:
             del self.all_nodes
