@@ -572,9 +572,19 @@ class AdapterTestTemplate(unittest.TestCase):
 
         attr = encode_dict_values_to_primitive(example.from_node["attributes"])
         meta = encode_dict_values_to_primitive(example.from_node["metadata"])
+
+
+        db_meta = encode_adapter_result_to_excpect(db_record.metadata).copy()
+        #transform string into dict to compare result
+
+        meta.update({METADATA_KEY_NAMESPACES: json.loads(meta[METADATA_KEY_NAMESPACES])})
+        meta.update({METADATA_KEY_TYPE_MAP: json.loads(meta[METADATA_KEY_TYPE_MAP])})
+
+        db_meta.update({METADATA_KEY_NAMESPACES: json.loads(db_meta[METADATA_KEY_NAMESPACES])})
+        db_meta.update({METADATA_KEY_TYPE_MAP: json.loads(db_meta[METADATA_KEY_TYPE_MAP])})
         self.assertEqual(attr,db_record.attributes)
 
-        self.assertEqual(meta,encode_adapter_result_to_excpect(db_record.metadata))
+        self.assertEqual(meta,db_meta)
         prim = primer_example()
         self.assertEqual(len(prim.get_records()),len(prim.unified().get_records()))
 
