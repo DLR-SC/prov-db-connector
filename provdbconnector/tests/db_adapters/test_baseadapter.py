@@ -612,8 +612,17 @@ class AdapterTestTemplate(unittest.TestCase):
         attr.update(attr_modified) # add additional attr to check dict
         meta = encode_dict_values_to_primitive(example.from_node["metadata"])
 
+        db_meta = encode_adapter_result_to_excpect(db_record.metadata).copy()
+
+        meta.update({METADATA_KEY_NAMESPACES: json.loads(meta[METADATA_KEY_NAMESPACES])})
+        meta.update({METADATA_KEY_TYPE_MAP: json.loads(meta[METADATA_KEY_TYPE_MAP])})
+
+        db_meta.update({METADATA_KEY_NAMESPACES: json.loads(db_meta[METADATA_KEY_NAMESPACES])})
+        db_meta.update({METADATA_KEY_TYPE_MAP: json.loads(db_meta[METADATA_KEY_TYPE_MAP])})
+
+
         self.assertEqual(attr, db_record.attributes)
-        self.assertEqual(meta, encode_adapter_result_to_excpect(db_record.metadata))
+        self.assertEqual(meta, db_meta)
 
     def test_merge_record_complex_fail(self):
         self.clear_database()
@@ -709,8 +718,17 @@ class AdapterTestTemplate(unittest.TestCase):
         attr = encode_dict_values_to_primitive(example.relation["attributes"])
         meta = encode_dict_values_to_primitive(example.relation["metadata"])
 
+        db_meta = encode_adapter_result_to_excpect(db_record.metadata).copy()
+
+        meta.update({METADATA_KEY_NAMESPACES: json.loads(meta[METADATA_KEY_NAMESPACES])})
+        meta.update({METADATA_KEY_TYPE_MAP: json.loads(meta[METADATA_KEY_TYPE_MAP])})
+
+        db_meta.update({METADATA_KEY_NAMESPACES: json.loads(db_meta[METADATA_KEY_NAMESPACES])})
+        db_meta.update({METADATA_KEY_TYPE_MAP: json.loads(db_meta[METADATA_KEY_TYPE_MAP])})
+
+
         self.assertEqual(attr, db_record.attributes)
-        self.assertEqual(meta, encode_adapter_result_to_excpect(db_record.metadata))
+        self.assertEqual(meta, db_meta)
 
 
     def test_merge_relation_complex(self):
@@ -741,8 +759,17 @@ class AdapterTestTemplate(unittest.TestCase):
         attr = encode_dict_values_to_primitive(example.relation["attributes"])
         meta = encode_dict_values_to_primitive(example.relation["metadata"])
 
+        db_meta = encode_adapter_result_to_excpect(db_record.metadata).copy()
+
+        meta.update({METADATA_KEY_NAMESPACES: json.loads(meta[METADATA_KEY_NAMESPACES])})
+        meta.update({METADATA_KEY_TYPE_MAP: json.loads(meta[METADATA_KEY_TYPE_MAP])})
+
+        db_meta.update({METADATA_KEY_NAMESPACES: json.loads(db_meta[METADATA_KEY_NAMESPACES])})
+        db_meta.update({METADATA_KEY_TYPE_MAP: json.loads(db_meta[METADATA_KEY_TYPE_MAP])})
+
+
         self.assertEqual(attr, db_record.attributes)
-        self.assertEqual(meta, encode_adapter_result_to_excpect(db_record.metadata))
+        self.assertEqual(meta, db_meta)
 
 
     def test_merge_relation_complex_fail(self):
