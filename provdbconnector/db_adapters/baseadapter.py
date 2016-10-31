@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from enum import Enum
 
 import logging
 
@@ -18,8 +19,9 @@ DbBundle = namedtuple("DbBundle", "records, bundle_record")
 DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
 
-
 class BaseAdapter(ABC):
+
+
     """
     Interface class for a prov database adapter
     """
@@ -37,30 +39,11 @@ class BaseAdapter(ABC):
         """
         pass
 
-    @abstractmethod
-    def save_document(self):
-        """
-        Create a new document id, so you only need to return a unique id
-        :return: unique id as string
-        """
-        pass
 
     @abstractmethod
-    def save_bundle(self, document_id, attributes, metadata):
-        """
-        Creates a bundle from the given parameter
-        :param document_id: the parent document id
-        :param attributes: The custom attributes for the bundle, normally empty
-        :param metadata: The metadata for the bundle like the identifier
-        :return: unique bundle id as string
-        """
-        pass
-
-    @abstractmethod
-    def save_record(self, bundle_id, attributes, metadata):
+    def save_record(self, attributes, metadata):
         """
         Creates a database node
-        :param bundle_id: The new record belongs to this bundle
         :param attributes: Attributes as dict for the record. Be careful you have to encode the dict
         :param metadata: Metadata as dict for the record. Be careful you have to encode the dict but you can be sure that all meta keys are always there
         :return: Record id as string
@@ -68,11 +51,11 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def save_relation(self, from_bundle_id, from_node, to_bundle_id, to_node, attributes, metadata):
+    def save_relation(self,  from_node,  to_node, attributes, metadata):
         """
         Create a relation between 2 nodes
-        :param from_bundle_id: The database for the from node
         :param from_node: The identifier
+        :param to_node: The identifier for the destionation node
         :param to_bundle_id: The database id for the to node
         :param to_node: The identifier for the destination node
         :param attributes:  Attributes as dict for the record. Be careful you have to encode the dict
@@ -81,23 +64,44 @@ class BaseAdapter(ABC):
         """
         pass
 
+
     @abstractmethod
-    def get_document(self, document_id):
+    def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
         """
-        Returns a DbDocument named tuple
-        :param document_id:
-        :return: DbDocument: A namedtuple of the type DbDocument
+        Returns all records (nodes and relations) based on a filter dict.
+        The filter dict's are and AND combination but only the start node must fulfill the conditions.
+        The result should contain all associated relations and nodes togehter
+        :param properties_dict:
+        :param metadata_dict:
+        :return:list of relations and nodes
         """
         pass
 
     @abstractmethod
-    def get_bundle(self, bundle_id):
+    def get_records_tail(self,properties_dict=None, metadata_dict=None, depth=None):
         """
-        Get all bundle records from the database and return a DbBundle record
-        :param bundle_id: The bundle id as str
-        :return: DbBundle: A namedtuple of the type DbBundle
+        Returns all connected nodes and relations based on a filter.
+        The filter is an AND combination and this describes the filter only for the origin nodes.
+        :param properties_dict:
+        :param metadata_dict:
+        :param depth:
+        :return: a list of relations and nodes
         """
         pass
+
+    @abstractmethod
+    def get_bundle_records(self,bundle_identifier):
+        """
+        Returns the relations and nodes for a specific bundle identifier.
+        Please use the bundle association to get all bundle nodes.
+        Only the relations belongs to the bundle where the start AND end node belong also to the bundle.
+        Except the prov:Mention see: W3C bundle links
+        :param bundle_identifier:
+        :return:list of nodes and bundles
+        """
+        pass
+
+
 
     @abstractmethod
     def get_record(self, record_id):
@@ -118,23 +122,12 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def delete_document(self, document_id):
+    def delete_records_by_filter(self, properties_dict, metadata_dict):
         """
-        Deletes a complete document with all included bundles
-
-        :param document_id:
-        :return: bool
-        :raise NotFoundException
-        """
-        pass
-
-    @abstractmethod
-    def delete_bundle(self, bundle_id):
-        """
-        Delete a complete bundle
-        :param bundle_id:
-        :return:bool
-        :raise NotFoundException
+        Delte records by filter
+        :param properties_dict:
+        :param metadata_dict:
+        :return:
         """
         pass
 

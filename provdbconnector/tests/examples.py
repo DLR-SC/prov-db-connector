@@ -7,7 +7,7 @@ from prov.tests.examples import primer_example, \
     collections, \
     long_literals, \
     datatypes
-import datetime
+from _datetime import datetime
 from prov.model import ProvDocument, QualifiedName, ProvRecord, ProvRelation, ProvActivity, Literal, Identifier
 from prov.constants import PROV_RECORD_IDS_MAP, PROV
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, \
@@ -20,17 +20,31 @@ def attributes_dict_example():
     attributes.update({"ex:individual attribute": "Some value"})
     attributes.update({"ex:int value": 99})
     attributes.update({"ex:double value": 99.33})
-    attributes.update({"ex:date value": datetime.datetime.now()})
+    attributes.update({"ex:date value": datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')})
     attributes.update({"ex:list value": ["list", "of", "strings"]})
     attributes.update({"ex:dict value": {"dict": "value"}})
 
     return attributes
+
+def base_connector_merge_example():
+
+    ReturnData = namedtuple("base_connector_merge_example_return_data", "from_node,relation,to_node")
+    example_relation = base_connector_relation_parameter_example()
+
+    example_node_a = base_connector_record_parameter_example()
+    example_node_b = base_connector_record_parameter_example()
+
+    example_node_a["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["from_node"]
+    example_node_b["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["to_node"]
+
+    return ReturnData(example_node_a,example_relation,example_node_b)
 
 
 def base_connector_bundle_parameter_example():
     doc = ProvDocument()
     doc.add_namespace("ex", "http://example.com")
     attributes = dict()
+    attributes.update({"prov:type": "prov:Bundle"})
 
     namespaces = dict()
     namespaces.update({"ex": "http://example.com"})
@@ -41,7 +55,7 @@ def base_connector_bundle_parameter_example():
 
     metadata = dict()
 
-    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Bundle")})
+    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Entity")})
     metadata.update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("ex:bundle name")})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
@@ -66,7 +80,7 @@ def base_connector_record_parameter_example():
     metadata = dict()
 
     metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Activity")})
-    metadata.update({METADATA_KEY_IDENTIFIER: "label for the node"})
+    metadata.update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("prov:example_node")})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
@@ -106,6 +120,18 @@ def base_connector_relation_parameter_example():
 
     return return_data
 
+def base_connector_merge_example():
+
+    ReturnData = namedtuple("base_connector_merge_example_return_data", "from_node,relation,to_node")
+    example_relation = base_connector_relation_parameter_example()
+
+    example_node_a = base_connector_record_parameter_example()
+    example_node_b = base_connector_record_parameter_example()
+
+    example_node_a["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["from_node"]
+    example_node_b["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["to_node"]
+
+    return ReturnData(example_node_a,example_relation,example_node_b)
 
 def prov_api_record_example():
     doc = ProvDocument()

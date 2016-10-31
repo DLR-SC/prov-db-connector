@@ -15,6 +15,8 @@ class Neo4jAdapterTests(AdapterTestTemplate):
                      "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
                      }
         self.instance.connect(auth_info)
+        session = self.instance._create_session()
+        session.run("MATCH (x) DETACH DELETE x")
 
     @unittest.skip(
         "Skipped because the server configuration currently is set to 'no password', so the authentication will never fail")
@@ -35,16 +37,6 @@ class Neo4jAdapterTests(AdapterTestTemplate):
         with self.assertRaises(InvalidOptionsException):
             self.instance.connect(auth_info)
 
-    def test_create_document_id_increment(self):
-        first = self.instance.save_document()
-
-        first = int(first)
-
-        second = self.instance.save_document()
-        second = int(second)
-
-        self.assertEqual(first + 1, second)
-
     def tearDown(self):
         session = self.instance._create_session()
         session.run("MATCH (x) DETACH DELETE x")
@@ -58,6 +50,10 @@ class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
                           "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
                           }
         self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
+
+    def clear_database(self):
+        session = self.provapi._adapter._create_session()
+        session.run("MATCH (x) DETACH DELETE x")
 
     def tearDown(self):
         session = self.provapi._adapter._create_session()

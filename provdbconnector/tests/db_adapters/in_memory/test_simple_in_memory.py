@@ -15,6 +15,9 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
         with self.assertRaises(InvalidOptionsException):
             self.instance.connect(auth_info)
 
+    def clear_database(self):
+        self.instance.all_nodes = dict()
+        self.instance.all_relations= dict()
     def tearDown(self):
         del self.instance
 
@@ -22,6 +25,10 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
 class SimpleInMemoryAdapterProvApiTests(ProvApiTestTemplate):
     def setUp(self):
         self.provapi = ProvApi(api_id=1, adapter=SimpleInMemoryAdapter, auth_info=None)
+
+    def clear_database(self):
+        self.provapi._adapter.all_nodes = dict()
+        self.provapi._adapter.all_relations = dict()
 
     def tearDown(self):
         del self.provapi

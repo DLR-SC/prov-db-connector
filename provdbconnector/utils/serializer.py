@@ -4,18 +4,24 @@ from datetime import datetime
 from io import StringIO
 
 import six
-from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTRIBUTES, PROV_MEMBERSHIP, \
-    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI
-from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime
 
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES
+from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTRIBUTES, PROV_MEMBERSHIP, \
+    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI, PROV_ACTIVITY, PROV_ENTITY, PROV_AGENT
+from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime,PROV_REC_CLS
+
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, METADATA_KEY_TYPE_MAP
 from provdbconnector.exceptions.utils import SerializerException
+from provdbconnector.exceptions.database import MergeException
+from collections import namedtuple
 
 import logging
 
 log = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
+
+FormalAndOtherAttributes = namedtuple("formal_and_other_attributes", "formal, other")
+
 # Reverse map for prov.model.XSD_DATATYPE_PARSERS
 LITERAL_XSDTYPE_MAP = {
     float: 'xsd:double',
@@ -99,9 +105,18 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
         namespaces = json.load(io)
     elif type(namespace_str) is dict:
         namespaces = namespace_str
+    elif type(namespace_str) is list:
+        for entry in namespace_str:
+            if type(entry) is str:
+                io = StringIO(entry)
+                namespaces.update(json.load(io))
+            else:
+                raise SerializerException(
+                    "Namespaces metadata should returned as json string dict or list of json strings not as {}".format(type(namespace_str)))
+
     else:
         raise SerializerException(
-            "Namespaces metadata should returned as json string or dict not as {}".format(type(namespace_str)))
+            "Namespaces metadata should returned as json string dict or list of json strings not as  {}".format(type(namespace_str)))
 
     for prefix, uri in namespaces.items():
         if prefix is not None and uri is not None:
@@ -172,11 +187,14 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
                     value = values[0]
             else:
                 value = values
-            value = (
-                bundle.valid_qualified_name(value)
-                if attr in PROV_ATTRIBUTE_QNAMES
-                else parse_xsd_datetime(value)
-            )
+
+            if attr in PROV_ATTRIBUTE_QNAMES:
+                value = (bundle.valid_qualified_name(value))
+            elif isinstance(value, datetime):
+                value = value
+            else:
+                parse_xsd_datetime(value)
+
             attributes[attr] = value
         else:
             value_type = None
@@ -230,3 +248,47 @@ def decode_json_representation(value, type, bundle):
     else:
         # simple type, just return it
         return value
+
+def split_into_formal_and_other_attributes(attributes,metadata):
+    prov_type = metadata[METADATA_KEY_PROV_TYPE]
+
+    if str(prov_type) == "prov:Unknown":
+        formal_qualified_names = set()
+    else:
+        class_type = PROV_REC_CLS[prov_type]
+        formal_qualified_names = class_type.FORMAL_ATTRIBUTES
+
+    formal_attributes = {key: attributes[key] for key in attributes.keys() if key in formal_qualified_names}
+    other_attributes = {key: attributes[key] for key in attributes.keys() if key not in formal_qualified_names}
+
+    return FormalAndOtherAttributes(formal_attributes,other_attributes )
+
+
+def merge_record(attributes,metadata, other_attributes, other_metadata):
+
+    attributes_merged = attributes.copy()
+    attributes_merged.update(other_attributes)
+
+    if metadata[METADATA_KEY_PROV_TYPE] != other_metadata[METADATA_KEY_PROV_TYPE]:
+        raise MergeException("Prov type should be the same but is: {}:{}".format(METADATA_KEY_PROV_TYPE, METADATA_KEY_PROV_TYPE))
+
+    for (key,value) in attributes.items():
+        if attributes_merged[key] != value:
+            raise MergeException("Invalid data, it is not allowed to override existing attributes key:{}, value:{} with value:{}".format(key,value,attributes_merged[key]  ))
+
+
+    merged_metadata_namespaces = metadata[METADATA_KEY_NAMESPACES].copy()
+    merged_metadata_namespaces.update(other_metadata[METADATA_KEY_NAMESPACES])
+
+
+    merged_metadata_type_map = metadata[METADATA_KEY_TYPE_MAP].copy()
+    merged_metadata_type_map.update(other_metadata[METADATA_KEY_TYPE_MAP])
+
+    merged_metadata = metadata.copy()
+    merged_metadata.update(other_metadata)
+    merged_metadata.update({METADATA_KEY_NAMESPACES: merged_metadata_namespaces})
+    merged_metadata.update({METADATA_KEY_TYPE_MAP: merged_metadata_type_map})
+
+
+    return (attributes_merged,merged_metadata)
+
