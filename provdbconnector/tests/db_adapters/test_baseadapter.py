@@ -343,7 +343,7 @@ class AdapterTestTemplate(unittest.TestCase):
         from_record_id = self.instance.save_record(from_record_args["attributes"], from_record_args["metadata"])  #
         to_record_id = self.instance.save_record(to_record_args["attributes"], to_record_args["metadata"])  #
 
-        relation_id = self.instance.save_relation(from_identifier, to_identifier, relation_args["attributes"], relation_args["metadata"])
+        relation_id = self.instance.save_relation(to_identifier, from_identifier, relation_args["attributes"], relation_args["metadata"])
 
         # add one more
         args = base_connector_record_parameter_example()
@@ -353,7 +353,7 @@ class AdapterTestTemplate(unittest.TestCase):
         relation_args["metadata"][METADATA_KEY_PROV_TYPE] = PROV_RECORD_IDS_MAP["wasAssociatedWith"]
 
         record_id = self.instance.save_record(args["attributes"], args["metadata"])
-        relation_id = self.instance.save_relation(from_identifier, identifier, relation_args["attributes"], relation_args["metadata"])
+        relation_id = self.instance.save_relation(identifier, from_identifier, relation_args["attributes"], relation_args["metadata"])
 
 
         relation_args["metadata"][METADATA_KEY_PROV_TYPE] = PROV_RECORD_IDS_MAP["wasGeneratedBy"]
@@ -445,11 +445,6 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_record(from_record_id)
 
 
-        raw_results = self.instance.get_records_by_filter()
-        self.assertIsNotNone(raw_results)
-        self.assertIsInstance(raw_results,list)
-        self.assertEqual(len(raw_results),0)
-
     def test_delete_by_filter_with_properties(self):
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
@@ -481,7 +476,7 @@ class AdapterTestTemplate(unittest.TestCase):
         raw_results = self.instance.get_records_by_filter(dict())
         self.assertIsNotNone(raw_results)
         self.assertIsInstance(raw_results, list)
-        self.assertEqual(len(raw_results), 1)
+        self.assertEqual(len(raw_results), 1)  #one relation and one node
 
 
     def test_delete_by_filter_with_metadata(self):
