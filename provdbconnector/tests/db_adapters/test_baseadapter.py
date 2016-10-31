@@ -7,8 +7,8 @@ from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_ID
 from provdbconnector.exceptions.database import NotFoundException, InvalidOptionsException,MergeException
 from provdbconnector.tests.examples import base_connector_record_parameter_example, primer_example,\
     base_connector_relation_parameter_example, base_connector_bundle_parameter_example, base_connector_merge_example
-from provdbconnector.utils.serializer import encode_dict_values_to_primitive
-
+from provdbconnector.utils.serializer import encode_dict_values_to_primitive, decode_json_representation
+import json
 
 def isnamedtupleinstance(x):
     t = type(x)
@@ -652,17 +652,32 @@ class AdapterTestTemplate(unittest.TestCase):
 
         # check namespaces
         db_record_namespaces = db_record.metadata[METADATA_KEY_NAMESPACES]
-        self.assertIsInstance(db_record_namespaces, list)
-        self.assertTrue(len(db_record_namespaces), 2)
-        self.assertEqual(meta[METADATA_KEY_NAMESPACES], db_record_namespaces[0])
-        self.assertEqual(meta_custom[METADATA_KEY_NAMESPACES], db_record_namespaces[1])
+
+        if type(db_record_namespaces) is list:
+            self.assertIsInstance(db_record_namespaces, list)
+            self.assertTrue(len(db_record_namespaces), 2)
+            self.assertEqual(meta[METADATA_KEY_NAMESPACES], db_record_namespaces[0])
+            self.assertEqual(meta_custom[METADATA_KEY_NAMESPACES], db_record_namespaces[1])
+        else:
+            self.assertIsInstance(db_record_namespaces, str)
+            self.assertEqual(meta[METADATA_KEY_NAMESPACES], db_record_namespaces)
+
 
         # check type_map
         db_record_type_map = db_record.metadata[METADATA_KEY_TYPE_MAP]
-        self.assertIsInstance(db_record_type_map, list)
-        self.assertTrue(len(db_record_type_map), 2)
-        self.assertEqual(meta[METADATA_KEY_TYPE_MAP], db_record_type_map[0])
-        self.assertEqual(meta_custom[METADATA_KEY_TYPE_MAP], db_record_type_map[1])
+
+        if type(db_record_type_map) is list:
+            self.assertIsInstance(db_record_type_map, list)
+            self.assertTrue(len(db_record_type_map), 2)
+            self.assertEqual(meta[METADATA_KEY_TYPE_MAP], db_record_type_map[0])
+            self.assertEqual(meta_custom[METADATA_KEY_TYPE_MAP], db_record_type_map[1])
+        else:
+            self.assertIsInstance(db_record_type_map, str)
+            decoded_map = json.loads(db_record_type_map)
+            expected_map = json.loads(meta[METADATA_KEY_TYPE_MAP])
+            expected_map.update(json.loads(meta_custom[METADATA_KEY_TYPE_MAP]))
+            self.assertEqual(decoded_map, expected_map)
+
 
 
     def test_merge_relation(self):
