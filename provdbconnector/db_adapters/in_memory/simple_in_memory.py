@@ -19,8 +19,6 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
     all_relations = dict()
 
-    all_relations_id_map = dict()
-
     def __init__(self, *args):
         super(SimpleInMemoryAdapter, self).__init__()
         pass
