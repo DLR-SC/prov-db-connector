@@ -39,6 +39,10 @@ class ProvApiTestTemplate(unittest.TestCase):
         # this function will never be executed !!!!
         self.provapi = ProvApi()
 
+    def clear_database(self):
+        pass
+
+
     def test_prov_primer_example(self):
         prov_document = examples.primer_example()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -90,6 +94,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_long_literals(self):
+        self.clear_database()
         prov_document = examples.long_literals()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
