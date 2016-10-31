@@ -13,7 +13,7 @@ before_install:
 
 # Install packages
 install:
-  - python setup.py install '.[test]'
+  - python setup.py install
 
 # Run test
 script:
