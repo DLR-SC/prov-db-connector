@@ -230,9 +230,9 @@ class SimpleInMemoryAdapter(BaseAdapter):
                         bundle_records.update({from_identifier: DbRecord(attributes,metadata)})
 
         #search for all relations between the bundle nodes
-        for node_identifier in bundle_records.copy().keys():
-            if node_identifier in self.all_relations:
-                for (from_identifier,  (to_identifier, attributes, metadata)) in self.all_relations[node_identifier].items():
+        for from_identifier in bundle_records.copy().keys():
+            if from_identifier in self.all_relations:
+                for (relation_id,  (to_identifier, attributes, metadata)) in self.all_relations[from_identifier].items():
 
                     # If the target of the relation is also in the bundle the relation belongs to the bundle
                     if to_identifier in bundle_records:
