@@ -278,8 +278,8 @@ def merge_record(attributes,metadata, other_attributes, other_metadata):
     merged_metadata_namespaces.update(other_metadata[METADATA_KEY_NAMESPACES])
 
 
-    merged_metadata_type_map = metadata[METADATA_KEY_NAMESPACES].copy()
-    merged_metadata_type_map.update(other_metadata[METADATA_KEY_NAMESPACES])
+    merged_metadata_type_map = metadata[METADATA_KEY_TYPE_MAP].copy()
+    merged_metadata_type_map.update(other_metadata[METADATA_KEY_TYPE_MAP])
 
     merged_metadata = metadata.copy()
     merged_metadata.update(other_metadata)
