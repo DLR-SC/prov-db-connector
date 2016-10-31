@@ -127,7 +127,32 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
 
     def get_records_tail(self, properties_dict=dict(), metadata_dict=dict(), depth=None):
-        pass
+        #only transform dict into list
+        return list(self._get_records_tail_internal(properties_dict,metadata_dict).values())
+
+    def _get_records_tail_internal(self, properties_dict=dict(), metadata_dict=dict(), max_depth=None, current_depth=0, result_records = None):
+        origin_records = self.get_records_by_filter(properties_dict, metadata_dict)
+
+        if result_records is None:
+            result_records = dict()
+        if current_depth == max_depth:
+            return dict()
+        for record in origin_records:
+            from_identifier = record.metadata[METADATA_KEY_IDENTIFIER]
+            if from_identifier  in self.all_relations:
+                for (relation_id,(to_identifier, attributes, metadata)) in self.all_relations[from_identifier].items():
+                    #find to node
+                    if to_identifier not in result_records:
+                        (to_attributes, to_metadata)= self.all_nodes[to_identifier]
+                        result_records.update({to_identifier: DbRecord(to_attributes, to_metadata)})
+
+                        # add other nodes recursive
+                        result_records.update(self._get_records_tail_internal(metadata_dict={METADATA_KEY_IDENTIFIER: to_identifier},current_depth=current_depth+1,result_records=result_records))
+
+                    # add relation to result
+                    result_records.update({relation_id: DbRelation(attributes, metadata)})
+
+        return result_records
 
 
     def delete_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
