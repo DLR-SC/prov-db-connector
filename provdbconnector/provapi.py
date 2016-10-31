@@ -174,6 +174,11 @@ class ProvApi(object):
             self._parse_record(prov_document, record)
 
         for bundle_record in bundle_entities:
+
+            #skip if we got some relations instead of only the bundle nodes
+            if str(bundle_record.metadata[METADATA_KEY_PROV_TYPE]) is not str(PROV_BUNDLE):
+                continue
+
             identifier = bundle_record.metadata[METADATA_KEY_IDENTIFIER]
             prov_bundle = prov_document.bundle(identifier=identifier)
 
