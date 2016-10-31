@@ -1,4 +1,4 @@
-from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbBundle, DbRecord, DbRelation, METADATA_KEY_IDENTIFIER
+from provdbconnector.db_adapters.baseadapter import BaseAdapter, DbDocument, DbBundle, DbRecord, DbRelation, METADATA_KEY_IDENTIFIER, METADATA_KEY_PROV_TYPE
 from provdbconnector.exceptions.database import InvalidOptionsException, NotFoundException
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive,split_into_formal_and_other_attributes,merge_record
 from uuid import uuid4
@@ -58,7 +58,32 @@ class SimpleInMemoryAdapter(BaseAdapter):
             self.all_relations.update({str(from_node): dict()})
 
 
-        #check merge for relations
+        # ===============
+        # MERGE RELATION
+        # ===============
+        new_relation_formal_attributes = split_into_formal_and_other_attributes(attributes, metadata)
+
+        #check that the from node already has some relations
+        if str(from_node) in self.all_relations:
+
+            #for each relation with the origin "from_node"
+            for (relation_id,(to_identifier,old_attributes,old_metadata)) in self.all_relations[str(from_node)].items():
+                #check if connecton is to the same identifier
+                if str(to_node) == to_identifier and metadata[METADATA_KEY_PROV_TYPE] == old_metadata[METADATA_KEY_PROV_TYPE]:
+                    # okay got potential duplicate... lets check the formal attributes
+                    old_relation_formal_attributes = split_into_formal_and_other_attributes(old_attributes, old_metadata)
+
+                    if old_relation_formal_attributes.formal == new_relation_formal_attributes.formal:
+                        # got duplicate
+                        (merged_attributes, merged_metadata) = merge_record(old_attributes,old_metadata,attributes,metadata)
+                        self.all_relations[str(from_node)].update({relation_id: (to_identifier,merged_attributes,merged_metadata)})
+                        return relation_id
+
+
+        # ===============
+        # CREATRE NEW RELATION
+        # ===============
+
         id = str(uuid4())
 
         relations = self.all_relations[str(from_node)]
