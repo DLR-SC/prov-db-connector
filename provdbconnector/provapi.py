@@ -176,7 +176,10 @@ class ProvApi(object):
         for bundle_record in bundle_entities:
 
             #skip if we got some relations instead of only the bundle nodes
-            if str(bundle_record.metadata[METADATA_KEY_PROV_TYPE]) is not str(PROV_BUNDLE):
+            if str(PROV_TYPE) not in bundle_record.attributes:
+                continue
+
+            if str(bundle_record.attributes[str(PROV_TYPE)]) != str(PROV_BUNDLE):
                 continue
 
             identifier = bundle_record.metadata[METADATA_KEY_IDENTIFIER]
