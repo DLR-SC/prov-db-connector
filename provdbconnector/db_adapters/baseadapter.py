@@ -66,12 +66,12 @@ class BaseAdapter(ABC):
 
 
     @abstractmethod
-    def get_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
+    def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
 
         pass
 
     @abstractmethod
-    def get_records_tail(self,properties_dict=dict(), metadata_dict=dict(), depth=None):
+    def get_records_tail(self,properties_dict=None, metadata_dict=None, depth=None):
         pass
 
     @abstractmethod

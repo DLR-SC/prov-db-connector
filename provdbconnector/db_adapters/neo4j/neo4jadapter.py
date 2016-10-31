@@ -369,7 +369,12 @@ class Neo4jAdapter(BaseAdapter):
         cypher_str = self._get_attributes_identifiers_cypher_string(filter.keys())
         return (encoded_params,cypher_str)
 
-    def get_records_by_filter(self,properties_dict=dict(),metadata_dict=dict()):
+    def get_records_by_filter(self,properties_dict=None,metadata_dict=None):
+
+        if properties_dict is None:
+            properties_dict = dict()
+        if metadata_dict is None:
+            metadata_dict = dict()
 
         (encoded_params ,cypher_str ) = self._get_cypher_filter_params(properties_dict,metadata_dict)
 

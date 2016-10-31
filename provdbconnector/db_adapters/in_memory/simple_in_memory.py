@@ -272,7 +272,12 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return True
 
 
-    def get_records_by_filter(self, properties_dict=dict(), metadata_dict=dict()):
+    def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
+
+        if properties_dict is None:
+            properties_dict = dict()
+        if metadata_dict is None:
+            metadata_dict = dict()
 
         return_records = list()
         return_keys = set()
