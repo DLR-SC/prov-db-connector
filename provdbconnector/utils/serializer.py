@@ -187,11 +187,14 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
                     value = values[0]
             else:
                 value = values
-            value = (
-                bundle.valid_qualified_name(value)
-                if attr in PROV_ATTRIBUTE_QNAMES
-                else parse_xsd_datetime(value)
-            )
+
+            if attr in PROV_ATTRIBUTE_QNAMES:
+                value = (bundle.valid_qualified_name(value))
+            elif isinstance(value, datetime):
+                value = value
+            else:
+                parse_xsd_datetime(value)
+
             attributes[attr] = value
         else:
             value_type = None
