@@ -67,15 +67,38 @@ class BaseAdapter(ABC):
 
     @abstractmethod
     def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
-
+        """
+        Returns all records (nodes and relations) based on a filter dict.
+        The filter dict's are and AND combination but only the start node must fulfill the conditions.
+        The result should contain all associated relations and nodes togehter
+        :param properties_dict:
+        :param metadata_dict:
+        :return:list of relations and nodes
+        """
         pass
 
     @abstractmethod
     def get_records_tail(self,properties_dict=None, metadata_dict=None, depth=None):
+        """
+        Returns all connected nodes and relations based on a filter.
+        The filter is an AND combination and this describes the filter only for the origin nodes.
+        :param properties_dict:
+        :param metadata_dict:
+        :param depth:
+        :return: a list of relations and nodes
+        """
         pass
 
     @abstractmethod
     def get_bundle_records(self,bundle_identifier):
+        """
+        Returns the relations and nodes for a specific bundle identifier.
+        Please use the bundle association to get all bundle nodes.
+        Only the relations belongs to the bundle where the start AND end node belong also to the bundle.
+        Except the prov:Mention see: W3C bundle links
+        :param bundle_identifier:
+        :return:list of nodes and bundles
+        """
         pass
 
 
@@ -100,6 +123,12 @@ class BaseAdapter(ABC):
 
     @abstractmethod
     def delete_records_by_filter(self, properties_dict, metadata_dict):
+        """
+        Delte records by filter
+        :param properties_dict:
+        :param metadata_dict:
+        :return:
+        """
         pass
 
     @abstractmethod
