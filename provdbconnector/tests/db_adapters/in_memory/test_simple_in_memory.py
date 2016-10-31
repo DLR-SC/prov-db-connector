@@ -27,8 +27,8 @@ class SimpleInMemoryAdapterProvApiTests(ProvApiTestTemplate):
         self.provapi = ProvApi(api_id=1, adapter=SimpleInMemoryAdapter, auth_info=None)
 
     def clear_database(self):
-        del self.provapi
-        self.provapi = ProvApi(api_id=1, adapter=SimpleInMemoryAdapter, auth_info=None)
+        self.provapi._adapter.all_nodes = dict()
+        self.provapi._adapter.all_relations = dict()
 
     def tearDown(self):
         del self.provapi
