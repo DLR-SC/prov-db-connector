@@ -280,8 +280,17 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(tail_records[0].attributes,dict)
         self.assertIsInstance(tail_records[0].metadata,dict)
 
-        self.assertEqual(tail_records[0].attributes,to_record.attributes)
-        self.assertEqual(tail_records[0].metadata,to_record.metadata)
+        if str(tail_records[0].metadata[METADATA_KEY_IDENTIFIER]) == str(to_record.metadata[METADATA_KEY_IDENTIFIER]):
+            db_from_record = tail_records[0]
+        elif str(tail_records[1].metadata[METADATA_KEY_IDENTIFIER]) == str(to_record.metadata[METADATA_KEY_IDENTIFIER]):
+            db_from_record = tail_records[1]
+        else:
+            raise Exception("tail_record must contain the to_record identifier")
+
+        tail_records_attr = encode_dict_values_to_primitive(db_from_record.attributes)
+        tail_records_meta = encode_dict_values_to_primitive(db_from_record.metadata)
+        self.assertEqual(tail_records_attr,to_record.attributes)
+        self.assertEqual(tail_records_meta,to_record.metadata)
 
     def test_get_records_tail_nested(self):
         self.clear_database()
@@ -295,7 +304,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         relation_params = base_connector_relation_parameter_example()
 
-        self.instance.save_relation(to_record.metadata[METADATA_KEY_IDENTIFIER], second_to_record.metadata[METADATA_KEY_IDENTIFIER],relation_params["attributes"],relation_params["metadata"])
+        self.instance.save_relation(to_record.metadata[METADATA_KEY_IDENTIFIER], second_from_record.metadata[METADATA_KEY_IDENTIFIER],relation_params["attributes"],relation_params["metadata"])
         self.instance.save_relation(second_from_record.metadata[METADATA_KEY_IDENTIFIER], from_record.metadata[METADATA_KEY_IDENTIFIER],relation_params["attributes"],relation_params["metadata"])
 
         meta_filter = dict()
@@ -566,8 +575,12 @@ class AdapterTestTemplate(unittest.TestCase):
         attr = encode_dict_values_to_primitive(example.from_node["attributes"])
         meta = encode_dict_values_to_primitive(example.from_node["metadata"])
         self.assertEqual(attr,db_record.attributes)
-        self.assertEqual(meta,encode_adapter_result_to_excpect(db_record.metadata))
 
+        db_meta = db_record.metadata
+        if type(db_record.metadata[METADATA_KEY_NAMESPACES]) is list:
+            db_meta = encode_adapter_result_to_excpect(db_record.metadata)
+
+        self.assertEqual(meta,db_meta)
         prim = primer_example()
         self.assertEqual(len(prim.get_records()),len(prim.unified().get_records()))
 
