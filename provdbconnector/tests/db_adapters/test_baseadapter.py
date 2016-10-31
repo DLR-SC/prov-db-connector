@@ -22,8 +22,11 @@ def isnamedtupleinstance(x):
 
 def encode_adapter_result_to_excpect(dict_vals):
     copy = dict_vals.copy()
-    copy.update({METADATA_KEY_NAMESPACES: copy[METADATA_KEY_NAMESPACES].pop()})
-    copy.update({METADATA_KEY_TYPE_MAP: copy[METADATA_KEY_TYPE_MAP].pop()})
+    if type(copy[METADATA_KEY_NAMESPACES]) is list:
+        copy.update({METADATA_KEY_NAMESPACES: copy[METADATA_KEY_NAMESPACES].pop()})
+
+    if type(copy[METADATA_KEY_TYPE_MAP]) is list:
+        copy.update({METADATA_KEY_TYPE_MAP: copy[METADATA_KEY_TYPE_MAP].pop()})
 
     return encode_dict_values_to_primitive(copy)
 
@@ -576,11 +579,7 @@ class AdapterTestTemplate(unittest.TestCase):
         meta = encode_dict_values_to_primitive(example.from_node["metadata"])
         self.assertEqual(attr,db_record.attributes)
 
-        db_meta = db_record.metadata
-        if type(db_record.metadata[METADATA_KEY_NAMESPACES]) is list:
-            db_meta = encode_adapter_result_to_excpect(db_record.metadata)
-
-        self.assertEqual(meta,db_meta)
+        self.assertEqual(meta,encode_adapter_result_to_excpect(db_record.metadata))
         prim = primer_example()
         self.assertEqual(len(prim.get_records()),len(prim.unified().get_records()))
 
