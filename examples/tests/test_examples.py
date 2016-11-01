@@ -18,5 +18,11 @@ class ExamplesTest(unittest.TestCase):
     def test_simple_example(self):
         import examples.simple_example
 
-    def simple_example_with_neo4j(self):
+    def test_simple_example_with_neo4j(self):
         import examples.simple_example_with_neo4j
+
+    def test_merge_example(self):
+        import examples.merge_example
+
+    def test_merge_fail_example(self):
+        import examples.merge_fail_example
