@@ -10,15 +10,6 @@ from provdbconnector.tests.examples import base_connector_record_parameter_examp
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive, decode_json_representation
 import json
 
-def isnamedtupleinstance(x):
-    t = type(x)
-    b = t.__bases__
-    if len(b) != 1 or b[0] != tuple:
-        return False
-    f = getattr(t, '_fields', None)
-    if not isinstance(f, tuple):
-        return False
-    return all(type(n) == str for n in f)
 
 def encode_adapter_result_to_excpect(dict_vals):
     copy = dict_vals.copy()
