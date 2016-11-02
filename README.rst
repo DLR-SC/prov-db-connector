@@ -25,6 +25,10 @@ We transform a PROV document into a graph structure and the result looks like th
    :alt: Complex example in Neo4j
 
    Complex example in Neo4j
+   
+<embed> 
+  <img src="_images/complex_example_with_neo4j_graph.png">
+</embed>
 
 See full documentation at: `prov-db-connector.readthedocs.io <http://prov-db-connector.readthedocs.io>`_
 
