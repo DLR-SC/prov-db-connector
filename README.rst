@@ -20,16 +20,9 @@ Currently we support the `Neo4j <https://neo4j.com/>`_ graph database.
 We transform a PROV document into a graph structure and the result looks like this:
 
 .. figure:: _images/complex_example_with_neo4j_graph.png
-   :align: center
-   :scale: 50 %
-   :alt: Complex example in Neo4j
 
    Complex example in Neo4j
    
-<embed> 
-  <img src="_images/complex_example_with_neo4j_graph.png">
-</embed>
-
 See full documentation at: `prov-db-connector.readthedocs.io <http://prov-db-connector.readthedocs.io>`_
 
 Installation
