@@ -1,14 +1,13 @@
+import json
 import unittest
 
+from prov.constants import PROV_TYPE,PROV_RECORD_IDS_MAP
 from prov.model import ProvDocument
-from prov.constants import PROV_ENTITY, PROV_TYPE,PROV_RECORD_IDS_MAP
-
 from provdbconnector.db_adapters.baseadapter import BaseAdapter, METADATA_KEY_IDENTIFIER, METADATA_KEY_TYPE_MAP, METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE
-from provdbconnector.exceptions.database import NotFoundException, InvalidOptionsException,MergeException
+from provdbconnector.exceptions.database import NotFoundException, MergeException
 from provdbconnector.tests.examples import base_connector_record_parameter_example, primer_example,\
     base_connector_relation_parameter_example, base_connector_bundle_parameter_example, base_connector_merge_example
-from provdbconnector.utils.serializer import encode_dict_values_to_primitive, decode_json_representation
-import json
+from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 
 
 def encode_adapter_result_to_excpect(dict_vals):
@@ -87,10 +86,15 @@ class AdapterTestTemplate(unittest.TestCase):
             self.run = unittest.TestCase.run.__get__(self, self.__class__)
         else:
             self.run = lambda self, *args, **kwargs: None
+
+    def setUp(self):
+        # this function will never be executed !!!!
+        self.instance = BaseAdapter()
+
     def clear_database(self):
         pass
-    ### create section ###
 
+    ### create section ###
     def test_save_bundle(self):
         self.clear_database()
         args = base_connector_bundle_parameter_example()
@@ -114,11 +118,11 @@ class AdapterTestTemplate(unittest.TestCase):
 
         from_meta = args_records["metadata"].copy()
         from_meta.update({METADATA_KEY_IDENTIFIER: args_relation["from_node"]})
-        from_node_id  = self.instance.save_record( args_records["attributes"], from_meta)
+        self.instance.save_record( args_records["attributes"], from_meta)
 
         to_meta = args_records["metadata"].copy()
         to_meta.update({METADATA_KEY_IDENTIFIER: args_relation["to_node"]})
-        to_node_id  = self.instance.save_record(args_records["attributes"], to_meta)
+        self.instance.save_record(args_records["attributes"], to_meta)
 
 
         relation_id = self.instance.save_relation(args_relation["from_node"], args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
@@ -145,8 +149,7 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_get_records_by_filter(self):
         self.clear_database()
         args = base_connector_record_parameter_example()
-        args_bundle = base_connector_bundle_parameter_example()
-
+        base_connector_bundle_parameter_example()
 
         record_id = self.instance.save_record(args["attributes"], args["metadata"])
 
@@ -523,29 +526,6 @@ class AdapterTestTemplate(unittest.TestCase):
 
     ### Merge documents ###
 
-
-    @unittest.skip("Not supportet")
-    def test_merge_no_merge(self):
-        self.clear_database()
-        example = base_connector_merge_example()
-        #Skip test if this merge mode is not supported
-
-
-        #set to no_merge
-        self.instance.setMergeBehaviour(MergeBehaviour.NO_MERGE)
-
-        #save record test
-        self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
-        with self.assertRaises(MergeException):
-            self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
-
-        #save relation test
-        self.instance.save_record(example.to_node)
-        self.instance.save_relation(example.relation)
-
-        with self.assertRaises(MergeException):
-            self.instance.save_relation(example.relation)
-
     def test_merge_record(self):
         self.clear_database()
         example = base_connector_merge_example()
@@ -805,7 +785,7 @@ class AdapterTestTemplate(unittest.TestCase):
         custom_metadata = example.relation["metadata"].copy()
         custom_metadata.update({METADATA_KEY_TYPE_MAP: {"custom_attr_1": "xds:some_value"}})
 
-        rel_id1 = self.instance.save_relation(from_label, to_label, example.relation["attributes"],
+        self.instance.save_relation(from_label, to_label, example.relation["attributes"],
                                               example.relation["metadata"])
 
         rel_id2 = self.instance.save_relation(from_label, to_label, example.relation["attributes"], custom_metadata)
@@ -860,4 +840,4 @@ class BaseConnectorTests(unittest.TestCase):
 
     def test_instance_abstract_class(self):
         with self.assertRaises(TypeError):
-            instance = BaseAdapter()
+            BaseAdapter()

@@ -1,30 +1,27 @@
 import json
+import logging
 import os
 from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
 
-from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE, PROV_ASSOCIATION
-from prov.model import ProvDocument,ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, ProvAssociation
-
+from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE
+from prov.model import ProvDocument, ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, \
+    ProvAssociation
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
-from provdbconnector.utils.converter import form_string, to_json, to_provn, to_xml
-from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
-
 from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException, \
     InvalidProvRecordException
 from provdbconnector.exceptions.utils import ParseException
-
-import logging
+from provdbconnector.utils.converter import form_string, to_json, to_provn, to_xml
+from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', '')
 NUMERIC_LEVEL = getattr(logging, LOG_LEVEL.upper(), None)
 logging.basicConfig(level=NUMERIC_LEVEL)
 logging.getLogger("prov.model").setLevel(logging.WARN)
 log = logging.getLogger(__name__)
-
 
 PROV_API_BUNDLE_IDENTIFIER_PREFIX = "prov:bundle:{}"
 
@@ -40,7 +37,7 @@ class ProvApi(object):
         Create a new instance of ProvAPI
 
         :param api_id: The id of the api, optional
-        :type api_id: str
+        :type api_id: int or str
         :param adapter: The adapter class, must enhance from BaseAdapter
         :type adapter: Baseadapter
         :param auth_info: A dict object that contains the information for authentication
@@ -163,16 +160,14 @@ class ProvApi(object):
 
         doc_id = self._create_bundle(prov_document)
 
-
         for bundle in prov_document.bundles:
-
             bundle_record = ProvEntity(bundle, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record)
-            bundle_id = self._adapter.save_record(attributes=attributes, metadata=metadata)
-
+            self._adapter.save_record(attributes=attributes, metadata=metadata)
 
             self._create_bundle(bundle)
-            self._create_bundle_association(prov_elements=bundle.get_records(ProvElement), prov_bundle_identifier=bundle.identifier)
+            self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
+                                            prov_bundle_identifier=bundle.identifier)
 
         for bundle in prov_document.bundles:
             self._create_bundle_links(bundle)
@@ -196,7 +191,7 @@ class ProvApi(object):
         filter_meta.update({document_id: True})
         filter_prop.update({PROV_TYPE: PROV_BUNDLE})
 
-        bundle_entities = self._adapter.get_records_by_filter(metadata_dict=filter_meta,properties_dict=filter_prop)
+        bundle_entities = self._adapter.get_records_by_filter(metadata_dict=filter_meta, properties_dict=filter_prop)
         document_records = self._adapter.get_records_by_filter(metadata_dict=filter_meta)
 
         # parse document
@@ -206,7 +201,7 @@ class ProvApi(object):
 
         for bundle_record in bundle_entities:
 
-            #skip if we got some relations instead of only the bundle nodes
+            # skip if we got some relations instead of only the bundle nodes
             if str(PROV_TYPE) not in bundle_record.attributes:
                 continue
 
@@ -222,7 +217,8 @@ class ProvApi(object):
                 self._parse_record(prov_bundle, record)
         return prov_document
 
-    def _parse_record(self, prov_bundle, raw_record):
+    @staticmethod
+    def _parse_record(prov_bundle, raw_record):
         """
         This method creates a ProvRecord in the ProvBundle based on the raw database response
 
@@ -289,7 +285,7 @@ class ProvApi(object):
 
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
-            (metadata, attributes) = self._get_metadata_and_attributes_for_record(record,bundle_id)
+            (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id)
             self._adapter.save_record(attributes, metadata)
 
         # create relations
@@ -298,7 +294,7 @@ class ProvApi(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
-            self._create_relation(relation,bundle_id, prov_bundle.identifier)
+            self._create_relation(relation, bundle_id, prov_bundle.identifier)
 
         return bundle_id
 
@@ -322,17 +318,17 @@ class ProvApi(object):
 
         # if target or origin record is unknown, create node "Unknown"
         if from_qualified_name is None:
-            from_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier,bundle_id=bundle_id)
+            from_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier, bundle_id=bundle_id)
 
         if to_qualified_name is None:
-            to_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier,bundle_id=bundle_id)
+            to_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier, bundle_id=bundle_id)
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
-        return self._adapter.save_relation( from_qualified_name, to_qualified_name,
+        return self._adapter.save_relation(from_qualified_name, to_qualified_name,
                                            attributes, metadata)
 
-    def _create_bundle_association(self,  prov_elements, prov_bundle_identifier):
+    def _create_bundle_association(self, prov_elements, prov_bundle_identifier):
         """
         This method creates a relation between the bundle entity and all nodes in the bundle
 
@@ -342,7 +338,8 @@ class ProvApi(object):
         :type prov_elements: list
         """
         bundle = ProvBundle()
-        belong_relation = ProvAssociation(bundle=bundle, identifier=None, attributes={PROV_TYPE: "prov:bundleAssociation"})
+        belong_relation = ProvAssociation(bundle=bundle, identifier=None,
+                                          attributes={PROV_TYPE: "prov:bundleAssociation"})
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
         to_qualified_name = prov_bundle_identifier
 
@@ -368,7 +365,7 @@ class ProvApi(object):
         identifier = doc.valid_qualified_name("prov:Unknown-{}".format(uid))
         record = ProvRecord(bundle=doc, identifier=identifier)
 
-        (metadata, attributes) = self._get_metadata_and_attributes_for_record(record,bundle_id)
+        (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id)
         self._adapter.save_record(attributes, metadata)
 
         # Create bundle association for unknown node if this node is for a bundle, ugly but working
@@ -391,7 +388,8 @@ class ProvApi(object):
 
             self._create_relation(mention)
 
-    def _get_metadata_and_attributes_for_record(self, prov_record, bundle_id= None):
+    @staticmethod
+    def _get_metadata_and_attributes_for_record(prov_record, bundle_id=None):
         """
         This function generate some meta data for the record for example:
 
@@ -399,11 +397,11 @@ class ProvApi(object):
             * Type_Map: The type map is important to get exactly the same document back, you have to save this information (like what attribute is a datetime)
 
         :param prov_record: The ProvRecord (ProvRelation or ProvElement)
-        :type ProvRecord
+        :type prov_record: ProvRecord
         :param bundle_id: The id of the document
-        :type str
-        :return: (metadata, attributes)
-        :rtype: tuple
+        :type bundle_id: str
+        :return: namedtuple(metadata, attributes)
+        :rtype: namedtuple
         """
         if not isinstance(prov_record, ProvRecord):
             raise InvalidArgumentTypeException()
@@ -460,7 +458,7 @@ class ProvApi(object):
                 qualified_name = bundle.valid_qualified_name(value)
                 if qualified_name is not None:
                     # Don't update the attribute, so we only save the namespace instead of the attribute as a qualified name.
-                    # For some reason the prov-library allow a string with a schnema: <namespace_prefix>:<identifier>
+                    # For some reason the prov-library allow a string with a schema: <namespace_prefix>:<identifier>
                     # This line cause an error during the test: "test_primer_example_alternate"
                     # attributes[key] = qualified_name # update attribute
 
@@ -482,9 +480,9 @@ class ProvApi(object):
             METADATA_KEY_TYPE_MAP: types_dict
         }
 
-        #Add document id to metadata, to restore the
+        # Add document id to metadata, to restore the
         if bundle_id:
-            metadata.update({bundle_id:True})
+            metadata.update({bundle_id: True})
         meta_and_attributes = namedtuple("MetaAndAttributes", "metadata, attributes")
 
         return meta_and_attributes(metadata, attributes)

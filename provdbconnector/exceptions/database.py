@@ -49,5 +49,6 @@ class NotFoundException(DatabaseException):
     """
     pass
 
+
 class MergeException(DatabaseException):
     pass

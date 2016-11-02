@@ -1,8 +1,6 @@
+import logging
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from enum import Enum
-
-import logging
 
 log = logging.getLogger(__name__).addHandler(logging.NullHandler())
 
@@ -18,6 +16,7 @@ DbBundle = namedtuple("DbBundle", "records, bundle_record")
 
 DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
+
 
 class BaseAdapter(ABC):
     """
@@ -41,7 +40,6 @@ class BaseAdapter(ABC):
         """
         pass
 
-
     @abstractmethod
     def save_record(self, attributes, metadata):
         """
@@ -57,7 +55,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def save_relation(self,  from_node,  to_node, attributes, metadata):
+    def save_relation(self, from_node, to_node, attributes, metadata):
         """
         Create a relation between 2 nodes
 
@@ -73,7 +71,6 @@ class BaseAdapter(ABC):
         :rtype: str
         """
         pass
-
 
     @abstractmethod
     def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
@@ -92,7 +89,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_records_tail(self,properties_dict=None, metadata_dict=None, depth=None):
+    def get_records_tail(self, properties_dict=None, metadata_dict=None, depth=None):
         """
         Returns all connected nodes and relations based on a filter.
         The filter is an AND combination and this describes the filter only for the origin nodes.
@@ -109,7 +106,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_bundle_records(self,bundle_identifier):
+    def get_bundle_records(self, bundle_identifier):
         """
         Returns the relations and nodes for a specific bundle identifier.
         Please use the bundle association to get all bundle nodes.

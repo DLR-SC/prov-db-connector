@@ -1,6 +1,7 @@
 import os
 from provdbconnector.db_adapters.baseadapter import BaseAdapter
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, \
+    METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
 
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, MergeException
@@ -9,9 +10,11 @@ from neo4j.v1.exceptions import ProtocolError
 from neo4j.v1 import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
-from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive,split_into_formal_and_other_attributes
+from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive, \
+    split_into_formal_and_other_attributes
 
 import logging
+
 logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
 log = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 NEO4J_CREATE_DOCUMENT_NODE_RETURN_ID = """CREATE (node { }) RETURN ID(node) as ID"""
 NEO4J_CREATE_NODE_SET_PART = "SET node.`{attr_name}` = {{`{attr_name}`}}"
 NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR = "SET node.`{attr_name}` = (CASE WHEN not exists(node.`{attr_name}`) THEN [{{`{attr_name}`}}] ELSE node.`{attr_name}` + {{`{attr_name}`}}  END)"
-NEO4J_CREATE_NODE_MERGE_CHECK_PART = """WITH CASE WHEN check = 0 THEN (CASE  WHEN EXISTS(node.`{attr_name}`) AND node.`{attr_name}` <> {{`{attr_name}`}} THEN 1 ELSE 0 END) ELSE 1 END as check , node """
+NEO4J_CREATE_NODE_MERGE_CHECK_PART = """WITH CASE WHEN check = 0 THEN (CASE  WHEN EXISTS(node.`{attr_name}`) AND node.`{attr_name}` <> {{`{attr_name}`}} THEN 1 ELSE 0 END) ELSE 1 END as check , node"""
 NEO4J_CREATE_NODE_RETURN_ID = """MERGE (node:{label} {{{formal_attributes}}})
                                 WITH 0 as check, node
                                 {merge_check_statement}
@@ -54,7 +57,7 @@ NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """
 NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """
                         MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID
                     """
-NEO4J_GET_RECORDS_BY_PROPERTY_DICT= """
+NEO4J_GET_RECORDS_BY_PROPERTY_DICT = """
                             MATCH (d {{{filter_dict}}} )-[r]-(x {{{filter_dict}}})
                             RETURN DISTINCT r as re
                             //Get all nodes that are alone without connections to other nodes
@@ -96,12 +99,11 @@ NEO4J_GET_BUNDLE_RECORDS = """ 
 
  """
 
-
 NEO4J_GET_RECORD_RETURN_NODE = """MATCH (node) WHERE ID(node)={record_id} RETURN node"""
 NEO4J_GET_RELATION_RETURN_NODE = """MATCH ()-[relation]-() WHERE ID(relation)={relation_id}  RETURN relation"""
 
 # delete
-NEO4J_DELETE__NODE_BY_ID = """MATCH  (x) Where ID(x) = {node_id} DETACH DELETE x """
+NEO4J_DELETE__NODE_BY_ID = """MATCH (x) Where ID(x) = {node_id} DETACH DELETE x """
 NEO4J_DELETE_NODE_BY_PROPERTIES = """MATCH (n {{{filter_dict}}}) DETACH DELETE n"""
 NEO4J_DELETE_BUNDLE_NODE_BY_ID = """MATCH (b) WHERE id(b)=toInt({bundle_id}) DELETE b """
 NEO4J_DELETE_RELATION_BY_ID = """MATCH ()-[r]-() WHERE id(r) = {relation_id} DELETE r"""
@@ -142,14 +144,16 @@ class Neo4jAdapter(BaseAdapter):
 
         self._create_session()
 
-    def _prefix_metadata(self, metadata):
+    @staticmethod
+    def _prefix_metadata(metadata):
         prefixed_metadata = dict()
         for key, value in metadata.items():
             prefixed_metadata["{meta_prefix}{key}".format(key=key, meta_prefix=NEO4J_META_PREFIX)] = value
 
         return prefixed_metadata
 
-    def _parse_to_primitive_attributes(self, attributes, prefixed_metadata):
+    @staticmethod
+    def _parse_to_primitive_attributes(attributes, prefixed_metadata):
         all_attributes = attributes.copy()
         all_attributes.update(prefixed_metadata)
 
@@ -162,24 +166,25 @@ class Neo4jAdapter(BaseAdapter):
 
         return db_attributes
 
-    def _get_attributes_identifiers_cypher_string(self, key_list):
+    @staticmethod
+    def _get_attributes_identifiers_cypher_string(key_list):
         db_attributes_identifiers = map(lambda key: "`{}`: {{`{}`}}".format(key, key), key_list)
         return ",".join(db_attributes_identifiers)
 
-    def _get_attributes_set_cypher_string(self,key_list, CYPHER_TEMPLATE = NEO4J_CREATE_NODE_SET_PART):
+    @staticmethod
+    def _get_attributes_set_cypher_string(key_list, cypher_template=NEO4J_CREATE_NODE_SET_PART):
         statements = list()
         for key in key_list:
-            statements.append(CYPHER_TEMPLATE.format(attr_name=key))
-
+            statements.append(cypher_template.format(attr_name=key))
         return " ".join(statements)
+
     def save_record(self, attributes, metadata):
 
         metadata = metadata.copy()
-
         prefixed_metadata = self._prefix_metadata(metadata)
 
-        #setup merge attributes
-        (formal_attributes, other_attributes) = split_into_formal_and_other_attributes(attributes,metadata)
+        # setup merge attributes
+        (formal_attributes, other_attributes) = split_into_formal_and_other_attributes(attributes, metadata)
 
         merge_relevant_keys = list()
         merge_relevant_keys.append("meta:{}".format(METADATA_KEY_IDENTIFIER))
@@ -189,32 +194,32 @@ class Neo4jAdapter(BaseAdapter):
         other_db_attribute_keys = other_db_attribute_keys + list(other_attributes.keys())
         other_db_attribute_keys = other_db_attribute_keys + list(prefixed_metadata.keys())
 
-        #get set statement for non formal attributes
+        # get set statement for non formal attributes
         attr_for_simple_set = other_db_attribute_keys.copy()
-        attr_for_simple_set.remove("meta:"+METADATA_KEY_NAMESPACES)
-        attr_for_simple_set.remove("meta:"+METADATA_KEY_TYPE_MAP)
+        attr_for_simple_set.remove("meta:" + METADATA_KEY_NAMESPACES)
+        attr_for_simple_set.remove("meta:" + METADATA_KEY_TYPE_MAP)
         cypher_set_statement = self._get_attributes_set_cypher_string(attr_for_simple_set)
 
         attr_for_list_merge = list()
-        attr_for_list_merge.append("meta:"+METADATA_KEY_NAMESPACES)
-        attr_for_list_merge.append("meta:"+METADATA_KEY_TYPE_MAP)
-        cypher_set_statement = cypher_set_statement + self._get_attributes_set_cypher_string(attr_for_list_merge, NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR)
+        attr_for_list_merge.append("meta:" + METADATA_KEY_NAMESPACES)
+        attr_for_list_merge.append("meta:" + METADATA_KEY_TYPE_MAP)
+        cypher_set_statement += self._get_attributes_set_cypher_string(attr_for_list_merge,
+                                                                       NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR)
 
-        #get CASE WHEN ... statement to check if a attribute is different
-        cypher_merge_check_statement = self._get_attributes_set_cypher_string(attr_for_simple_set,NEO4J_CREATE_NODE_MERGE_CHECK_PART)
+        # get CASE WHEN ... statement to check if a attribute is different
+        cypher_merge_check_statement = self._get_attributes_set_cypher_string(attr_for_simple_set,
+                                                                              NEO4J_CREATE_NODE_MERGE_CHECK_PART)
 
-        #get cypher string for the merge relevant attributes
+        # get cypher string for the merge relevant attributes
         cypher_merge_relevant_str = self._get_attributes_identifiers_cypher_string(merge_relevant_keys)
 
-        #get prov type
+        # get prov type
         provtype = metadata[METADATA_KEY_PROV_TYPE]
 
-
-        #get db_attributes as dict
+        # get db_attributes as dict
         db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
 
         session = self._create_session()
-
 
         command = NEO4J_CREATE_NODE_RETURN_ID.format(label=provtype.localpart,
                                                      formal_attributes=cypher_merge_relevant_str,
@@ -230,18 +235,19 @@ class Neo4jAdapter(BaseAdapter):
                 record_id = record["ID"]
                 merge_success = record["check"]
 
-
             if record_id is None:
                 raise CreateRecordException("No ID property returned by database for the command {}".format(command))
             if merge_success == 0:
                 tx.success = True
             else:
                 tx.success = False
-                raise MergeException("The attributes {other} could not merged into the existing node, All attributes: {all} ".format(other=other_db_attribute_keys,all=db_attributes))
+                raise MergeException(
+                    "The attributes {other} could not merged into the existing node, All attributes: {all} ".format(
+                        other=other_db_attribute_keys, all=db_attributes))
 
         return str(record_id)
 
-    def save_relation(self,  from_node,  to_node, attributes, metadata):
+    def save_relation(self, from_node, to_node, attributes, metadata):
 
         metadata = metadata.copy()
 
@@ -260,18 +266,18 @@ class Neo4jAdapter(BaseAdapter):
 
         # get set statement for non formal attributes
 
-        #Remove namespace and type_map from the direct set statement, because this attributes need to be merged
+        # Remove namespace and type_map from the direct set statement, because this attributes need to be merged
         attr_for_simple_set = other_db_attribute_keys.copy()
         attr_for_simple_set.remove("meta:" + METADATA_KEY_NAMESPACES)
         attr_for_simple_set.remove("meta:" + METADATA_KEY_TYPE_MAP)
         cypher_set_statement = self._get_attributes_set_cypher_string(attr_for_simple_set)
 
-        #Add separate cypher command to merge the namespaces and tpye map into a list
+        # Add separate cypher command to merge the namespaces and tpye map into a list
         attr_for_list_merge = list()
         attr_for_list_merge.append("meta:" + METADATA_KEY_NAMESPACES)
         attr_for_list_merge.append("meta:" + METADATA_KEY_TYPE_MAP)
-        cypher_set_statement = cypher_set_statement + self._get_attributes_set_cypher_string(attr_for_list_merge,
-                                                                                             NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR)
+        cypher_set_statement += self._get_attributes_set_cypher_string(attr_for_list_merge,
+                                                                       NEO4J_CREATE_NODE_SET_PART_MERGE_ATTR)
 
         # get CASE WHEN ... statement to check if a attribute is different
         cypher_merge_check_statement = self._get_attributes_set_cypher_string(attr_for_simple_set,
@@ -280,7 +286,6 @@ class Neo4jAdapter(BaseAdapter):
         # get cypher string for the merge relevant attributes
         cypher_merge_relevant_str = self._get_attributes_identifiers_cypher_string(merge_relevant_keys)
 
-
         # get db_attributes as dict
         db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
 
@@ -288,12 +293,12 @@ class Neo4jAdapter(BaseAdapter):
 
         relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
-        command = NEO4J_CREATE_RELATION_RETURN_ID.format( from_identifier=from_node,
-                                                          to_identifier=to_node,
-                                                          relation_type=relationtype,
-                                                          formal_attributes=cypher_merge_relevant_str,
-                                                          merge_check_statement=cypher_merge_check_statement,
-                                                          set_statement=cypher_set_statement
+        command = NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=from_node,
+                                                         to_identifier=to_node,
+                                                         relation_type=relationtype,
+                                                         formal_attributes=cypher_merge_relevant_str,
+                                                         merge_check_statement=cypher_merge_check_statement,
+                                                         set_statement=cypher_set_statement
                                                          )
         with session.begin_transaction() as tx:
             result = tx.run(command, dict(db_attributes))
@@ -315,7 +320,8 @@ class Neo4jAdapter(BaseAdapter):
 
         return str(record_id)
 
-    def _split_attributes_metadata_from_node(self, db_node):
+    @staticmethod
+    def _split_attributes_metadata_from_node(db_node):
         record = namedtuple('Record', 'attributes, metadata')
         # split data
         metadata = {k.replace(NEO4J_META_PREFIX, ""): v for k, v in db_node.properties.items() if
@@ -323,29 +329,24 @@ class Neo4jAdapter(BaseAdapter):
         attributes = {k: v for k, v in db_node.properties.items() if
                       not k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
 
-
-        #convert a list of namespace into a string if it is only one item
-        #@todo Kind of a hack to pass all test, it is also allowed to return a list of JSON encoded strings
+        # convert a list of namespace into a string if it is only one item
+        # @todo Kind of a hack to pass all test, it is also allowed to return a list of JSON encoded strings
         namespaces = metadata[METADATA_KEY_NAMESPACES]
-        if isinstance(namespaces,list):
-            #If len is 1 return only the raw JSON string
+        if isinstance(namespaces, list):
+            # If len is 1 return only the raw JSON string
             if len(namespaces) is 1:
                 metadata.update({METADATA_KEY_NAMESPACES: namespaces.pop()})
 
-        #convert a list of namespace into a string if it is only one item
-        #@todo Kind of a hack to pass all test, it is also allowed to return a list of JSON encoded strings
+        # convert a list of namespace into a string if it is only one item
+        # @todo Kind of a hack to pass all test, it is also allowed to return a list of JSON encoded strings
         type_map = metadata[METADATA_KEY_TYPE_MAP]
-        if isinstance(type_map,list):
-            #If len is 1 return only the raw JSON string
+        if isinstance(type_map, list):
+            # If len is 1 return only the raw JSON string
             if len(type_map) is 1:
                 metadata.update({METADATA_KEY_TYPE_MAP: type_map.pop()})
 
-
         record = record(attributes, metadata)
         return record
-
-    def decode_string_value_to_primitive(self, attributes, metadata):
-        type_map = metadata[METADATA_KEY_TYPE_MAP]
 
     def get_bundle_ids(self, document_id):
         session = self._create_session()
@@ -358,25 +359,25 @@ class Neo4jAdapter(BaseAdapter):
 
         return ids
 
-    def _get_cypher_filter_params(self,properties_dict,metadata_dict):
+    def _get_cypher_filter_params(self, properties_dict, metadata_dict):
         metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
 
-        #Merge the 2 dicts into one
+        # Merge the 2 dicts into one
         filter = properties_dict.copy()
         filter.update(metadata_dict_prefixed)
 
         encoded_params = encode_dict_values_to_primitive(filter)
         cypher_str = self._get_attributes_identifiers_cypher_string(filter.keys())
-        return (encoded_params,cypher_str)
+        return encoded_params, cypher_str
 
-    def get_records_by_filter(self,properties_dict=None,metadata_dict=None):
+    def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
 
         if properties_dict is None:
             properties_dict = dict()
         if metadata_dict is None:
             metadata_dict = dict()
 
-        (encoded_params ,cypher_str ) = self._get_cypher_filter_params(properties_dict,metadata_dict)
+        (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
 
         session = self._create_session()
         records = list()
@@ -390,21 +391,22 @@ class Neo4jAdapter(BaseAdapter):
             records.append(relation_record)
         return records
 
-    def get_records_tail(self,properties_dict=None, metadata_dict=None, depth=None):
+    def get_records_tail(self, properties_dict=None, metadata_dict=None, depth=None):
 
         if properties_dict is None:
             properties_dict = dict()
-        if metadata_dict  is None:
+        if metadata_dict is None:
             metadata_dict = dict()
 
         (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
 
-        depth_str =""
+        depth_str = ""
         if depth is not None:
             depth_str = "1..{max}".format(max=depth)
 
         session = self._create_session()
-        result_set = session.run(NEO4J_GET_RECORDS_TAIL_BY_FILTER.format(filter_dict=cypher_str, depth=depth_str), encoded_params)
+        result_set = session.run(NEO4J_GET_RECORDS_TAIL_BY_FILTER.format(filter_dict=cypher_str, depth=depth_str),
+                                 encoded_params)
         records = list()
         for result in result_set:
             record = result["re"]
@@ -416,11 +418,11 @@ class Neo4jAdapter(BaseAdapter):
 
         return records
 
-    def get_bundle_records(self,bundle_identifier):
-
+    def get_bundle_records(self, bundle_identifier):
 
         session = self._create_session()
-        result_set = session.run(NEO4J_GET_BUNDLE_RECORDS, {'meta:{}'.format(METADATA_KEY_IDENTIFIER): bundle_identifier})
+        result_set = session.run(NEO4J_GET_BUNDLE_RECORDS,
+                                 {'meta:{}'.format(METADATA_KEY_IDENTIFIER): bundle_identifier})
         records = list()
         for result in result_set:
             record = result["re"]
@@ -431,8 +433,6 @@ class Neo4jAdapter(BaseAdapter):
             records.append(relation_record)
 
         return records
-
-
 
     def get_record(self, record_id):
 
@@ -479,21 +479,19 @@ class Neo4jAdapter(BaseAdapter):
         if metadata_dict is None:
             metadata_dict = dict()
 
-
         (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
         session = self._create_session()
 
-        result = session.run(NEO4J_DELETE_NODE_BY_PROPERTIES.format(filter_dict=cypher_str), encoded_params)
+        session.run(NEO4J_DELETE_NODE_BY_PROPERTIES.format(filter_dict=cypher_str), encoded_params)
 
         return True
 
-
     def delete_record(self, record_id):
         session = self._create_session()
-        result_set = session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
+        session.run(NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
         return True
 
     def delete_relation(self, relation_id):
         session = self._create_session()
-        result_set = session.run(NEO4J_DELETE_RELATION_BY_ID, {"relation_id": int(relation_id)})
+        session.run(NEO4J_DELETE_RELATION_BY_ID, {"relation_id": int(relation_id)})
         return True
