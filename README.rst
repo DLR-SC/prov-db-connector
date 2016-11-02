@@ -23,8 +23,9 @@ We transform a PROV document into a graph structure and the result looks like th
    :align: center
    :scale: 50 %
    :alt: Complex example in Neo4j
+
    Complex example in Neo4j
-   
+
 See full documentation at: `prov-db-connector.readthedocs.io <http://prov-db-connector.readthedocs.io>`_
 
 Installation
