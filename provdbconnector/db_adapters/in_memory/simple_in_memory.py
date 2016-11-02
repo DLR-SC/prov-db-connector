@@ -127,18 +127,6 @@ class SimpleInMemoryAdapter(BaseAdapter):
                 return DbRelation(attributes, metadata)
         raise NotFoundException("could't find the relation with id {}".format(relation_id))
 
-    def get_bundle(self, bundle_id):
-        bundle = self.bundles.get(bundle_id)
-        if bundle is None:
-            raise NotFoundException()
-
-        records = list()
-        for record_id in bundle.records:
-            record = self.all_records.get(record_id)
-            records.append(record)
-
-        return DbBundle(records, bundle.bundle_record)
-
     def delete_relation(self, relation_id):
 
         for (from_key, relations) in self.all_relations.items():
@@ -148,9 +136,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-
     def delete_record(self, record_id):
-
 
         if record_id not in self.all_nodes:
             raise NotFoundException()

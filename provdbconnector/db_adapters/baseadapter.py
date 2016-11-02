@@ -20,8 +20,6 @@ DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
 
 class BaseAdapter(ABC):
-
-
     """
     Interface class for a prov database adapter
     """
@@ -34,8 +32,12 @@ class BaseAdapter(ABC):
     def connect(self, authentication_info):
         """
         Establish the database connection / login into the database
+
         :param authentication_info: a custom dict with credentials
-        :return: bool
+        :type authentication_info: dict
+        :return: Indicate whether the connection was successful
+        :rtype: boolean
+        :raise InvalidOptionsException:
         """
         pass
 
@@ -44,9 +46,13 @@ class BaseAdapter(ABC):
     def save_record(self, attributes, metadata):
         """
         Creates a database node
+
         :param attributes: Attributes as dict for the record. Be careful you have to encode the dict
+        :type attributes: dict
         :param metadata: Metadata as dict for the record. Be careful you have to encode the dict but you can be sure that all meta keys are always there
-        :return: Record id as string
+        :type metadata: dict
+        :return: Record id
+        :rtype: str
         """
         pass
 
@@ -54,13 +60,17 @@ class BaseAdapter(ABC):
     def save_relation(self,  from_node,  to_node, attributes, metadata):
         """
         Create a relation between 2 nodes
+
         :param from_node: The identifier
-        :param to_node: The identifier for the destionation node
-        :param to_bundle_id: The database id for the to node
+        :type from_node: str
         :param to_node: The identifier for the destination node
+        :type: to_node: str
         :param attributes:  Attributes as dict for the record. Be careful you have to encode the dict
+        :type attributes: dict
         :param metadata: Metadata as dict for the record. Be careful you have to encode the dict but you can be sure that all meta keys are always there
-        :return:
+        :type metadata: dict
+        :return: Record id
+        :rtype: str
         """
         pass
 
@@ -70,10 +80,14 @@ class BaseAdapter(ABC):
         """
         Returns all records (nodes and relations) based on a filter dict.
         The filter dict's are and AND combination but only the start node must fulfill the conditions.
-        The result should contain all associated relations and nodes togehter
+        The result should contain all associated relations and nodes together
+
         :param properties_dict:
+        :type properties_dict: dict
         :param metadata_dict:
-        :return:list of relations and nodes
+        :type metadata_dict: dict
+        :return: list of relations and nodes
+        :rtype: list
         """
         pass
 
@@ -82,10 +96,15 @@ class BaseAdapter(ABC):
         """
         Returns all connected nodes and relations based on a filter.
         The filter is an AND combination and this describes the filter only for the origin nodes.
+
         :param properties_dict:
+        :type properties_dict: dict
         :param metadata_dict:
+        :type metadata_dict: dict
         :param depth:
+        :type depth: int
         :return: a list of relations and nodes
+        :rtype: list
         """
         pass
 
@@ -96,19 +115,23 @@ class BaseAdapter(ABC):
         Please use the bundle association to get all bundle nodes.
         Only the relations belongs to the bundle where the start AND end node belong also to the bundle.
         Except the prov:Mention see: W3C bundle links
-        :param bundle_identifier:
-        :return:list of nodes and bundles
+
+        :param bundle_identifier: The bundle identifier
+        :type bundle_identifier: str
+        :return: list of nodes and bundles
+        :rtype: list
         """
         pass
-
-
 
     @abstractmethod
     def get_record(self, record_id):
         """
         Return a single record
-        :param record_id:
+
+        :param record_id: The id
+        :type record_id: str
         :return: DbRecord
+        :rtype: DbRecord
         """
         pass
 
@@ -116,18 +139,26 @@ class BaseAdapter(ABC):
     def get_relation(self, relation_id):
         """
         Returns a single relation
-        :param relation_id:
-        :return:DbRelation
+
+        :param relation_id: The id
+        :type relation_id: str
+        :return: DbRelation
+        :rtype: DbRelation
         """
         pass
 
     @abstractmethod
     def delete_records_by_filter(self, properties_dict, metadata_dict):
         """
-        Delte records by filter
+        Delete records by filter
+
         :param properties_dict:
+        :type properties_dict: dict
         :param metadata_dict:
-        :return:
+        :type metadata_dict: dict
+        :return: Indicates whether the deletion was successful
+        :rtype: boolean
+        :raise NotFoundException:
         """
         pass
 
@@ -135,9 +166,12 @@ class BaseAdapter(ABC):
     def delete_record(self, record_id):
         """
         Delete a single record
+
         :param record_id:
-        :return:bool
-        :raise NotFoundException
+        :type record_id: str
+        :return: Indicates whether the deletion was successful
+        :rtype: boolean
+        :raise NotFoundException:
         """
         pass
 
@@ -145,8 +179,11 @@ class BaseAdapter(ABC):
     def delete_relation(self, relation_id):
         """
         Delete a single relation
+
         :param relation_id:
-        :return:bool
-        :raise NotFoundException
+        :type relation_id: str
+        :return: Indicates whether the deletion was successful
+        :rtype: boolean
+        :raise NotFoundException:
         """
         pass

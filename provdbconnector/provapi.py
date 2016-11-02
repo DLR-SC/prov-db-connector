@@ -38,9 +38,13 @@ class ProvApi(object):
     def __init__(self, api_id=None, adapter=None, auth_info=None, *args):
         """
         Create a new instance of ProvAPI
+
         :param api_id: The id of the api, optional
+        :type api_id: str
         :param adapter: The adapter class, must enhance from BaseAdapter
+        :type adapter: Baseadapter
         :param auth_info: A dict object that contains the information for authentication
+        :type auth_info: dict or None
         """
         if api_id is None:
             self.api_id = uuid4()
@@ -55,9 +59,12 @@ class ProvApi(object):
     # Converter Methods
     def create_document_from_json(self, content=None):
         """
-        creates a new document in the database
-        :param content: The content as str or Buffer
-        :return: document_id as string
+        Creates a new document in the database
+
+        :param content: The content
+        :type content: str or buffer
+        :return: document_id
+        :rtype: str or buffer
         """
         prov_document = form_string(content=content)
         return self.create_document(content=prov_document)
@@ -65,8 +72,11 @@ class ProvApi(object):
     def get_document_as_json(self, document_id=None):
         """
         Get a ProvDocument from the database based on the document_id
-        :param document_id: The id as a sting value
-        :return: ProvDocument
+
+        :param document_id: document id
+        :type document_id: str
+        :return: ProvDocument as json string
+        :rtype: str
         """
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_json(prov_document)
@@ -74,8 +84,11 @@ class ProvApi(object):
     def create_document_from_xml(self, content=None):
         """
         Creates a prov document in the database based on the xml file
-        :param content: xml string or buffer
-        :return:document_id as string
+
+        :param content: The content
+        :type content: str or buffer
+        :return: document_id
+        :rtype: str
         """
         prov_document = form_string(content=content)
         return self.create_document(content=prov_document)
@@ -83,8 +96,11 @@ class ProvApi(object):
     def get_document_as_xml(self, document_id=None):
         """
         Get a ProvDocument from the database based on the document_id
-        :param document_id: The id as a sting value
-        :return: ProvDocument
+
+        :param document_id: The id
+        :type document_id: str
+        :return: ProvDocument as XML string
+        :rtype: str
         """
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_xml(prov_document)
@@ -92,8 +108,11 @@ class ProvApi(object):
     def create_document_from_provn(self, content=None):
         """
         Creates a prov document in the database based on the provn string or buffer
-        :param content: provn string or buffer
-        :return:document_id as string
+
+        :param content: provn object
+        :type content: str or buffer
+        :return: Document_id
+        :rtype: str
         """
         prov_document = form_string(content=content)
         return self.create_document(content=prov_document)
@@ -101,8 +120,11 @@ class ProvApi(object):
     def get_document_as_provn(self, document_id=None):
         """
         Get a ProvDocument from the database based on the document_id
-        :param document_id: The id as a sting value
+
+        :param document_id: The id
+        :type document_id: str
         :return: ProvDocument
+        :rtype: ProvDocument
         """
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_provn(prov_document)
@@ -110,8 +132,11 @@ class ProvApi(object):
     def create_document_from_prov(self, content=None):
         """
         Creates a prov document in the database based on the prov document
-        :param content: prov document instnace
-        :return:document_id as string
+
+        :param content: Prov document
+        :type content: ProvDocument
+        :return: document_id
+        :rtype: str
         """
         if not isinstance(content, ProvDocument):
             raise InvalidArgumentTypeException()
@@ -120,9 +145,12 @@ class ProvApi(object):
     # Methods that consume ProvDocument instances and produce ProvDocument instances
     def create_document(self, content=None):
         """
-        The main method to create the document in the db
-        :param content: The content can be a xml, json or provn string or buffer or a ProvDocument instnace
-        :return:Document id as string
+        The main method to create a document in the db
+
+        :param content: The content can be a xml, json or provn string or buffer or a ProvDocument instance
+        :type content: str or buffer or ProvDocument
+        :return: Document id
+        :rtype: str
         """
 
         # Try to convert the content into the provDocument, if it is already a ProvDocument instance the function will return this document
@@ -153,9 +181,12 @@ class ProvApi(object):
 
     def get_document_as_prov(self, document_id=None):
         """
-        Get a ProvDocument from the database based on the document_id
-        :param document_id: The id as a sting value
-        :return: ProvDocument
+        Get a ProvDocument from the database based on the document id
+
+        :param document_id: The id
+        :type document_id: str
+        :return: Prov Document
+        :rtype: ProvDocument
         """
         if type(document_id) is not str:
             raise InvalidArgumentTypeException()
@@ -191,14 +222,14 @@ class ProvApi(object):
                 self._parse_record(prov_bundle, record)
         return prov_document
 
-
     def _parse_record(self, prov_bundle, raw_record):
         """
         This method creates a ProvRecord in the ProvBundle based on the raw database response
 
         :param prov_bundle: ProvBundle instance
-        :param raw_record: DbRelation or DbRecord instance (namedtuple)
-        :return:None, the method updates the prov_bundle directly
+        :type prov_bundle: ProvBundle
+        :param raw_record: DbRelation or DbRecord instance as (namedtuple)
+        :type raw_record: DbRelation or DbRecord
         """
 
         # check if record belongs to this bundle
@@ -245,9 +276,11 @@ class ProvApi(object):
     def _create_bundle(self, prov_bundle):
         """
         Private method to create a bundle in the database
-        :param bundle_id: The bundle from the databasedatapter
-        :param prov_bundle: the ProvBundle
-        :return:None
+
+        :param prov_bundle: ProvBundle
+        :type prov_bundle: prov.model.ProvBundle
+        :return bundle_id: The bundle from the database adapter
+        :rtype: str
         """
         bundle_id = str(uuid4())
 
@@ -269,11 +302,18 @@ class ProvApi(object):
 
         return bundle_id
 
-    def _create_relation(self,prov_relation,bundle_id=None, bundle_identifier=None):
+    def _create_relation(self, prov_relation, bundle_id=None, bundle_identifier=None):
         """
         Creates a relation between 2 nodes that are already in the database.
+
         :param prov_relation: The ProvRelation instance
-        :return:Relation id as string
+        :type prov_relation: ProvRelation
+        :param bundle_id
+        :type bundle_id: str
+        :param bundle_identifier
+        :type bundle_identifier: str
+        :return: Relation id
+        :rtype: str
         """
         # get from and to node
         from_tuple, to_tuple = prov_relation.formal_attributes[:2]
@@ -295,10 +335,11 @@ class ProvApi(object):
     def _create_bundle_association(self,  prov_elements, prov_bundle_identifier):
         """
         This method creates a relation between the bundle entity and all nodes in the bundle
-        :param document_id: The database document id
-        :param bundle_id: The database bundle id
-        :param prov_bundle: The instance of ProvBundle
-        :return:
+
+        :param prov_bundle_identifier: The bundle identifier
+        :type prov_bundle_identifier: str
+        :param prov_elements: List of prov elements
+        :type prov_elements: list
         """
         bundle = ProvBundle()
         belong_relation = ProvAssociation(bundle=bundle, identifier=None, attributes={PROV_TYPE: "prov:bundleAssociation"})
@@ -311,10 +352,16 @@ class ProvApi(object):
             self._adapter.save_relation(from_qualified_name, to_qualified_name,
                                         belong_attributes, belong_metadata)
 
-    def _create_unknown_node(self,bundle_identifier=None,bundle_id=None):
+    def _create_unknown_node(self, bundle_identifier=None, bundle_id=None):
         """
         If a relation end or start is "Unknown" (yes this is allowed in PROV) we create a specific node to create the relation
+
+        :param bundle_identifier: The bundle identifier
+        :type bundle_identifier: str
+        :param bundle_id: The bundle id
+        :type bundle_id: str
         :return: The identifier of the Unknown node
+        :rtype: str
         """
         uid = uuid4()
         doc = ProvDocument()
@@ -326,18 +373,17 @@ class ProvApi(object):
 
         # Create bundle association for unknown node if this node is for a bundle, ugly but working
         if bundle_identifier is not None:
-            self._create_bundle_association([record],bundle_identifier)
-
+            self._create_bundle_association([record], bundle_identifier)
 
         return identifier
 
     def _create_bundle_links(self, prov_bundle):
         """
         This function creates the links between nodes in bundles, see https://www.w3.org/TR/prov-links/
-        :param prov_bundle: For this bundle we will create the links
-        :return: None
-        """
 
+        :param prov_bundle: For this bundle we will create the links
+        :type prov_bundle: ProvBundle
+        """
 
         for mention in prov_bundle.get_records(ProvRelation):
             if mention.get_type() is not PROV_MENTION:
@@ -353,10 +399,11 @@ class ProvApi(object):
             * Type_Map: The type map is important to get exactly the same document back, you have to save this information (like what attribute is a datetime)
 
         :param prov_record: The ProvRecord (ProvRelation or ProvElement)
-        :type ProvDocument
+        :type ProvRecord
         :param bundle_id: The id of the document
         :type str
-        :return: Tuple (metadata, attributes)
+        :return: (metadata, attributes)
+        :rtype: tuple
         """
         if not isinstance(prov_record, ProvRecord):
             raise InvalidArgumentTypeException()
