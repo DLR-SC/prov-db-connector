@@ -665,7 +665,10 @@ class AdapterTestTemplate(unittest.TestCase):
             self.assertEqual(meta_custom[METADATA_KEY_NAMESPACES], db_record_namespaces[1])
         else:
             self.assertIsInstance(db_record_namespaces, str)
-            self.assertEqual(meta[METADATA_KEY_NAMESPACES], db_record_namespaces)
+            decoded_map = json.loads(db_record_namespaces)
+            expected_map = json.loads(meta[METADATA_KEY_NAMESPACES])
+            expected_map.update(json.loads(meta_custom[METADATA_KEY_NAMESPACES]))
+            self.assertEqual(decoded_map, expected_map)
 
 
         # check type_map
@@ -828,7 +831,10 @@ class AdapterTestTemplate(unittest.TestCase):
             self.assertEqual(meta_custom[METADATA_KEY_NAMESPACES], db_record_namespaces[1])
         else:
             self.assertIsInstance(db_record_namespaces, str)
-            self.assertEqual(meta[METADATA_KEY_NAMESPACES], db_record_namespaces)
+            decoded_map = json.loads(db_record_namespaces)
+            expected_map = json.loads(meta[METADATA_KEY_NAMESPACES])
+            expected_map.update(json.loads(meta_custom[METADATA_KEY_NAMESPACES]))
+            self.assertEqual(decoded_map, expected_map)
 
         # check type_map
         db_record_type_map = db_record.metadata[METADATA_KEY_TYPE_MAP]
