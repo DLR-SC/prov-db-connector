@@ -69,7 +69,7 @@ class ConverterTests(unittest.TestCase):
         # currently the prov lib don't support from_provn
 
         with self.assertRaises(NotImplementedError):
-            prov = from_provn(self.test_files['provn'])
+            from_provn(self.test_files['provn'])
 
             # self.assertIsInstance(prov, ProvDocument)
 
