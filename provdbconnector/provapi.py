@@ -191,7 +191,7 @@ class ProvApi(object):
         filter_meta.update({document_id: True})
         filter_prop.update({PROV_TYPE: PROV_BUNDLE})
 
-        bundle_entities = self._adapter.get_records_by_filter(metadata_dict=filter_meta, properties_dict=filter_prop)
+        bundle_entities = self._adapter.get_records_by_filter(metadata_dict=filter_meta, attributes_dict=filter_prop)
         document_records = self._adapter.get_records_by_filter(metadata_dict=filter_meta)
 
         # parse document

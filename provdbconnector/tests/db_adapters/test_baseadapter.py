@@ -187,7 +187,7 @@ class AdapterTestTemplate(unittest.TestCase):
         bundle_filter = dict()
         bundle_filter.update({PROV_TYPE: "prov:Bundle"})
 
-        raw_bundle_nodes = self.instance.get_records_by_filter(properties_dict=bundle_filter)
+        raw_bundle_nodes = self.instance.get_records_by_filter(attributes_dict=bundle_filter)
         self.assertIsNotNone(raw_bundle_nodes)
         self.assertIsInstance(raw_bundle_nodes,list)
         self.assertEqual(len(raw_bundle_nodes),1)
@@ -204,7 +204,7 @@ class AdapterTestTemplate(unittest.TestCase):
         #remove date value because this is individual for each node
         del node_filter ["ex:date value"]
 
-        raw_nodes = self.instance.get_records_by_filter(properties_dict=node_filter)
+        raw_nodes = self.instance.get_records_by_filter(attributes_dict=node_filter)
         self.assertIsNotNone(raw_nodes)
         self.assertIsInstance(raw_nodes,list)
         self.assertEqual(len(raw_nodes),4)#4 because the relation is also in the restults and 3 nodes, exclude the bundle node

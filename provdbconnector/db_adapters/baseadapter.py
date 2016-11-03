@@ -73,14 +73,14 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
+    def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
         """
         Returns all records (nodes and relations) based on a filter dict.
         The filter dict's are and AND combination but only the start node must fulfill the conditions.
         The result should contain all associated relations and nodes together
 
-        :param properties_dict:
-        :type properties_dict: dict
+        :param attributes_dict:
+        :type attributes_dict: dict
         :param metadata_dict:
         :type metadata_dict: dict
         :return: list of relations and nodes
@@ -89,13 +89,13 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_records_tail(self, properties_dict=None, metadata_dict=None, depth=None):
+    def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
         """
         Returns all connected nodes and relations based on a filter.
         The filter is an AND combination and this describes the filter only for the origin nodes.
 
-        :param properties_dict:
-        :type properties_dict: dict
+        :param attributes_dict:
+        :type attributes_dict: dict
         :param metadata_dict:
         :type metadata_dict: dict
         :param depth:
@@ -145,12 +145,12 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def delete_records_by_filter(self, properties_dict, metadata_dict):
+    def delete_records_by_filter(self, attributes_dict, metadata_dict):
         """
         Delete records by filter
 
-        :param properties_dict:
-        :type properties_dict: dict
+        :param attributes_dict:
+        :type attributes_dict: dict
         :param metadata_dict:
         :type metadata_dict: dict
         :return: Indicates whether the deletion was successful

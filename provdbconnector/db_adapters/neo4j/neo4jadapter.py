@@ -370,14 +370,14 @@ class Neo4jAdapter(BaseAdapter):
         cypher_str = self._get_attributes_identifiers_cypher_string(filter.keys())
         return encoded_params, cypher_str
 
-    def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
+    def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
 
-        if properties_dict is None:
-            properties_dict = dict()
+        if attributes_dict is None:
+            attributes_dict = dict()
         if metadata_dict is None:
             metadata_dict = dict()
 
-        (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
+        (encoded_params, cypher_str) = self._get_cypher_filter_params(attributes_dict, metadata_dict)
 
         session = self._create_session()
         records = list()
@@ -391,14 +391,14 @@ class Neo4jAdapter(BaseAdapter):
             records.append(relation_record)
         return records
 
-    def get_records_tail(self, properties_dict=None, metadata_dict=None, depth=None):
+    def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
 
-        if properties_dict is None:
-            properties_dict = dict()
+        if attributes_dict is None:
+            attributes_dict = dict()
         if metadata_dict is None:
             metadata_dict = dict()
 
-        (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
+        (encoded_params, cypher_str) = self._get_cypher_filter_params(attributes_dict, metadata_dict)
 
         depth_str = ""
         if depth is not None:
@@ -472,14 +472,14 @@ class Neo4jAdapter(BaseAdapter):
 
         return self._split_attributes_metadata_from_node(relation)
 
-    def delete_records_by_filter(self, properties_dict=None, metadata_dict=None):
+    def delete_records_by_filter(self, attributes_dict=None, metadata_dict=None):
 
-        if properties_dict is None:
-            properties_dict = dict()
+        if attributes_dict is None:
+            attributes_dict = dict()
         if metadata_dict is None:
             metadata_dict = dict()
 
-        (encoded_params, cypher_str) = self._get_cypher_filter_params(properties_dict, metadata_dict)
+        (encoded_params, cypher_str) = self._get_cypher_filter_params(attributes_dict, metadata_dict)
         session = self._create_session()
 
         session.run(NEO4J_DELETE_NODE_BY_PROPERTIES.format(filter_dict=cypher_str), encoded_params)

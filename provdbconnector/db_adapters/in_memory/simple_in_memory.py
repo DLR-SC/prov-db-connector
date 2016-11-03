@@ -25,12 +25,31 @@ class SimpleInMemoryAdapter(BaseAdapter):
         pass
 
     def connect(self, authentication_info):
+        """
+        This function setups your database connection (auth / service discover)
+
+
+        :param authentication_info:
+        :rtype dict or None
+        :return:
+        """
         if authentication_info is not None:
             raise InvalidOptionsException()
 
         return True
 
     def save_record(self, attributes, metadata):
+        """
+        Store a single node in the database and if necessary and possible merge the node
+
+
+        :param attributes: The actual provenance data
+        :type attributes: dict
+        :param metadata: Some metadata that are not PROV-O related
+        :type metadata: dict
+        :return: id of the record
+        :rtype str
+        """
         # because it is in memory, we should copy the dicts to prevent others from modify the data
         attributes = attributes.copy()
         metadata = metadata.copy()
@@ -57,6 +76,22 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return str(identifier)
 
     def save_relation(self, from_node, to_node, attributes, metadata):
+        """
+        Store a relation between 2 nodes in the database.
+        Merge also the relation if necessary and possible
+
+
+        :param from_node: The identifier for the start node
+        :type from_node: prov.model.Identifier
+        :param to_node: The identifier for the end node
+        :type to_node: prov.model.Identifier
+        :param attributes: The actual provenance data
+        :type attributes: dict
+        :param metadata: Some metadata that are not PROV-O related
+        :type metadata: dict
+        :return: The id of the relation
+        :rtype: str
+        """
         # save all relation information and return the relation id as string
 
         # because it is in memory, we should copy the dicts to prevent others from modify the data
@@ -102,11 +137,17 @@ class SimpleInMemoryAdapter(BaseAdapter):
         relations = self.all_relations[str(from_node)]
         relations.update({id: (str(to_node), attributes, metadata)})
 
-        # self.all_records.update({new_rel_id: db_relations})
-
         return id
 
     def get_record(self, record_id):
+        """
+        Get a ProvDocument from the database based on the document id
+
+        :param record_id: The id of the node
+        :type record_id: str
+        :return: A named tuple with (attributes, metadata)
+        :rtype: DbRecord
+        """
         if record_id not in self.all_nodes:
             raise NotFoundException()
 
@@ -118,6 +159,14 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return db_record
 
     def get_relation(self, relation_id):
+        """
+        Return the relation behind the relation_id
+
+        :param relation_id: The id of the relation
+        :type relation_id: str
+        :return: The namedtuple with (attributes, metadata)
+        :rtype DbRelation
+        """
 
         for (from_uri, relations) in self.all_relations.items():
             if relation_id in relations:
@@ -130,6 +179,14 @@ class SimpleInMemoryAdapter(BaseAdapter):
         raise NotFoundException("could't find the relation with id {}".format(relation_id))
 
     def delete_relation(self, relation_id):
+        """
+        Delete the relation
+
+        :param relation_id: The relation id
+        :type relation_id: str
+        :return: Result of the delete operation
+        :rtype Bool
+        """
 
         for (from_key, relations) in self.all_relations.items():
             if relation_id in relations:
@@ -139,6 +196,14 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return True
 
     def delete_record(self, record_id):
+        """
+        Delete a single record
+
+        :param record_id: The node id
+        :type record_id: str
+        :return: Result of the delete operation
+        :rtype Bool
+        """
 
         if record_id not in self.all_nodes:
             raise NotFoundException()
@@ -147,19 +212,45 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-    def get_records_tail(self, properties_dict=None, metadata_dict=None, depth=None):
+    def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
+        """
+        Return the provenance based on a filter combination.
+        The filter dicts are only relevant for the start nodes.
+        They describe the params to get the start nodes (for example a filter for a specific identifier ) and from there
+        we want all connected nodes
+
+        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
+        :type attributes_dict: dict
+        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
+        :type metadata_dict: dict
+        :param depth: The level of detail, default to infinite
+        :type depth: int
+        :return: A list of DbRelations and DbRecords
+        :rtype list(DbRelation or DBRecord)
+        """
         # only transform dict into list
-        return list(self._get_records_tail_internal(properties_dict, metadata_dict).values())
+        return list(self._get_records_tail_internal(attributes_dict, metadata_dict).values())
 
-    def _get_records_tail_internal(self, properties_dict=None, metadata_dict=None, max_depth=None, current_depth=0,
+    def _get_records_tail_internal(self, attributes_dict=None, metadata_dict=None, max_depth=None, current_depth=0,
                                    result_records=None):
+        """
+        Internal function, because we need to call it recursive. This function is only neccecary in this in memory adapter.
+        It's your choice how you implement the get_records_tail function
 
-        if properties_dict is None:
-            properties_dict = dict()
+        :param attributes_dict:
+        :param metadata_dict:
+        :param max_depth:
+        :param current_depth:
+        :param result_records:
+        :return:
+        """
+
+        if attributes_dict is None:
+            attributes_dict = dict()
         if metadata_dict is None:
             metadata_dict = dict()
 
-        origin_records = self.get_records_by_filter(properties_dict, metadata_dict)
+        origin_records = self.get_records_by_filter(attributes_dict, metadata_dict)
 
         if result_records is None:
             result_records = dict()
@@ -185,21 +276,21 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return result_records
 
-    def delete_records_by_filter(self, properties_dict=None, metadata_dict=None):
+    def delete_records_by_filter(self, attributes_dict=None, metadata_dict=None):
 
-        if properties_dict is None:
-            properties_dict = dict()
+        if attributes_dict is None:
+            attributes_dict = dict()
         if metadata_dict is None:
             metadata_dict = dict()
 
         # erase all if no filter set
-        if len(properties_dict) == 0 and len(metadata_dict) == 0:
+        if len(attributes_dict) == 0 and len(metadata_dict) == 0:
             del self.all_nodes
             self.all_nodes = dict()
             return True
 
         # erase only matching nodes
-        records_to_delete = self.get_records_by_filter(properties_dict, metadata_dict)
+        records_to_delete = self.get_records_by_filter(attributes_dict, metadata_dict)
 
         for record in records_to_delete:
             if not isinstance(record, DbRecord):
@@ -273,20 +364,20 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-    def get_records_by_filter(self, properties_dict=None, metadata_dict=None):
+    def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
 
-        if properties_dict is None:
-            properties_dict = dict()
+        if attributes_dict is None:
+            attributes_dict = dict()
         if metadata_dict is None:
             metadata_dict = dict()
 
         return_records = list()
         return_keys = set()
-        properties_filter_dict = encode_dict_values_to_primitive(properties_dict.copy())
+        properties_filter_dict = encode_dict_values_to_primitive(attributes_dict.copy())
         metadata_filter_dict = encode_dict_values_to_primitive(metadata_dict.copy())
         for (identifier, (attributes, metadata)) in self.all_nodes.items():
 
-            if self._check_attribute_metadata_filter(properties_filter=properties_dict,
+            if self._check_attribute_metadata_filter(properties_filter=attributes_dict,
                                                      metadata_filter=metadata_dict,
                                                      metadata=metadata,
                                                      attributes=attributes):
