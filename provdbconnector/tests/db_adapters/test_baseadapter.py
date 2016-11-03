@@ -10,7 +10,18 @@ from provdbconnector.tests.examples import base_connector_record_parameter_examp
 from provdbconnector.utils.serializer import encode_dict_values_to_primitive
 
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    return repr(obj)
+
 def encode_adapter_result_to_excpect(dict_vals):
+    """
+    This function translate a metadata dict to an expected version of this dict
+
+    :param dict_vals:
+    :return:
+    """
     copy = dict_vals.copy()
     if type(copy[METADATA_KEY_NAMESPACES]) is list:
         copy.update({METADATA_KEY_NAMESPACES: copy[METADATA_KEY_NAMESPACES].pop()})
@@ -21,6 +32,14 @@ def encode_adapter_result_to_excpect(dict_vals):
     return encode_dict_values_to_primitive(copy)
 
 def insert_document_with_bundles(instance, identifier_prefix=""):
+    """
+    This function creates a full bundle on your database adapter, to prepare the test data
+
+    :param instance: The db_adapter instnace
+    :param identifier_prefix: A prefix for the identifiers
+
+    :return: The ids of the records
+    """
     args_record = base_connector_record_parameter_example()
     args_bundle = base_connector_bundle_parameter_example()
     doc = ProvDocument()
@@ -63,7 +82,16 @@ def insert_document_with_bundles(instance, identifier_prefix=""):
 
 
 class AdapterTestTemplate(unittest.TestCase):
+    """
+    This test class is a template for each database adapter.
+    The following example show how you implement the test for your adapter:
 
+        .. literalinclude:: ../../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
+           :linenos:
+           :language: python
+           :lines: 1-25
+
+    """
     maxDiff = None
 
     def __init__(self, *args, **kwargs):
@@ -88,14 +116,29 @@ class AdapterTestTemplate(unittest.TestCase):
             self.run = lambda self, *args, **kwargs: None
 
     def setUp(self):
+        """
+        Setup the instnace of your database adapter
+          .. warning::
+            Override this method otherwise all test will fail
+
+        :return:
+        """
         # this function will never be executed !!!!
         self.instance = BaseAdapter()
 
     def clear_database(self):
+        """
+        This function is to clear your database adapter before each test
+        :return:
+        """
         pass
 
     ### create section ###
     def test_save_bundle(self):
+        """
+
+        :return:
+        """
         self.clear_database()
         args = base_connector_bundle_parameter_example()
         id = self.instance.save_record(args["attributes"], args["metadata"])
@@ -103,6 +146,54 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(id), str, "id should be a string ")
 
     def test_save_record(self):
+        """
+        This test try to save a simple record
+
+        **Input-Data**
+
+        .. warning::
+            This is a json representation of the input data and not the real input data.
+            For example metadata.prov_type is a QualifiedName instance
+        .. code-block:: json
+
+            {
+               "metadata":{
+                  "identifier":"<QualifiedName: prov:example_node>",
+                  "namespaces":{
+                     "ex":"http://example.com",
+                     "custom":"http://custom.com"
+                  },
+                  "prov_type":"<QualifiedName: prov:Activity>",
+                  "type_map":{
+                     "int value":"int",
+                     "date value":"xds:datetime"
+                  }
+               },
+               "attributes":{
+                  "ex:individual attribute":"Some value",
+                  "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                  "ex:dict value":{
+                     "dict":"value"
+                  },
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:double value":99.33,
+                  "ex:int value":99
+               }
+            }
+
+        **Output-Data**
+
+        The output is only a id as string
+
+         `4d3cdc76-467d-4db8-89bf-9accc7b27777`
+
+
+
+        """
         self.clear_database()
         args = base_connector_record_parameter_example()
 
@@ -111,6 +202,59 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_save_relation(self):
+        """
+        This test try to save a simple relation between 2 identifiers
+
+        **Input-Data**
+
+        .. warning::
+            This is a json representation of the input data and not the real input data.
+            For example metadata.prov_type is a QualifiedName instance
+
+        .. code-block:: json
+
+            {
+
+               "from_node":"<QualifiedName: ex:Yoda>",
+               "to_node":"<QualifiedName: ex:Luke Skywalker>",
+               "metadata":{
+                  "prov_type":"<QualifiedName: prov:Mention>",
+                  "type_map":{
+                     "date value":"xds:datetime",
+                     "int value":"int"
+                  },
+                  "namespaces":{
+                     "custom":"http://custom.com",
+                     "ex":"http://example.com"
+                  },
+                  "identifier":"identifier for the relation"
+               },
+               "attributes":{
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:int value":99,
+                  "ex:double value":99.33,
+                  "ex:individual attribute":"Some value",
+                  "ex:dict value":{
+                     "dict":"value"
+                  },
+                  "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)"
+               },
+            }
+
+        **Output-Data**
+
+        The output is only the id of the relation as string
+
+         `4d3cdc76-467d-4db8-89bf-9accc7b27778`
+
+
+
+        """
+
         self.clear_database()
         args_relation = base_connector_relation_parameter_example()
         args_records = base_connector_record_parameter_example()
@@ -131,6 +275,10 @@ class AdapterTestTemplate(unittest.TestCase):
 
     @unittest.skip("We should discuss the possibility of relations that are create automatically nodes")
     def test_save_relation_with_unknown_records(self):
+        """
+        This test is to test the creation of a relation where the nodes are not in the database
+        :return:
+        """
         self.clear_database()
         args_relation = base_connector_relation_parameter_example()
 
@@ -144,9 +292,54 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(relation_id), str, "id should be a string ")
 
     ### Get section ###
-
-
     def test_get_records_by_filter(self):
+        """
+
+        This test is to get a the whole graph without any filter
+
+        **Input-Data**
+
+        We have no input data for the filter function because we want to get the whole graph
+
+        **Output-Data**
+
+        The output is the only node that exist in the database (was also created during the test)
+
+        .. warning::
+            This is a json representation of the input data and not the real input data.
+            For example metadata.prov_type is a QualifiedName instance
+        .. code-block:: json
+
+            {
+               "metadata":{
+                  "identifier":"<QualifiedName: prov:example_node>",
+                  "namespaces":{
+                     "ex":"http://example.com",
+                     "custom":"http://custom.com"
+                  },
+                  "prov_type":"<QualifiedName: prov:Activity>",
+                  "type_map":{
+                     "int value":"int",
+                     "date value":"xds:datetime"
+                  }
+               },
+               "attributes":{
+                  "ex:individual attribute":"Some value",
+                  "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                  "ex:dict value":{
+                     "dict":"value"
+                  },
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:double value":99.33,
+                  "ex:int value":99
+               }
+            }
+
+        """
         self.clear_database()
         args = base_connector_record_parameter_example()
         base_connector_bundle_parameter_example()
@@ -155,13 +348,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         raw_result = self.instance.get_records_by_filter()
 
-        # Return structure...
-        # raw_doc = {
-        #     records: []
-        #     identifier: ""
-        # }
-
-        # check bundle
+        #check restul
         self.assertIsNotNone(raw_result)
         self.assertIsInstance(raw_result, list)
         self.assertEqual(len(raw_result), 1)
@@ -179,6 +366,160 @@ class AdapterTestTemplate(unittest.TestCase):
         # check bundle
 
     def test_get_records_by_filter_with_properties(self):
+        """
+        This test is to get a specific part of the graph via certain filter criteria
+
+
+        *Get single node*
+
+        The first part of the test is to try to get a single node based on a attribut
+
+        *Input-Data*
+
+        .. code-block:: json
+
+            {
+                "prov:type":"prov:Bundle"
+            }
+
+
+        *Output-Data*
+
+        The output is a list of namedtuples wit the following structure: `list(tuple(attributes,metadata))`
+
+        .. code-block:: json
+
+            [
+                [
+                    {
+                        "prov:type": "prov:Bundle"
+                    },
+                    {
+                        "prov_type": "prov:Entity",
+                        "identifier": "ex:bundle name",
+                        "type_map": "{\\"date value\\": \\"xds:datetime\\", \\"int value\\": \\"int\\"}",
+                        "namespaces": "{\\"ex\\": \\"http://example.com\\"}"
+                    }
+                ]
+            ]
+
+
+        *Get other nodes*
+
+        The second part tests the other way to get all other node except the bundle node
+
+        *Input-Data*
+
+        The input is a set of attributes
+
+        .. code-block:: json
+
+            {
+               "ex:dict value":{
+                  "dict":"value"
+               },
+               "ex:double value":99.33,
+               "ex:int value":99,
+               "ex:individual attribute":"Some value",
+               "ex:list value":[
+                  "list",
+                  "of",
+                  "strings"
+               ]
+            }
+
+        *Output-Data*
+
+        The output is a list of namedtuple with attributes and metadata
+
+        .. code-block:: json
+
+            [
+               [
+                  {
+                     "ex:dict value":"{'dict': 'value'}",
+                     "ex:double value":99.33,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ],
+                     "ex:int value":99,
+                     "ex:date value":"2005-06-01 13:33:00",
+                     "ex:individual attribute":"Some value"
+                  },
+                  {
+                     "identifier":"ex:TO NODE",
+                     "type_map":"{'int value': 'int', 'date value': 'xds:datetime'}",
+                     "namespaces":"{'ex': 'http://example.com', 'custom': 'http://custom.com'}",
+                     "prov_type":"prov:Activity"
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":"{'dict': 'value'}",
+                     "ex:double value":99.33,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ],
+                     "ex:int value":99,
+                     "ex:date value":"2005-06-01 13:33:00",
+                     "ex:individual attribute":"Some value"
+                  },
+                  {
+                     "identifier":"ex:FROM NODE",
+                     "type_map":"{'int value': 'int', 'date value': 'xds:datetime'}",
+                     "namespaces":"{'ex': 'http://example.com', 'custom': 'http://custom.com'}",
+                     "prov_type":"prov:Activity"
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":"{'dict': 'value'}",
+                     "ex:double value":99.33,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ],
+                     "ex:int value":99,
+                     "ex:date value":"2005-06-01 13:33:00",
+                     "ex:individual attribute":"Some value"
+                  },
+                  {
+                     "identifier":"ex:prov:example_node",
+                     "type_map":"{'int value': 'int', 'date value': 'xds:datetime'}",
+                     "namespaces":"{'ex': 'http://example.com', 'custom': 'http://custom.com'}",
+                     "prov_type":"prov:Activity"
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":"{'dict': 'value'}",
+                     "ex:double value":99.33,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ],
+                     "ex:int value":99,
+                     "ex:date value":"2005-06-01 13:33:00",
+                     "ex:individual attribute":"Some value"
+                  },
+                  {
+                     "identifier":"identifier for the relation",
+                     "type_map":"{'int value': 'int', 'date value': 'xds:datetime'}",
+                     "namespaces":"{'ex': 'http://example.com', 'custom': 'http://custom.com'}",
+                     "prov_type":"prov:Mention"
+                  }
+               ]
+            ]
+
+        :return
+
+        """
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
@@ -188,6 +529,7 @@ class AdapterTestTemplate(unittest.TestCase):
         bundle_filter.update({PROV_TYPE: "prov:Bundle"})
 
         raw_bundle_nodes = self.instance.get_records_by_filter(attributes_dict=bundle_filter)
+
         self.assertIsNotNone(raw_bundle_nodes)
         self.assertIsInstance(raw_bundle_nodes,list)
         self.assertEqual(len(raw_bundle_nodes),1)
@@ -234,6 +576,16 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(raw_nodes[2].metadata, meta_dict)
 
     def test_get_records_by_filter_with_metadata(self):
+        """
+        Should test also the filter by metadata
+
+        @todo implement test for filter by metadata
+
+        .. warning::
+            This test is not implemented jet
+
+        :return:
+        """
         self.clear_database()
         args = base_connector_record_parameter_example()
 
@@ -259,6 +611,85 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_get_records_tail(self):
+        """
+        This test is to get the whole provenance from a starting point
+
+        **Input-Data**
+
+        In this case we filter by metadata and by the identifier
+
+        .. code-block:: json
+
+            {
+               "identifier":"ex:FROM NODE"
+            }
+
+        **Output-Data**
+
+        The output is all connected nodes and there relations
+
+        .. code-block:: json
+
+            [
+               [
+                  {
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ],
+                     "ex:double value":99.33,
+                     "ex:int value":99,
+                     "ex:individual attribute":"Some value",
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:dict value":{
+                        "dict":"value"
+                     }
+                  },
+                  {
+                     "prov_type":"<QualifiedName: prov:Mention>",
+                     "identifier":"identifier for the relation",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     },
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ],
+                     "ex:double value":99.33,
+                     "ex:int value":99,
+                     "ex:individual attribute":"Some value",
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:dict value":{
+                        "dict":"value"
+                     }
+                  },
+                  {
+                     "prov_type":"<QualifiedName: prov:Activity>",
+                     "identifier":"<QualifiedName: ex:TO NODE>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     },
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     }
+                  }
+               ]
+            ]
+
+        """
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
@@ -289,7 +720,254 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(tail_records_attr,to_record.attributes)
         self.assertEqual(tail_records_meta,to_record.metadata)
 
-    def test_get_records_tail_nested(self):
+    def test_get_records_tail_recursive(self):
+        """
+        Test the same behavior as the `test_get_records_tail` test but with a recursive data structure
+
+        .. code-block:: json
+
+            {
+               "identifier":"ex:FROM NODE"
+            }
+
+        **Output-Data**
+
+        The output is all connected nodes and there relations
+
+        .. code-block:: json
+
+            [
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"identifier for the relation",
+                     "prov_type":"<QualifiedName: prov:Mention>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"identifier for the relation",
+                     "prov_type":"<QualifiedName: prov:Mention>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"<QualifiedName: ex:TO NODE>",
+                     "prov_type":"<QualifiedName: prov:Activity>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"<QualifiedName: ex:second_TO NODE>",
+                     "prov_type":"<QualifiedName: prov:Activity>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"identifier for the relation",
+                     "prov_type":"<QualifiedName: prov:Mention>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"<QualifiedName: ex:FROM NODE>",
+                     "prov_type":"<QualifiedName: prov:Activity>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"identifier for the relation",
+                     "prov_type":"<QualifiedName: prov:Mention>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ],
+               [
+                  {
+                     "ex:dict value":{
+                        "dict":"value"
+                     },
+                     "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                     "ex:double value":99.33,
+                     "ex:individual attribute":"Some value",
+                     "ex:int value":99,
+                     "ex:list value":[
+                        "list",
+                        "of",
+                        "strings"
+                     ]
+                  },
+                  {
+                     "namespaces":{
+                        "custom":"http://custom.com",
+                        "ex":"http://example.com"
+                     },
+                     "identifier":"<QualifiedName: ex:second_FROM NODE>",
+                     "prov_type":"<QualifiedName: prov:Activity>",
+                     "type_map":{
+                        "date value":"xds:datetime",
+                        "int value":"int"
+                     }
+                  }
+               ]
+            ]
+
+
+
+        """
+        #def test_get_records_tail_recursive(self):
+
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         ids2 = insert_document_with_bundles(self.instance,"second_")
@@ -317,6 +995,26 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIsInstance(tail_records[0].metadata,dict)
 
     def test_get_bundle_records(self):
+        """
+        The get_bundle function is to return the records (relation and nodes) for a bundle identifier
+
+        Test the same behavior as the `test_get_records_tail` test but with a recursive data structure
+
+        .. code-block:: json
+
+            {
+               "identifier":"ex:FROM NODE"
+            }
+
+        **Output-Data**
+
+        The output is all connected nodes and there relations
+
+         .. warning::
+            coming soon!
+
+
+        """
         self.clear_database()
         #create relation in database
         doc = ProvDocument()
@@ -356,21 +1054,56 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
         #Test the get
-
-
         result_records = self.instance.get_bundle_records("ex:Yoda")
+
         self.assertIsNotNone(result_records)
         self.assertIsInstance(result_records,list)
         self.assertTrue(len(result_records),2)# 2 x node (another node) ,  1 x relation (was informed by )
 
 
     def test_get_record(self):
+        """
+        Create a record and then try to get it back
+
+        **Input-Data**
+
+        `"id-333"`
+
+        **Output-Data**
+
+        The output is all connected nodes and there relations
+
+        .. code-block:: json
+
+            [
+               {
+                  "ex:int value":99,
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:date value":"2005-06-01 13:33:00",
+                  "ex:individual attribute":"Some value",
+                  "ex:double value":99.33,
+                  "ex:dict value":"{\"dict\": \"value\"}"
+               },
+               {
+                  "identifier":"prov:example_node",
+                  "prov_type":"prov:Activity",
+                  "type_map":"{\"date value\": \"xds:datetime\", \"int value\": \"int\"}",
+                  "namespaces":"{\"custom\": \"http://custom.com\", \"ex\": \"http://example.com\"}"
+               }
+            ]
+
+        """
         self.clear_database()
         args = base_connector_record_parameter_example()
 
         record_id = self.instance.save_record( args["attributes"], args["metadata"])#
 
         record_raw = self.instance.get_record(record_id)
+
 
         self.assertIsNotNone(record_raw)
         self.assertIsNotNone(record_raw.attributes)
@@ -387,11 +1120,51 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(record_id), str, "id should be a string ")
 
     def test_get_record_not_found(self):
+        """
+        Try to get a record with a invalid id
+        :return:
+        """
         self.clear_database()
         with self.assertRaises(NotFoundException):
             self.instance.get_record("99999999")
 
     def test_get_relation(self):
+        """
+        create a relation between 2 nodes and try to get the relation back
+
+
+        **Input-Data**
+
+        `"id-333"`
+
+        **Output-Data**
+
+        The output is all connected nodes and there relations
+
+        .. code-block:: json
+
+            [
+               {
+                  "ex:dict value":"{\"dict\": \"value\"}",
+                  "ex:int value":99,
+                  "ex:individual attribute":"Some value",
+                  "ex:date value":"2005-06-01 13:33:00",
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:double value":99.33
+               },
+               {
+                  "identifier":"identifier for the relation",
+                  "prov_type":"prov:Mention",
+                  "namespaces":"{\"ex\": \"http://example.com\", \"custom\": \"http://custom.com\"}",
+                  "type_map":"{\"date value\": \"xds:datetime\", \"int value\": \"int\"}"
+               }
+            ]
+
+        """
         self.clear_database()
         from_record_args = base_connector_record_parameter_example()
         to_record_args = base_connector_record_parameter_example()
@@ -422,12 +1195,22 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(relation_raw.metadata, metadata_primitive)
 
     def test_get_relation_not_found(self):
+        """
+        Try to get a not existing relation
+
+
+        """
         self.clear_database()
         with self.assertRaises(NotFoundException):
             self.instance.get_relation("99999999")
 
     ##Delete section ###
     def test_delete_by_filter(self):
+        """
+        Try to all records of the database
+
+        :return:
+        """
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         result = self.instance.delete_records_by_filter()
@@ -440,6 +1223,11 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_delete_by_filter_with_properties(self):
+        """
+        Try to delete by filter, same behavior as get_by_filter
+
+        :return:
+        """
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
@@ -474,6 +1262,10 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_delete_by_filter_with_metadata(self):
+        """
+        Try to delete by metadata, same behavior as get_by_metadata
+        :return:
+        """
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
 
@@ -503,6 +1295,11 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(len(raw_results), 3)
 
     def test_delete_record(self):
+        """
+        Delete a single record based on the id
+
+        :return:
+        """
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         from_record_id = ids["from_record_id"]
@@ -514,6 +1311,11 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.get_record(from_record_id)
 
     def test_delete_relation(self):
+        """
+        Delete a singe relation based on the relation id
+
+        :return:
+        """
         self.clear_database()
         ids = insert_document_with_bundles(self.instance)
         relation_id = ids["relation_id"]
@@ -527,6 +1329,73 @@ class AdapterTestTemplate(unittest.TestCase):
     ### Merge documents ###
 
     def test_merge_record(self):
+        """
+        This function test the merge abbility of your adapter.
+
+        **Input-Data**
+
+        We try to create the node twice, with the following data
+
+        .. code-block:: json
+
+            {
+               "metadata":{
+                  "prov_type":"<QualifiedName: prov:Activity>",
+                  "namespaces":{
+                     "ex":"http://example.com",
+                     "custom":"http://custom.com"
+                  },
+                  "identifier":"<QualifiedName: ex:Yoda>",
+                  "type_map":{
+                     "int value":"int",
+                     "date value":"xds:datetime"
+                  }
+               },
+               "attributes":{
+                  "ex:int value":99,
+                  "ex:individual attribute":"Some value",
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+                  "ex:dict value":{
+                     "dict":"value"
+                  },
+                  "ex:double value":99.33
+               }
+            }
+
+        **Output-Data**
+
+        The output is one entry with no change of the data
+
+        .. code-block:: json
+
+            [
+               {
+                  "ex:int value":99,
+                  "ex:individual attribute":"Some value",
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:date value":"2005-06-01 13:33:00",
+                  "ex:dict value":"{\"dict\": \"value\"}",
+                  "ex:double value":99.33
+               },
+               {
+                  "prov_type":"prov:Activity",
+                  "namespaces":"{\"ex\": \"http://example.com\", \"custom\": \"http://custom.com\"}",
+                  "identifier":"ex:Yoda",
+                  "type_map":"{\"int value\": \"int\", \"date value\": \"xds:datetime\"}"
+               }
+            ]
+
+
+        """
         self.clear_database()
         example = base_connector_merge_example()
         #Skip test if this merge mode is not supported
@@ -555,11 +1424,75 @@ class AdapterTestTemplate(unittest.TestCase):
         db_meta.update({METADATA_KEY_TYPE_MAP: json.loads(db_meta[METADATA_KEY_TYPE_MAP])})
         self.assertEqual(attr,db_record.attributes)
 
+
         self.assertEqual(meta,db_meta)
         prim = primer_example()
         self.assertEqual(len(prim.get_records()),len(prim.unified().get_records()))
 
     def test_merge_record_complex(self):
+        """
+        In this example we test if we merge different attributes into one node
+
+
+        **Input-Data**
+
+        This is the attributes used to create the entry
+
+        .. code-block:: json
+
+            {
+               "ex:individual attribute":"Some value",
+               "ex:dict value":{
+                  "dict":"value"
+               },
+               "ex:double value":99.33,
+               "ex:list value":[
+                  "list",
+                  "of",
+                  "strings"
+               ],
+               "ex:int value":99,
+               "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)"
+            }
+
+        This are the attributes to alter the existing node
+
+        .. code-block:: json
+
+            {
+                "ex:a other attribute":true
+            }
+
+        **Output-Data**
+
+        The output is one entry with the additional attribute
+
+        .. code-block:: json
+
+            [
+               {
+                  "ex:individual attribute":"Some value",
+                  "ex:dict value":"{\"dict\": \"value\"}",
+                  "ex:double value":99.33,
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:int value":99,
+                  "ex:date value":"2005-06-01 13:33:00",
+                  "ex:a other attribute":true
+               },
+               {
+                  "type_map":"{\"date value\": \"xds:datetime\", \"int value\": \"int\"}",
+                  "identifier":"ex:Yoda",
+                  "prov_type":"prov:Activity",
+                  "namespaces":"{\"ex\": \"http://example.com\", \"custom\": \"http://custom.com\"}"
+               }
+            ]
+
+
+        """
         self.clear_database()
         example = base_connector_merge_example()
         # Skip test if this merge mode is not supported
@@ -596,6 +1529,44 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertEqual(meta, db_meta)
 
     def test_merge_record_complex_fail(self):
+        """
+         In this example we test if we merge different attributes into one node
+
+
+         **Input-Data**
+
+         This is the attributes used to create the entry
+
+         .. code-block:: json
+
+             {
+               "ex:list value":[
+                  "list",
+                  "of",
+                  "strings"
+               ],
+               "ex:double value":99.33,
+               "ex:date value":"datetime.datetime(2005, 6, 1, 13, 33)",
+               "ex:dict value":{
+                  "dict":"value"
+               },
+               "ex:int value":99,
+               "ex:individual attribute":"Some value"
+            }
+
+         Try to *override* the existing attribute
+
+         .. code-block:: json
+
+            {
+                "ex:int value": 1
+            }
+
+         **Output-Data**
+
+         Should throw an MergeException
+
+         """
         self.clear_database()
         example = base_connector_merge_example()
         # Skip test if this merge mode is not supported
@@ -612,6 +1583,76 @@ class AdapterTestTemplate(unittest.TestCase):
             self.instance.save_record(attr_modified, metadata_modified)
 
     def test_merge_record_metadata(self):
+        """
+        This test try to merge the metadata.
+        This is important if you add some new attributes that uses other namespaces, so you need to merge the namespaces
+        Same behavior for the type_map
+
+        **Input-Data**
+
+        The metadata for the initial record:
+
+        .. code-block:: json
+
+             {
+               "type_map":{
+                  "date value":"xds:datetime",
+                  "int value":"int"
+               },
+               "prov_type":"<QualifiedName: prov:Activity>",
+               "namespaces":{
+                  "custom":"http://custom.com",
+                  "ex":"http://example.com"
+               },
+               "identifier":"<QualifiedName: ex:Yoda>"
+            }
+
+
+        Try to add a record with some modified namespaces
+
+        .. code-block:: json
+
+            {
+               "namespaces":{
+                  "custom":"http://custom.com",
+                  "ex":"http://example.com"
+               },
+               "prov_type":"<QualifiedName: prov:Activity>",
+               "identifier":"<QualifiedName: ex:Yoda>",
+               "type_map":{
+                  "custom_attr_1":"xds:some_value"
+               }
+            }
+
+
+        **Output-Data**
+
+        The output is the merged result of the type map
+
+        .. code-block:: json
+
+            [
+               {
+                  "ex:individual attribute":"Some value",
+                  "ex:list value":[
+                     "list",
+                     "of",
+                     "strings"
+                  ],
+                  "ex:int value":99,
+                  "ex:date value":"2005-06-01 13:33:00",
+                  "ex:dict value":"{\"dict\": \"value\"}",
+                  "ex:double value":99.33
+               },
+               {
+                  "prov_type":"prov:Activity",
+                  "type_map":"{\"custom_attr_1\": \"xds:some_value\", \"date value\": \"xds:datetime\", \"int value\": \"int\"}",
+                  "identifier":"ex:Yoda",
+                  "namespaces":"{\"custom\": \"http://custom.com\", \"ex\": \"http://example.com\"}"
+               }
+            ]
+
+        """
         self.clear_database()
         example = base_connector_merge_example()
         # Skip test if this merge mode is not supported
@@ -637,6 +1678,9 @@ class AdapterTestTemplate(unittest.TestCase):
 
         # check namespaces
         db_record_namespaces = db_record.metadata[METADATA_KEY_NAMESPACES]
+
+
+
 
         if type(db_record_namespaces) is list:
             self.assertIsInstance(db_record_namespaces, list)
@@ -669,6 +1713,20 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation(self):
+        """
+        Merge a relation is pretty similar to merge records.
+        The big difference is the different rules for uniques
+
+
+        A relation is unique if:
+
+        - The relation type is the same
+        - all other formal attributes (see SimpleDbAdapter) are the same
+
+        otherwise it is not the same relation.
+
+
+        """
         self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
@@ -706,6 +1764,10 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation_complex(self):
+        """
+        Same behavior as the merge_node test
+
+        """
         self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
@@ -747,6 +1809,11 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation_complex_fail(self):
+        """
+        Same behavior as the merge_node_fail test
+
+
+        """
         self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
@@ -770,6 +1837,10 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     def test_merge_relation_metadata(self):
+        """
+        Same as the merge_record_metadata
+
+        """
         self.clear_database()
         example = base_connector_merge_example()
         prim = primer_example()
