@@ -28,11 +28,12 @@ class SimpleInMemoryAdapter(BaseAdapter):
         """
         This function setups your database connection (auth / service discover)
 
-
-        :param authentication_info:
-        :rtype dict or None
-        :return:
+        :param authentication_info: The info to connect to the db
+        :type authentication_info: dict or None
+        :return: The result of the connection attempt
+        :rtype: Bool
         """
+
         if authentication_info is not None:
             raise InvalidOptionsException()
 
@@ -42,14 +43,14 @@ class SimpleInMemoryAdapter(BaseAdapter):
         """
         Store a single node in the database and if necessary and possible merge the node
 
-
         :param attributes: The actual provenance data
         :type attributes: dict
         :param metadata: Some metadata that are not PROV-O related
         :type metadata: dict
         :return: id of the record
-        :rtype str
+        :rtype: str
         """
+
         # because it is in memory, we should copy the dicts to prevent others from modify the data
         attributes = attributes.copy()
         metadata = metadata.copy()
@@ -80,7 +81,6 @@ class SimpleInMemoryAdapter(BaseAdapter):
         Store a relation between 2 nodes in the database.
         Merge also the relation if necessary and possible
 
-
         :param from_node: The identifier for the start node
         :type from_node: prov.model.Identifier
         :param to_node: The identifier for the end node
@@ -92,6 +92,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         :return: The id of the relation
         :rtype: str
         """
+
         # save all relation information and return the relation id as string
 
         # because it is in memory, we should copy the dicts to prevent others from modify the data
@@ -165,7 +166,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         :param relation_id: The id of the relation
         :type relation_id: str
         :return: The namedtuple with (attributes, metadata)
-        :rtype DbRelation
+        :rtype: DbRelation
         """
 
         for (from_uri, relations) in self.all_relations.items():
@@ -185,7 +186,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         :param relation_id: The relation id
         :type relation_id: str
         :return: Result of the delete operation
-        :rtype Bool
+        :rtype: Bool
         """
 
         for (from_key, relations) in self.all_relations.items():
@@ -202,7 +203,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         :param record_id: The node id
         :type record_id: str
         :return: Result of the delete operation
-        :rtype Bool
+        :rtype: Bool
         """
 
         if record_id not in self.all_nodes:
@@ -226,7 +227,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         :param depth: The level of detail, default to infinite
         :type depth: int
         :return: A list of DbRelations and DbRecords
-        :rtype list(DbRelation or DBRecord)
+        :rtype: list(DbRelation or DbRecord)
         """
         # only transform dict into list
         return list(self._get_records_tail_internal(attributes_dict, metadata_dict).values())
@@ -237,8 +238,10 @@ class SimpleInMemoryAdapter(BaseAdapter):
         Internal function, because we need to call it recursive. This function is only neccecary in this in memory adapter.
         It's your choice how you implement the get_records_tail function
 
-        :param attributes_dict:
-        :param metadata_dict:
+        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
+        :type attributes_dict: dict
+        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
+        :type metadata_dict: dict
         :param max_depth:
         :param current_depth:
         :param result_records:
@@ -277,7 +280,16 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return result_records
 
     def delete_records_by_filter(self, attributes_dict=None, metadata_dict=None):
+        """
+        Delete a set of records based on filter conditions
 
+        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
+        :type attributes_dict: dict
+        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
+        :type metadata_dict: dict
+        :return: The result of the operation
+        :rtype: Bool
+        """
         if attributes_dict is None:
             attributes_dict = dict()
         if metadata_dict is None:
@@ -304,7 +316,19 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return True
 
     def get_bundle_records(self, bundle_identifier):
+        """
+        Get the records for a specific bundle identifier
 
+        This include all nodes that have a relation of the prov:type = prov:bundleAssociation and also
+        all relation where the start and end node are in the bundle.
+        Also you should add the prov mentionOf relation where the start node is in the bundle.
+        See https://www.w3.org/TR/prov-links/
+
+        :param bundle_identifier: The identifier of the bundle
+        :type bundle_identifier: prov.model.Identifier
+        :return: The list with the bundle nodes and all connections where the start node and end node in the bundle.
+        :rtype: list(DbRelation or DbRecord )
+        """
         bundle_records = dict()
 
         # get all nodes for the bundle
@@ -336,15 +360,27 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return list(bundle_records.values())
 
     @staticmethod
-    def _check_attribute_metadata_filter(properties_filter, metadata_filter, attributes, metadata):
+    def _check_attribute_metadata_filter(attributes_filter, metadata_filter, attributes, metadata):
+        """
+        This function checks if a (attributes, metadata) match to the filter
 
+        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
+        :type attributes_dict: dict
+        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
+        :type metadata_dict: dict
+        :param attributes: The actual provenance data
+        :type attributes: dict
+        :param metadata: Some metadata that are not PROV-O related
+        :type metadata: dict
+        :return:
+        """
         match = True
 
         meta_encoded = encode_dict_values_to_primitive(metadata)
         attr_encoded = encode_dict_values_to_primitive(attributes)
 
         filter_meta_encoded = encode_dict_values_to_primitive(metadata_filter)
-        filter_attr_encoded = encode_dict_values_to_primitive(properties_filter)
+        filter_attr_encoded = encode_dict_values_to_primitive(attributes_filter)
 
         # check properties
         for (key, value) in filter_attr_encoded.items():
@@ -365,7 +401,20 @@ class SimpleInMemoryAdapter(BaseAdapter):
         return True
 
     def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
+        """
+        Filter all nodes based on the provided attributes and metadata dict
+        The filter is currently defined as follows:
 
+        - The filter is only applied to the start node
+        - All connections from the start node are also included in the result set
+
+        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
+        :type attributes_dict: dict
+        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
+        :type metadata_dict: dict
+        :return: The list of matching relations and nodes
+        :rtype: List(DbRecord or Dbrelation)
+        """
         if attributes_dict is None:
             attributes_dict = dict()
         if metadata_dict is None:
@@ -377,7 +426,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
         metadata_filter_dict = encode_dict_values_to_primitive(metadata_dict.copy())
         for (identifier, (attributes, metadata)) in self.all_nodes.items():
 
-            if self._check_attribute_metadata_filter(properties_filter=attributes_dict,
+            if self._check_attribute_metadata_filter(attributes_filter=attributes_dict,
                                                      metadata_filter=metadata_dict,
                                                      metadata=metadata,
                                                      attributes=attributes):
