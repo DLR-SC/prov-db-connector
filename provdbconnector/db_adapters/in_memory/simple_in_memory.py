@@ -197,40 +197,6 @@ class SimpleInMemoryAdapter(BaseAdapter):
                 return DbRelation(attributes, metadata)
         raise NotFoundException("could't find the relation with id {}".format(relation_id))
 
-    def delete_relation(self, relation_id):
-        """
-        Delete the relation
-
-        :param relation_id: The relation id
-        :type relation_id: str
-        :return: Result of the delete operation
-        :rtype: Bool
-        """
-
-        for (from_key, relations) in self.all_relations.items():
-            if relation_id in relations:
-                del relations[relation_id]
-                break
-
-        return True
-
-    def delete_record(self, record_id):
-        """
-        Delete a single record
-
-        :param record_id: The node id
-        :type record_id: str
-        :return: Result of the delete operation
-        :rtype: Bool
-        """
-
-        if record_id not in self.all_nodes:
-            raise NotFoundException()
-
-        del self.all_nodes[record_id]
-
-        return True
-
     def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
         """
         Filter all nodes based on the provided attributes and metadata dict
@@ -351,42 +317,6 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return result_records
 
-    def delete_records_by_filter(self, attributes_dict=None, metadata_dict=None):
-        """
-        Delete a set of records based on filter conditions
-
-        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
-        :type attributes_dict: dict
-        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
-        :type metadata_dict: dict
-        :return: The result of the operation
-        :rtype: Bool
-        """
-        if attributes_dict is None:
-            attributes_dict = dict()
-        if metadata_dict is None:
-            metadata_dict = dict()
-
-        # erase all if no filter set
-        if len(attributes_dict) == 0 and len(metadata_dict) == 0:
-            del self.all_nodes
-            self.all_nodes = dict()
-            return True
-
-        # erase only matching nodes
-        records_to_delete = self.get_records_by_filter(attributes_dict, metadata_dict)
-
-        for record in records_to_delete:
-            if not isinstance(record, DbRecord):
-                continue
-            identifier = record.metadata[METADATA_KEY_IDENTIFIER]
-
-            if identifier not in self.all_nodes:
-                raise NotFoundException("We cant find the id ")
-            del self.all_nodes[identifier]
-
-        return True
-
     def get_bundle_records(self, bundle_identifier):
         """
         Get the records for a specific bundle identifier
@@ -431,6 +361,75 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return list(bundle_records.values())
 
+    def delete_records_by_filter(self, attributes_dict=None, metadata_dict=None):
+        """
+        Delete a set of records based on filter conditions
+
+        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
+        :type attributes_dict: dict
+        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
+        :type metadata_dict: dict
+        :return: The result of the operation
+        :rtype: Bool
+        """
+        if attributes_dict is None:
+            attributes_dict = dict()
+        if metadata_dict is None:
+            metadata_dict = dict()
+
+        # erase all if no filter set
+        if len(attributes_dict) == 0 and len(metadata_dict) == 0:
+            del self.all_nodes
+            self.all_nodes = dict()
+            return True
+
+        # erase only matching nodes
+        records_to_delete = self.get_records_by_filter(attributes_dict, metadata_dict)
+
+        for record in records_to_delete:
+            if not isinstance(record, DbRecord):
+                continue
+            identifier = record.metadata[METADATA_KEY_IDENTIFIER]
+
+            if identifier not in self.all_nodes:
+                raise NotFoundException("We cant find the id ")
+            del self.all_nodes[identifier]
+
+        return True
+
+    def delete_record(self, record_id):
+        """
+        Delete a single record
+
+        :param record_id: The node id
+        :type record_id: str
+        :return: Result of the delete operation
+        :rtype: Bool
+        """
+
+        if record_id not in self.all_nodes:
+            raise NotFoundException()
+
+        del self.all_nodes[record_id]
+
+        return True
+
+    def delete_relation(self, relation_id):
+        """
+        Delete the relation
+
+        :param relation_id: The relation id
+        :type relation_id: str
+        :return: Result of the delete operation
+        :rtype: Bool
+        """
+
+        for (from_key, relations) in self.all_relations.items():
+            if relation_id in relations:
+                del relations[relation_id]
+                break
+
+        return True
     @staticmethod
     def _check_attribute_metadata_filter(attributes_filter, metadata_filter, attributes, metadata):
         """
@@ -471,4 +470,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
                 return False
 
         return True
+
+
+
 
