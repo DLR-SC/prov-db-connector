@@ -12,15 +12,33 @@ log = logging.getLogger(__name__)
 
 
 class SimpleInMemoryAdapter(BaseAdapter):
-    document_bundle_ids = dict()
+    """
+    The simple in memory adapter is a reference implementation for a database adapter to save prov information
+    into a graph database
 
-    bundles = dict()  # dict for all bundles including record and relation information
 
+    For exmaple to use the simple db_adapter use the following script
+
+    .. literalinclude:: ../../examples/simple_example.py
+            :linenos:
+            :language: python
+
+    """
     all_nodes = dict()  # separate dict for records only (to get them by id)
-
+    """
+    Contains all nodes
+    """
     all_relations = dict()
+    """
+    Contains all relation according to the following structure
+    `(start_identifier, (end_identifier,attributes, metadata))``
+    """
 
     def __init__(self, *args):
+        """
+        Init the adapter without any params
+        :param args:
+        """
         super(SimpleInMemoryAdapter, self).__init__()
         pass
 
@@ -213,6 +231,60 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
+    def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
+        """
+        Filter all nodes based on the provided attributes and metadata dict
+        The filter is currently defined as follows:
+
+        - The filter is only applied to the start node
+        - All connections from the start node are also included in the result set
+
+        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
+        :type attributes_dict: dict
+        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
+        :type metadata_dict: dict
+        :return: The list of matching relations and nodes
+        :rtype: List(DbRecord or Dbrelation)
+        """
+        if attributes_dict is None:
+            attributes_dict = dict()
+        if metadata_dict is None:
+            metadata_dict = dict()
+
+        return_records = list()
+        return_keys = set()
+        properties_filter_dict = encode_dict_values_to_primitive(attributes_dict.copy())
+        metadata_filter_dict = encode_dict_values_to_primitive(metadata_dict.copy())
+        for (identifier, (attributes, metadata)) in self.all_nodes.items():
+
+            if self._check_attribute_metadata_filter(attributes_filter=attributes_dict,
+                                                     metadata_filter=metadata_dict,
+                                                     metadata=metadata,
+                                                     attributes=attributes):
+
+                meta_encoded = encode_dict_values_to_primitive(metadata)
+                attr_encoded = encode_dict_values_to_primitive(attributes)
+
+                return_records.append(DbRecord(attr_encoded, meta_encoded))
+                return_keys.add(identifier)
+
+            else:
+                # not match so don't add
+                pass
+
+        # get relations
+        for (from_id, relations) in self.all_relations.items():
+
+            if from_id in return_keys:
+
+                for (relation_id, (to_id, attributes, metadata)) in relations.items():
+                    attributes = encode_dict_values_to_primitive(attributes)
+                    metadata = encode_dict_values_to_primitive(metadata)
+
+                    return_records.append(DbRelation(attributes, metadata))
+
+        return return_records
+
     def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
         """
         Return the provenance based on a filter combination.
@@ -400,56 +472,3 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-    def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
-        """
-        Filter all nodes based on the provided attributes and metadata dict
-        The filter is currently defined as follows:
-
-        - The filter is only applied to the start node
-        - All connections from the start node are also included in the result set
-
-        :param attributes_dict: A filter dict with a conjunction of all values in the attributes_dict and metadata_dict
-        :type attributes_dict: dict
-        :param metadata_dict: A filter for the metadata with a conjunction of all values (also in the attributes_dict )
-        :type metadata_dict: dict
-        :return: The list of matching relations and nodes
-        :rtype: List(DbRecord or Dbrelation)
-        """
-        if attributes_dict is None:
-            attributes_dict = dict()
-        if metadata_dict is None:
-            metadata_dict = dict()
-
-        return_records = list()
-        return_keys = set()
-        properties_filter_dict = encode_dict_values_to_primitive(attributes_dict.copy())
-        metadata_filter_dict = encode_dict_values_to_primitive(metadata_dict.copy())
-        for (identifier, (attributes, metadata)) in self.all_nodes.items():
-
-            if self._check_attribute_metadata_filter(attributes_filter=attributes_dict,
-                                                     metadata_filter=metadata_dict,
-                                                     metadata=metadata,
-                                                     attributes=attributes):
-
-                meta_encoded = encode_dict_values_to_primitive(metadata)
-                attr_encoded = encode_dict_values_to_primitive(attributes)
-
-                return_records.append(DbRecord(attr_encoded, meta_encoded))
-                return_keys.add(identifier)
-
-            else:
-                # not match so don't add
-                pass
-
-        # get relations
-        for (from_id, relations) in self.all_relations.items():
-
-            if from_id in return_keys:
-
-                for (relation_id, (to_id, attributes, metadata)) in relations.items():
-                    attributes = encode_dict_values_to_primitive(attributes)
-                    metadata = encode_dict_values_to_primitive(metadata)
-
-                    return_records.append(DbRelation(attributes, metadata))
-
-        return return_records
