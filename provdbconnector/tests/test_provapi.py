@@ -14,6 +14,16 @@ from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, Inval
 
 
 class ProvApiTestTemplate(unittest.TestCase):
+    """
+    This abstract test class to test the high level function of you database adapter.
+    To use this unitest Template extend from this class.
+
+    .. literalinclude:: ../../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
+       :linenos:
+       :language: python
+       :lines: 25-40
+
+    """
     def __init__(self, *args, **kwargs):
         """
         Prevent from execute the test case directly see:
@@ -36,14 +46,33 @@ class ProvApiTestTemplate(unittest.TestCase):
             self.run = lambda self, *args, **kwargs: None
 
     def setUp(self):
+        """
+        Use the setup method to create a provapi instance with you adapter
+
+        .. warning::
+            Override this function if you extend this test!
+            Otherwise the test will fail.
+        :return:
+        """
         # this function will never be executed !!!!
         self.provapi = ProvApi()
 
     def clear_database(self):
-        pass
+        """
+        Override this function to clear your database before each test
+
+        :return:
+        """
+        raise InvalidArgumentTypeException()
+
 
 
     def test_prov_primer_example(self):
+        """
+        This test try to save and restore a common prov example document
+
+        :return:
+        """
         self.clear_database()
         prov_document = examples.primer_example()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -52,6 +81,12 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_primer_example_alternate(self):
+        """
+        This test try to save and restore a common prov example document.
+        But in a more complex way
+
+        :return:
+        """
         self.clear_database()
         prov_document = examples.primer_example_alternate()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -60,6 +95,11 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_w3c_publication_1(self):
+        """
+        This test try to save and restore a common prov example document.
+
+        :return:
+        """
         self.clear_database()
         prov_document = examples.w3c_publication_1()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -68,6 +108,12 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_w3c_publication_2(self):
+        """
+        This test try to save and restore a common prov example document.
+
+        :return:
+        """
+
         self.clear_database()
         prov_document = examples.w3c_publication_2()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -76,6 +122,13 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_bundles1(self):
+        """
+        This test try to save and restore a common prov example document.
+        With a bundle and some connections inside the bundle.
+        This example is also available via `Provstore <https://provenance.ecs.soton.ac.uk/store/documents/114710/>`
+
+        :return:
+        """
         self.clear_database()
         prov_document = examples.bundles1()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -85,6 +138,16 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document_unified, prov_document_unified)
 
     def test_bundles2(self):
+        """
+        This test try to save and restore a common prov example document.
+        With a bundle and some connections inside the bundle.
+        This example is also available via `Provstore <https://provenance.ecs.soton.ac.uk/store/documents/114704/>`
+
+        The main difference to the bundle_1 is that here we have also a mentionOf connection between bundles.
+        See PROV-Links spec for more information
+
+        :return:
+        """
         self.clear_database()
         prov_document = examples.bundles2()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -93,6 +156,12 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_collections(self):
+        """
+        This test try to save and restore a common prov example document.
+
+        :return:
+        """
+
         self.clear_database()
         prov_document = examples.collections()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -101,6 +170,12 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_long_literals(self):
+        """
+        This test try to save and restore a common prov example document.
+
+        :return:
+        """
+
         self.clear_database()
         prov_document = examples.long_literals()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -109,6 +184,12 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
     def test_datatypes(self):
+        """
+        This test try to save and restore a common prov example document.
+
+        :return:
+        """
+
         self.clear_database()
         prov_document = examples.datatypes()
         stored_document_id = self.provapi.create_document_from_prov(prov_document)
@@ -118,6 +199,10 @@ class ProvApiTestTemplate(unittest.TestCase):
 
 
 class ProvApiTests(unittest.TestCase):
+    """
+    This tests are only for the ProvApi itself. You don't have to extend this test in case you want to write your own
+    adapter
+    """
     maxDiff = None
 
     def setUp(self):
@@ -135,6 +220,10 @@ class ProvApiTests(unittest.TestCase):
         self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
     def tearDown(self):
+        """
+        Destroy the prov api and remove all data from neo4j
+        :return:
+        """
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         session = self.provapi._adapter._create_session()
         session.run("MATCH (x) DETACH DELETE x")
@@ -142,6 +231,10 @@ class ProvApiTests(unittest.TestCase):
 
     # Test create instnace
     def test_provapi_instance(self):
+        """
+        Try to create a test instnace
+        :return:
+        """
         self.assertRaises(NoDataBaseAdapterException, lambda: ProvApi())
         self.assertRaises(InvalidOptionsException, lambda: ProvApi(api_id=1, adapter=Neo4jAdapter))
 
@@ -154,10 +247,18 @@ class ProvApiTests(unittest.TestCase):
 
     # Methods that automatically convert to ProvDocument
     def test_create_document_from_json(self):
+        """
+        Try to create a document from a json buffer
+        :return:
+        """
         json_buffer = self.test_prov_files["json"]
         self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_json(self):
+        """
+        try to get the document as json
+        :return:
+        """
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
 
@@ -168,10 +269,18 @@ class ProvApiTests(unittest.TestCase):
         self.assertEqual(prov_document_reverse, example)
 
     def test_create_document_from_xml(self):
+        """
+        Try to create a document from xml
+        :return:
+        """
         json_buffer = self.test_prov_files["xml"]
         self.provapi.create_document_from_json(json_buffer)
 
     def test_get_document_as_xml(self):
+        """
+        try to get the document as xml
+        :return:
+        """
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
 
@@ -183,11 +292,19 @@ class ProvApiTests(unittest.TestCase):
         self.assertEqual(prov_document_reverse, example)
 
     def test_create_document_from_provn(self):
+        """
+        Try to create a document from provn
+        :return:
+        """
         json_buffer = self.test_prov_files["provn"]
         with self.assertRaises(NotImplementedError):
             self.provapi.create_document_from_provn(json_buffer)
 
     def test_get_document_as_provn(self):
+        """
+        Try to get a document in provn
+        :return:
+        """
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
 
@@ -202,6 +319,10 @@ class ProvApiTests(unittest.TestCase):
 
     # Methods with ProvDocument input / output
     def test_create_document(self):
+        """
+        Try to create a document from a prov instnace
+        :return:
+        """
         # test prov document input
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
@@ -213,34 +334,59 @@ class ProvApiTests(unittest.TestCase):
             self.provapi.create_document(1)
 
     def test_create_document_from_prov(self):
+        """
+        Try to create a primer example document
+        :return:
+        """
         example = examples.primer_example()
         document_id = self.provapi.create_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
     def test_create_document_from_prov_alternate(self):
+        """
+        Try to create a prov_alternative
+        :return:
+        """
         example = examples.primer_example_alternate()
         document_id = self.provapi.create_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
     def test_create_document_from_prov_bundles(self):
+        """
+        Try to create a document with bundles
+        :return:
+        """
         example = examples.bundles1()
         document_id = self.provapi.create_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
     def test_create_document_from_prov_bundles2(self):
+        """
+        Try to create more bundles
+        :return:
+        """
         example = examples.bundles2()
         document_id = self.provapi.create_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
     def test_create_document_from_prov_invalid_arguments(self):
+        """
+        Try to create a prov with some invalid arguments
+        :return:
+        """
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.create_document_from_prov(None)
 
     def test_get_document_as_prov(self):
+        """
+        Try to get the document as ProvDocument instnace
+
+        :return:
+        """
         example = examples.bundles2()
         document_id = self.provapi.create_document_from_prov(example)
 
@@ -251,18 +397,36 @@ class ProvApiTests(unittest.TestCase):
         self.assertEqual(prov_document, example)
 
     def test_get_document_as_prov_invalid_arguments(self):
+        """
+        Try to get the prov document with invalid arguments
+
+        :return:
+        """
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.get_document_as_prov()
 
     def test_create_bundle_invalid_arguments(self):
+        """
+        Try to create a bundle with invalid arguments
+        :return:
+        """
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi._create_bundle(None)
 
     def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
+        """
+        Try to get attributes and metadata with invalid arguments
+        :return:
+        """
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi._get_metadata_and_attributes_for_record(None)
 
     def test_get_metadata_and_attributes_for_record(self):
+        """
+        Test the split into metadata / attributes function
+        This function separates the attributes and metadata from a prov record
+        :return:
+        """
         example = examples.prov_api_record_example()
 
         result = self.provapi._get_metadata_and_attributes_for_record(example.prov_record)
