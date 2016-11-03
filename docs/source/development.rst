@@ -90,7 +90,15 @@ See this example tests for the :py:class:`~provdbconnector.db_adapters.in_memory
 
 The last step is to create your logic inside the :py:class:`~provdbconnector.db_adapters.in_memory.simple_in_memory.SimpleInMemoryAdapter` for example the save_record and get_record functions:
 
+Now you are ready to implement all other functions.
+
+.. note::
+   If you don't know where should you start
+   Start with the first test and try to implement functions successively according to the tests
+   and look into the documentation of the :py:class:`~provdbconnector.tests.db_adapters.test_baseadapter.AdapterTestTemplate`
+
 .. literalinclude:: ../../provdbconnector/db_adapters/in_memory/simple_in_memory.py
    :linenos:
    :lines: 32-56, 105-115
    :language: python
+
