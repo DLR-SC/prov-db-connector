@@ -13,10 +13,7 @@ before_install:
 
 # Install packages
 install:
-  #- pip install '.[test]'
-  - pip install coverage
-  - pip install coveralls
-  - make setup
+  - pip install '.[test]'
 
 # Run test
 script:
