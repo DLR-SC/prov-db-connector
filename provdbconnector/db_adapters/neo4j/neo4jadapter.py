@@ -30,12 +30,27 @@ NEO4J_META_PREFIX = "meta:"
 
 
 class Neo4jAdapter(BaseAdapter):
+    """
+    This is the neo4j adapter to store prov. data in a neo4j database
+
+    """
     def __init__(self, *args):
+        """
+        Setup the class
+
+        :param args: None
+        """
         super(Neo4jAdapter, self).__init__()
         self.driver = None
         pass
 
     def _create_session(self):
+        """
+        Get a session from the driver
+
+        :return: Session
+        :rtype Session
+        """
         try:
             session = self.driver.session()
         except OSError as e:
@@ -46,6 +61,14 @@ class Neo4jAdapter(BaseAdapter):
         return session
 
     def connect(self, authentication_options):
+        """
+        The connect method to create a new instance of the db_driver
+
+        :param authentication_options: Username, password and host
+        :return: None
+        :rtype: None
+        :raises: InvalidOptionsException
+        """
         if authentication_options is None:
             raise InvalidOptionsException()
 
@@ -66,6 +89,12 @@ class Neo4jAdapter(BaseAdapter):
 
     @staticmethod
     def _prefix_metadata(metadata):
+        """
+        Prefix all keys of a dict, only for the neo4j adapter
+
+        :param metadata:
+        :return: A dict with prefixed keys
+        """
         prefixed_metadata = dict()
         for key, value in metadata.items():
             prefixed_metadata["{meta_prefix}{key}".format(key=key, meta_prefix=NEO4J_META_PREFIX)] = value
@@ -74,6 +103,13 @@ class Neo4jAdapter(BaseAdapter):
 
     @staticmethod
     def _parse_to_primitive_attributes(attributes, prefixed_metadata):
+        """
+        Convert the dict values and keys into a neo4j friendly type (dict=>json, list,int,float, QualifiedName=>str, datetime=>str)
+
+        :param attributes:
+        :param prefixed_metadata:
+        :return:
+        """
         all_attributes = attributes.copy()
         all_attributes.update(prefixed_metadata)
 
@@ -88,17 +124,40 @@ class Neo4jAdapter(BaseAdapter):
 
     @staticmethod
     def _get_attributes_identifiers_cypher_string(key_list):
+        """
+        This function return a cypher string with all keys as cypher parameters
+
+        :param key_list:
+        :return:
+        """
         db_attributes_identifiers = map(lambda key: "`{}`: {{`{}`}}".format(key, key), key_list)
         return ",".join(db_attributes_identifiers)
 
     @staticmethod
     def _get_attributes_set_cypher_string(key_list, cypher_template=cypher_commands.NEO4J_CREATE_NODE_SET_PART):
+        """
+        Returns a set cypher command for all keys of the keylist
+
+        :param key_list:
+        :param cypher_template:
+        :return:
+        """
         statements = list()
         for key in key_list:
             statements.append(cypher_template.format(attr_name=key))
         return " ".join(statements)
 
     def save_record(self, attributes, metadata):
+        """
+        Saves a single record
+
+        :param attributes: The attributes dict
+        :type attributes: dict
+        :param metadata: The metadata dict
+        :type metadata: dict
+        :return: The id of the record
+        :rtype: str
+        """
 
         metadata = metadata.copy()
         prefixed_metadata = self._prefix_metadata(metadata)
@@ -168,6 +227,20 @@ class Neo4jAdapter(BaseAdapter):
         return str(record_id)
 
     def save_relation(self, from_node, to_node, attributes, metadata):
+        """
+        Save a single relation
+
+        :param from_node: The from node as QualifiedName
+        :type from_node: QualifiedName
+        :param to_node: The to node as QualifiedName
+        :type to_node: QualifiedName
+        :param attributes: The attributes dict
+        :type attributes: dict
+        :param metadata: The metadata dict
+        :type metadata: dict
+        :return: Id of the relation
+        :rtype: str
+        """
 
         metadata = metadata.copy()
 
@@ -242,6 +315,14 @@ class Neo4jAdapter(BaseAdapter):
 
     @staticmethod
     def _split_attributes_metadata_from_node(db_node):
+        """
+        This functions splits a db node back into attributes and metadata, based on the prefix
+
+
+        :param db_node:
+        :type db_node: dict
+        :return: namedTuple(attributes,metadata)
+        """
         record = namedtuple('Record', 'attributes, metadata')
         # split data
         metadata = {k.replace(NEO4J_META_PREFIX, ""): v for k, v in db_node.properties.items() if
@@ -268,18 +349,15 @@ class Neo4jAdapter(BaseAdapter):
         record = record(attributes, metadata)
         return record
 
-    def get_bundle_ids(self, document_id):
-        session = self._create_session()
-
-        result_set = session.run(cypher_commands.NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS, {"parent_id": document_id})
-
-        ids = list()
-        for result in result_set:
-            ids.append(result["ID"])
-
-        return ids
-
     def _get_cypher_filter_params(self, properties_dict, metadata_dict):
+        """
+        This functions returns a tuple with the cypher_str for the cypher filter and the right parameter names
+
+
+        :param properties_dict: Search dict
+        :param metadata_dict: Seacrh dict
+        :return: Tuple(Keys with metadata prefix (if necessary), cypher filter str )
+        """
         metadata_dict_prefixed = {"meta:{}".format(k): v for k, v in metadata_dict.items()}
 
         # Merge the 2 dicts into one
@@ -291,6 +369,16 @@ class Neo4jAdapter(BaseAdapter):
         return encoded_params, cypher_str
 
     def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
+        """
+        Return the records by a certain filter
+
+        :param attributes_dict: Filter dict
+        :type attributes_dict: dict
+        :param metadata_dict: Filter dict for metadata
+        :type metadata_dict: dict
+        :return: list of all nodes and relations that fit the conditions
+        :rtype: list(DbRecord and DbRelation)
+        """
 
         if attributes_dict is None:
             attributes_dict = dict()
@@ -312,6 +400,18 @@ class Neo4jAdapter(BaseAdapter):
         return records
 
     def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
+        """
+        Return all connected nodes form the origin.
+
+
+        :param attributes_dict: Filter dict
+        :type attributes_dict: dict
+        :param metadata_dict: Filter dict for metadata
+        :type metadata_dict: dict
+        :param depth: Max steps
+        :return: list of all nodes and relations that fit the conditions
+        :rtype: list(DbRecord and DbRelation)
+        """
 
         if attributes_dict is None:
             attributes_dict = dict()
@@ -339,6 +439,13 @@ class Neo4jAdapter(BaseAdapter):
         return records
 
     def get_bundle_records(self, bundle_identifier):
+        """
+        Return all records and relations for the bundle
+
+
+        :param bundle_identifier:
+        :return:
+        """
 
         session = self._create_session()
         result_set = session.run(cypher_commands.NEO4J_GET_BUNDLE_RECORDS,
@@ -355,6 +462,13 @@ class Neo4jAdapter(BaseAdapter):
         return records
 
     def get_record(self, record_id):
+        """
+        Try to find the record in the database
+
+        :param record_id:
+        :return: DbRecord
+        :rtype: DbRecord
+        """
 
         session = self._create_session()
         result_set = session.run(cypher_commands.NEO4J_GET_RECORD_RETURN_NODE, {"record_id": int(record_id)})
@@ -374,6 +488,13 @@ class Neo4jAdapter(BaseAdapter):
         return self._split_attributes_metadata_from_node(node)
 
     def get_relation(self, relation_id):
+        """
+        Get a relation
+
+        :param relation_id:
+        :return: The relation
+        :rtype: DbRelation
+        """
 
         session = self._create_session()
         result_set = session.run(cypher_commands.NEO4J_GET_RELATION_RETURN_NODE, {"relation_id": int(relation_id)})
@@ -393,6 +514,14 @@ class Neo4jAdapter(BaseAdapter):
         return self._split_attributes_metadata_from_node(relation)
 
     def delete_records_by_filter(self, attributes_dict=None, metadata_dict=None):
+        """
+        Delete records and relations by a filter
+
+
+        :param attributes_dict:
+        :param metadata_dict:
+        :return:
+        """
 
         if attributes_dict is None:
             attributes_dict = dict()
@@ -407,11 +536,25 @@ class Neo4jAdapter(BaseAdapter):
         return True
 
     def delete_record(self, record_id):
+        """
+        Delete a single record
+
+
+        :param record_id:
+        :return:
+        """
         session = self._create_session()
         session.run(cypher_commands.NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
         return True
 
     def delete_relation(self, relation_id):
+        """
+        Delete a single relation
+
+
+        :param relation_id:
+        :return:
+        """
         session = self._create_session()
         session.run(cypher_commands.NEO4J_DELETE_RELATION_BY_ID, {"relation_id": int(relation_id)})
         return True
