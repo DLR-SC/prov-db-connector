@@ -1,5 +1,5 @@
 import os
-import provdbconnector.db_adapters.neo4j.cypher_commands as cypher_commands
+from . import cypher_commands
 from provdbconnector.db_adapters.baseadapter import BaseAdapter
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, \
     METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
