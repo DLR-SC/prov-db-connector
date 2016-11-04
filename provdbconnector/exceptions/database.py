@@ -51,4 +51,7 @@ class NotFoundException(DatabaseException):
 
 
 class MergeException(DatabaseException):
+    """
+    Thrown, if a record or relation can't get merged
+    """
     pass
