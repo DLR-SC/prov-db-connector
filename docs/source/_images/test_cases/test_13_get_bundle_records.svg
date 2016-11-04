@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="162.76119995117188" height="154.13876342773438"
+     viewBox="15.483741760253906 35.32429504394531 162.76119995117188 154.13876342773438">
+    <title>Neo4j Graph Visualization</title>
+    <desc>Created using Neo4j (http://www.neo4j.com/)</desc>
+    <g class="layer relationships">
+        <g class="relationship" transform="translate(44.48374112670318 75.21264410525231) rotate(414.06625021907536)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 26.137603389098352 0.5 L 26.137603389098352 -0.5 L 25 -0.5 Z M 72.14932213909836 0.5 L 73.2869255281967 0.5 L 73.2869255281967 3.5 L 80.2869255281967 0 L 73.2869255281967 -3.5 L 73.2869255281967 -0.5 L 72.14932213909836 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="49.14346276409835" y="3"
+                  font-family="sans-serif">wasAsso…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(149.24494806384783 64.32429877245751) rotate(474.08445071284746)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 26.147237295381366 0.5 L 26.147237295381366 -0.5 L 25 -0.5 Z M 72.15895604538136 0.5 L 73.30619334076273 0.5 L 73.30619334076273 3.5 L 80.30619334076273 0 L 73.30619334076273 -3.5 L 73.30619334076273 -0.5 L 72.15895604538136 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="49.153096670381366" y="3"
+                  transform="rotate(180 49.153096670381366 0)" font-family="sans-serif">wasAsso…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(44.48374112670318 75.21264410525231) rotate(354.0662740956259)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 25.264325774949405 0.5 L 25.264325774949405 -0.5 L 25 -0.5 Z M 73.06120077494941 0.5 L 73.32552654989881 0.5 L 73.32552654989881 3.5 L 80.32552654989881 0 L 73.32552654989881 -3.5 L 73.32552654989881 -0.5 L 73.06120077494941 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="49.162763274949405" y="3"
+                  font-family="sans-serif">wasGene…
+            </text>
+        </g>
+    </g>
+    <g class="layer nodes">
+        <g class="node" transform="translate(106.27131081096371,160.46305712297726)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:Yoda
+            </text>
+        </g>
+        <g class="node" transform="translate(149.24494806384783,64.32429877245751)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="0" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:Luke
+            </text>
+            <text text-anchor="middle" pointer-events="none" y="10" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">Skywal…
+            </text>
+        </g>
+        <g class="node" transform="translate(44.48374112670318,75.21264410525231)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">prov:ano…
+            </text>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="599.8195190429688" height="380.9333190917969"
+     viewBox="-189.7169647216797 -124.35797119140625 599.8195190429688 380.9333190917969">
+    <title>Neo4j Graph Visualization</title>
+    <desc>Created using Neo4j (http://www.neo4j.com/)</desc>
+    <g class="layer relationships">
+        <g class="relationship"
+           transform="translate(-13.322443504245093 -19.638791237890207) rotate(498.53178769980343)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 41.50407988244922 0.5 L 41.50407988244922 -0.5 L 40 -0.5 Z M 93.29314238244922 0.5 L 94.79722226489844 0.5 L 94.79722226489844 3.5 L 101.79722226489844 0 L 94.79722226489844 -3.5 L 94.79722226489844 -0.5 L 93.29314238244922 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="67.39861113244922" y="3"
+                  transform="rotate(180 67.39861113244922 0)" font-family="sans-serif">wasAssoci…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(-6.461151904639097 95.21010720395996) rotate(190.49307028529074)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 25.737257277611725 0.5 L 25.737257277611725 -0.5 L 25 -0.5 Z M 67.29975727761172 0.5 L 68.03701455522345 0.5 L 68.03701455522345 3.5 L 75.03701455522345 0 L 68.03701455522345 -3.5 L 68.03701455522345 -0.5 L 67.29975727761172 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="46.518507277611725" y="3"
+                  transform="rotate(180 46.518507277611725 0)" font-family="sans-serif">wasAss…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(-119.57439568883322 74.25995688478181) rotate(460.7030386536104)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 40.09698172438539 0.5 L 40.09698172438539 -0.5 L 40 -0.5 Z M 93.66729422438539 0.5 L 93.76427594877077 0.5 L 93.76427594877077 3.5 L 100.76427594877077 0 L 93.76427594877077 -3.5 L 93.76427594877077 -0.5 L 93.66729422438539 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="66.88213797438539" y="3"
+                  transform="rotate(180 66.88213797438539 0)" font-family="sans-serif">wasAttribut…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(227.7411035724366 159.2056922275802) rotate(281.92069989681676)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 41.73258274297896 0.5 L 41.73258274297896 -0.5 L 40 -0.5 Z M 87.74430149297896 0.5 L 89.47688423595793 0.5 L 89.47688423595793 3.5 L 96.47688423595793 0 L 89.47688423595793 -3.5 L 89.47688423595793 -0.5 L 87.74430149297896 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="64.73844211797896" y="3"
+                  font-family="sans-serif">wasAsso…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(124.60374210088355 31.88963923279589) rotate(357.28939112380874)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 41.456156882649324 0.5 L 41.456156882649324 -0.5 L 40 -0.5 Z M 83.01865688264932 0.5 L 84.47481376529865 0.5 L 84.47481376529865 3.5 L 91.47481376529865 0 L 84.47481376529865 -3.5 L 84.47481376529865 -0.5 L 83.01865688264932 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="62.237406882649324" y="3"
+                  font-family="sans-serif">wasAss…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(154.88564158979355 100.50181067850212) rotate(323.47808326700635)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 25.97389295601689 0.5 L 25.97389295601689 -0.5 L 25 -0.5 Z M 77.7629554560169 0.5 L 78.73684841203378 0.5 L 78.73684841203378 3.5 L 85.73684841203378 0 L 78.73684841203378 -3.5 L 78.73684841203378 -0.5 L 77.7629554560169 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="51.86842420601689" y="3"
+                  font-family="sans-serif">wasAssoci…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(255.93145337980664 25.67201067684494) rotate(393.74256066211194)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 41.52048912438471 0.5 L 41.52048912438471 -0.5 L 40 -0.5 Z M 83.96970787438471 0.5 L 85.49019699876942 0.5 L 85.49019699876942 3.5 L 92.49019699876942 0 L 85.49019699876942 -3.5 L 85.49019699876942 -0.5 L 83.96970787438471 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="62.74509849938471" y="3"
+                  font-family="sans-serif">wasAttri…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(-119.57439568883322 74.25995688478181) rotate(420.7262452572254)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 42.095781309810945 0.5 L 42.095781309810945 -0.5 L 40 -0.5 Z M 99.22859380981095 0.5 L 101.32437511962189 0.5 L 101.32437511962189 3.5 L 108.32437511962189 0 L 101.32437511962189 -3.5 L 101.32437511962189 -0.5 L 99.22859380981095 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="70.66218755981095" y="3"
+                  font-family="sans-serif">wasGenerat…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(255.93145337980664 25.67201067684494) rotate(255.5407792533597)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 41.26399814713077 0.5 L 41.26399814713077 -0.5 L 40 -0.5 Z M 91.72493564713076 0.5 L 92.98893379426154 0.5 L 92.98893379426154 3.5 L 99.98893379426154 0 L 92.98893379426154 -3.5 L 92.98893379426154 -0.5 L 91.72493564713076 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="66.49446689713076" y="3"
+                  transform="rotate(180 66.49446689713076 0)" font-family="sans-serif">wasGener…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(124.60374210088355 31.88963923279589) rotate(200.4853993091656)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 48.66550685083095 0.5 L 48.66550685083095 -0.5 L 40 -0.5 Z M 91.57175685083095 0.5 L 100.2372637016619 0.5 L 100.2372637016619 3.5 L 107.2372637016619 0 L 100.2372637016619 -3.5 L 100.2372637016619 -0.5 L 91.57175685083095 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="70.11863185083095" y="3"
+                  transform="rotate(180 70.11863185083095 0)" font-family="sans-serif">mentionOf
+            </text>
+        </g>
+        <g class="relationship"
+           transform="translate(-13.322443504245093 -19.638791237890207) rotate(446.58110476297657)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 42.077615848562 0.5 L 42.077615848562 -0.5 L 40 -0.5 Z M 80.976053348562 0.5 L 83.053669197124 0.5 L 83.053669197124 3.5 L 90.053669197124 0 L 83.053669197124 -3.5 L 83.053669197124 -0.5 L 80.976053348562 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="61.526834598562" y="3"
+                  font-family="sans-serif">wasGe…
+            </text>
+        </g>
+        <g class="relationship" transform="translate(227.7411035724366 159.2056922275802) rotate(230.98944101603564)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 45.19628629951569 0.5 L 45.19628629951569 -0.5 L 40 -0.5 Z M 111.65331754951569 0.5 L 116.84960384903138 0.5 L 116.84960384903138 3.5 L 123.84960384903138 0 L 116.84960384903138 -3.5 L 116.84960384903138 -0.5 L 111.65331754951569 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="78.42480192451569" y="3"
+                  transform="rotate(180 78.42480192451569 0)" font-family="sans-serif">wasDerivedFrom
+            </text>
+        </g>
+        <g class="relationship" transform="translate(227.7411035724366 159.2056922275802) rotate(218.86041294561824)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 40 0.5 L 40.892905828281165 0.5 L 40.892905828281165 -0.5 L 40 -0.5 Z M 60.670249578281165 0.5 L 61.56315540656233 0.5 L 61.56315540656233 3.5 L 68.56315540656233 0 L 61.56315540656233 -3.5 L 61.56315540656233 -0.5 L 60.670249578281165 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="50.781577703281165" y="3"
+                  transform="rotate(180 50.781577703281165 0)" font-family="sans-serif">w…
+            </text>
+        </g>
+    </g>
+    <g class="layer nodes">
+        <g class="node" transform="translate(-119.57439568883322,74.25995688478181)">
+            <circle class="outline" cx="0" cy="0" r="40" fill="#6DCE9E" stroke="#60B58B" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">bob:bundle4
+            </text>
+        </g>
+        <g class="node" transform="translate(-145.71695789732104,212.5753494647728)">
+            <circle class="outline" cx="0" cy="0" r="40" fill="#FF756E" stroke="#E06760" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:Bob
+            </text>
+        </g>
+        <g class="node" transform="translate(255.93145337980664,25.67201067684494)">
+            <circle class="outline" cx="0" cy="0" r="40" fill="#6DCE9E" stroke="#60B58B" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">alice:bundle5
+            </text>
+        </g>
+        <g class="node" transform="translate(366.102582464893,99.2653161936511)">
+            <circle class="outline" cx="0" cy="0" r="40" fill="#FF756E" stroke="#E06760" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:Alice
+            </text>
+        </g>
+        <g class="node" transform="translate(-54.38105143513133,190.55792275717343)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#DE9BF9" stroke="#BF85D6" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">prov:Un…
+            </text>
+        </g>
+        <g class="node" transform="translate(224.72285665924505,-95.35797346658806)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#DE9BF9" stroke="#BF85D6" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">prov:Un…
+            </text>
+        </g>
+        <g class="node" transform="translate(-13.322443504245093,-19.638791237890207)">
+            <circle class="outline" cx="0" cy="0" r="40" fill="#6DCE9E" stroke="#60B58B" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:report1
+            </text>
+        </g>
+        <g class="node" transform="translate(-6.461151904639097,95.21010720395996)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#DE9BF9" stroke="#BF85D6" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">prov:Un…
+            </text>
+        </g>
+        <g class="node" transform="translate(124.60374210088355,31.88963923279589)">
+            <circle class="outline" cx="0" cy="0" r="40" fill="#6DCE9E" stroke="#60B58B" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:report1bis
+            </text>
+        </g>
+        <g class="node" transform="translate(227.7411035724366,159.2056922275802)">
+            <circle class="outline" cx="0" cy="0" r="40" fill="#6DCE9E" stroke="#60B58B" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:report2
+            </text>
+        </g>
+        <g class="node" transform="translate(154.88564158979355,100.50181067850212)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#DE9BF9" stroke="#BF85D6" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">prov:Un…
+            </text>
+        </g>
+    </g>
+</svg>

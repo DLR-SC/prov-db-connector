@@ -8,7 +8,13 @@ from provdbconnector.tests import ProvApiTestTemplate
 
 
 class Neo4jAdapterTests(AdapterTestTemplate):
+    """
+    This test extends from AdapterTestTemplate and provide a common set for the neo4j adapter
+    """
     def setUp(self):
+        """
+        Setup the test
+        """
         self.instance = Neo4jAdapter()
         auth_info = {"user_name": NEO4J_USER,
                      "user_password": NEO4J_PASS,
@@ -21,6 +27,9 @@ class Neo4jAdapterTests(AdapterTestTemplate):
     @unittest.skip(
         "Skipped because the server configuration currently is set to 'no password', so the authentication will never fail")
     def test_connect_fails(self):
+        """
+        Try to connect with the wrong password
+        """
         auth_info = {"user_name": NEO4J_USER,
                      "user_password": 'xxxxxx',
                      "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
@@ -30,6 +39,9 @@ class Neo4jAdapterTests(AdapterTestTemplate):
             self.instance.connect(auth_info)
 
     def test_connect_invalid_options(self):
+        """
+        Try to connect with some invalid arguments
+        """
         auth_info = {"u": NEO4J_USER,
                      "p": 'xxxxxx',
                      "h": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
@@ -38,12 +50,19 @@ class Neo4jAdapterTests(AdapterTestTemplate):
             self.instance.connect(auth_info)
 
     def tearDown(self):
+        """
+        Delete all data on the database
+        :return:
+        """
         session = self.instance._create_session()
         session.run("MATCH (x) DETACH DELETE x")
         del self.instance
 
 
 class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
+    """
+    High level api test for the neo4j adapter
+    """
     def setUp(self):
         self.auth_info = {"user_name": NEO4J_USER,
                           "user_password": NEO4J_PASS,
@@ -52,10 +71,17 @@ class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
         self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
     def clear_database(self):
+        """
+        This function get called before each test starts
+
+        """
         session = self.provapi._adapter._create_session()
         session.run("MATCH (x) DETACH DELETE x")
 
     def tearDown(self):
+        """
+        Delete all data in the database
+        """
         session = self.provapi._adapter._create_session()
         session.run("MATCH (x) DETACH DELETE x")
         del self.provapi

@@ -1,20 +1,18 @@
 import json
+import logging
 import sys
+from collections import namedtuple
 from datetime import datetime
 from io import StringIO
 
 import six
-
 from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTRIBUTES, PROV_MEMBERSHIP, \
-    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI, PROV_ACTIVITY, PROV_ENTITY, PROV_AGENT
-from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime,PROV_REC_CLS
-
-from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, METADATA_KEY_TYPE_MAP
-from provdbconnector.exceptions.utils import SerializerException
+    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI
+from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime, PROV_REC_CLS
+from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, \
+    METADATA_KEY_TYPE_MAP
 from provdbconnector.exceptions.database import MergeException
-from collections import namedtuple
-
-import logging
+from provdbconnector.exceptions.utils import SerializerException
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +34,19 @@ if six.integer_types[-1] not in LITERAL_XSDTYPE_MAP:
 
 
 def encode_dict_values_to_primitive(dict_values):
+    """
+    This function transforms a dict with all kind of types into a dict with only
+
+    - str
+    - dict
+    - book
+    - str
+
+    values
+
+    :param dict_values:
+    :return:
+    """
     new_dict_values = dict()
     for key, value in dict_values.items():
         key_simple = str(key)
@@ -45,8 +56,19 @@ def encode_dict_values_to_primitive(dict_values):
 
 
 def encode_string_value_to_primitive(value):
-    if sys.version_info[0] < 3 and type(value) is unicode:
-        return value.encode("utf8")
+    """
+    Convert a value into one of the following types:
+
+    - dict
+    - str
+    - float
+    - int
+    - list
+
+
+    :param value:
+    :return:
+    """
     if isinstance(value, Literal):
         return value.value
     elif type(value) is int:
@@ -65,6 +87,12 @@ def encode_string_value_to_primitive(value):
 
 
 def literal_json_representation(literal):
+    """
+    Some internationalization stuff
+
+    :param literal:
+    :return:
+    """
     # TODO: QName export
     value, datatype, langtag = literal.value, literal.datatype, literal.langtag
     if langtag:
@@ -74,6 +102,11 @@ def literal_json_representation(literal):
 
 
 def encode_json_representation(value):
+    """
+    Get the type of a value
+    :param value:
+    :return:
+    """
     if isinstance(value, Literal):
         return literal_json_representation(value)
     elif isinstance(value, datetime):
@@ -81,7 +114,7 @@ def encode_json_representation(value):
     elif isinstance(value, QualifiedName):
         # TODO Manage prefix in the whole structure consistently
         # TODO QName export
-        return {'type': PROV_QUALIFIEDNAME._str}
+        return {'type': str(PROV_QUALIFIEDNAME)}
     elif isinstance(value, Identifier):
         return {'type': 'xsd:anyURI'}
     elif type(value) in LITERAL_XSDTYPE_MAP:
@@ -93,6 +126,13 @@ def encode_json_representation(value):
 # DECODE
 
 def add_namespaces_to_bundle(prov_bundle, metadata):
+    """
+    Add all namespaces in the metadata_dict to the provided bundle
+
+    :param prov_bundle:
+    :param metadata:
+    :return: None
+    """
     namespaces = dict()
     try:
         namespace_str = metadata[METADATA_KEY_NAMESPACES]
@@ -112,11 +152,13 @@ def add_namespaces_to_bundle(prov_bundle, metadata):
                 namespaces.update(json.load(io))
             else:
                 raise SerializerException(
-                    "Namespaces metadata should returned as json string dict or list of json strings not as {}".format(type(namespace_str)))
+                    "Namespaces metadata should returned as json string dict or list of json strings not as {}".format(
+                        type(namespace_str)))
 
     else:
         raise SerializerException(
-            "Namespaces metadata should returned as json string dict or list of json strings not as  {}".format(type(namespace_str)))
+            "Namespaces metadata should returned as json string dict or list of json strings not as  {}".format(
+                type(namespace_str)))
 
     for prefix, uri in namespaces.items():
         if prefix is not None and uri is not None:
@@ -231,6 +273,15 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
 
 
 def decode_json_representation(value, type, bundle):
+    """
+    Return the value based on the type see also encode_json_representation
+
+    :param value:
+    :param type:
+    :param bundle:
+    :return:
+    """
+
     if isinstance(type, dict):
         # complex type
         datatype = type['type'] if 'type' in type else None
@@ -249,7 +300,18 @@ def decode_json_representation(value, type, bundle):
         # simple type, just return it
         return value
 
-def split_into_formal_and_other_attributes(attributes,metadata):
+
+def split_into_formal_and_other_attributes(attributes, metadata):
+    """
+    This function split the attributes and metadata into formal attributes and other attributes.
+    Helpful for merge operations and searching for duplicate relations
+
+    :param attributes:
+    :param metadata:
+    :return: namedtuple(formal_attributes, other_attributes)
+    :rtype FormalAndOtherAttributes
+    """
+
     prov_type = metadata[METADATA_KEY_PROV_TYPE]
 
     if str(prov_type) == "prov:Unknown":
@@ -261,25 +323,36 @@ def split_into_formal_and_other_attributes(attributes,metadata):
     formal_attributes = {key: attributes[key] for key in attributes.keys() if key in formal_qualified_names}
     other_attributes = {key: attributes[key] for key in attributes.keys() if key not in formal_qualified_names}
 
-    return FormalAndOtherAttributes(formal_attributes,other_attributes )
+    return FormalAndOtherAttributes(formal_attributes, other_attributes)
 
 
-def merge_record(attributes,metadata, other_attributes, other_metadata):
+def merge_record(attributes, metadata, other_attributes, other_metadata):
+    """
+    Merge 2 records into one
 
+
+    :param attributes: The original attributes
+    :param metadata: The original metadata
+    :param other_attributes: The attributes to merge
+    :param other_metadata:  The metadata to merge
+    :return: tuple(attributes, metadata)
+    :rtype Tuple(attributes,metadata)
+    """
     attributes_merged = attributes.copy()
     attributes_merged.update(other_attributes)
 
     if metadata[METADATA_KEY_PROV_TYPE] != other_metadata[METADATA_KEY_PROV_TYPE]:
-        raise MergeException("Prov type should be the same but is: {}:{}".format(METADATA_KEY_PROV_TYPE, METADATA_KEY_PROV_TYPE))
+        raise MergeException(
+            "Prov type should be the same but is: {}:{}".format(METADATA_KEY_PROV_TYPE, METADATA_KEY_PROV_TYPE))
 
-    for (key,value) in attributes.items():
+    for (key, value) in attributes.items():
         if attributes_merged[key] != value:
-            raise MergeException("Invalid data, it is not allowed to override existing attributes key:{}, value:{} with value:{}".format(key,value,attributes_merged[key]  ))
-
+            raise MergeException(
+                "Invalid data, it is not allowed to override existing attributes key:{}, value:{} with value:{}".format(
+                    key, value, attributes_merged[key]))
 
     merged_metadata_namespaces = metadata[METADATA_KEY_NAMESPACES].copy()
     merged_metadata_namespaces.update(other_metadata[METADATA_KEY_NAMESPACES])
-
 
     merged_metadata_type_map = metadata[METADATA_KEY_TYPE_MAP].copy()
     merged_metadata_type_map.update(other_metadata[METADATA_KEY_TYPE_MAP])
@@ -289,6 +362,4 @@ def merge_record(attributes,metadata, other_attributes, other_metadata):
     merged_metadata.update({METADATA_KEY_NAMESPACES: merged_metadata_namespaces})
     merged_metadata.update({METADATA_KEY_TYPE_MAP: merged_metadata_type_map})
 
-
-    return (attributes_merged,merged_metadata)
-
+    return attributes_merged, merged_metadata
