@@ -2,7 +2,7 @@ language: python
 sudo: required
 
 python:
-  - 3.4
+  - 3.5
 
 services:
   - docker
@@ -16,6 +16,7 @@ install:
   #- pip install '.[test]'
   - pip install coverage
   - pip install coveralls
+  - make setup
 
 # Run test
 script:
