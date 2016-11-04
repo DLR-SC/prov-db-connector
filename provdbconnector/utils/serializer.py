@@ -34,6 +34,19 @@ if six.integer_types[-1] not in LITERAL_XSDTYPE_MAP:
 
 
 def encode_dict_values_to_primitive(dict_values):
+    """
+    This function transforms a dict with all kind of types into a dict with only
+
+    - str
+    - dict
+    - book
+    - str
+
+    values
+
+    :param dict_values:
+    :return:
+    """
     new_dict_values = dict()
     for key, value in dict_values.items():
         key_simple = str(key)
@@ -43,6 +56,19 @@ def encode_dict_values_to_primitive(dict_values):
 
 
 def encode_string_value_to_primitive(value):
+    """
+    Convert a value into one of the following types:
+
+    - dict
+    - str
+    - float
+    - int
+    - list
+
+
+    :param value:
+    :return:
+    """
     if isinstance(value, Literal):
         return value.value
     elif type(value) is int:
@@ -61,6 +87,12 @@ def encode_string_value_to_primitive(value):
 
 
 def literal_json_representation(literal):
+    """
+    Some internationalization stuff
+
+    :param literal:
+    :return:
+    """
     # TODO: QName export
     value, datatype, langtag = literal.value, literal.datatype, literal.langtag
     if langtag:
@@ -70,6 +102,11 @@ def literal_json_representation(literal):
 
 
 def encode_json_representation(value):
+    """
+    Get the type of a value
+    :param value:
+    :return:
+    """
     if isinstance(value, Literal):
         return literal_json_representation(value)
     elif isinstance(value, datetime):
@@ -89,6 +126,13 @@ def encode_json_representation(value):
 # DECODE
 
 def add_namespaces_to_bundle(prov_bundle, metadata):
+    """
+    Add all namespaces in the metadata_dict to the provided bundle
+
+    :param prov_bundle:
+    :param metadata:
+    :return: None
+    """
     namespaces = dict()
     try:
         namespace_str = metadata[METADATA_KEY_NAMESPACES]
@@ -229,6 +273,15 @@ def create_prov_record(bundle, prov_type, prov_id, properties, type_map):
 
 
 def decode_json_representation(value, type, bundle):
+    """
+    Return the value based on the type see also encode_json_representation
+
+    :param value:
+    :param type:
+    :param bundle:
+    :return:
+    """
+
     if isinstance(type, dict):
         # complex type
         datatype = type['type'] if 'type' in type else None
@@ -249,6 +302,16 @@ def decode_json_representation(value, type, bundle):
 
 
 def split_into_formal_and_other_attributes(attributes, metadata):
+    """
+    This function split the attributes and metadata into formal attributes and other attributes.
+    Helpful for merge operations and searching for duplicate relations
+
+    :param attributes:
+    :param metadata:
+    :return: namedtuple(formal_attributes, other_attributes)
+    :rtype FormalAndOtherAttributes
+    """
+
     prov_type = metadata[METADATA_KEY_PROV_TYPE]
 
     if str(prov_type) == "prov:Unknown":
@@ -264,6 +327,17 @@ def split_into_formal_and_other_attributes(attributes, metadata):
 
 
 def merge_record(attributes, metadata, other_attributes, other_metadata):
+    """
+    Merge 2 records into one
+
+
+    :param attributes: The original attributes
+    :param metadata: The original metadata
+    :param other_attributes: The attributes to merge
+    :param other_metadata:  The metadata to merge
+    :return: tuple(attributes, metadata)
+    :rtype Tuple(attributes,metadata)
+    """
     attributes_merged = attributes.copy()
     attributes_merged.update(other_attributes)
 
