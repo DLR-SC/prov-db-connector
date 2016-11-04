@@ -24,12 +24,6 @@ NEO4J_CREATE_RELATION_RETURN_ID = """
                                     ID(node) as ID, check
                                 """  # args: provType, values
 # get
-NEO4j_GET_BUNDLE_RETURN_BUNDLE_NODE = """
-                        MATCH (b {`meta:prov_type`:'prov:Bundle'}) WHERE ID(b)=toInt({bundle_id}) RETURN b
-                    """
-NEO4J_Get_BUNDLES_RETURN_BUNDLE_IDS = """
-                        MATCH (d {`meta:parent_id`:{parent_id}, `meta:prov_type`: 'prov:Bundle'}) Return id(d) as ID
-                    """
 NEO4J_GET_RECORDS_BY_PROPERTY_DICT = """
                             MATCH (d {{{filter_dict}}} )-[r]-(x {{{filter_dict}}})
                             RETURN DISTINCT r as re
