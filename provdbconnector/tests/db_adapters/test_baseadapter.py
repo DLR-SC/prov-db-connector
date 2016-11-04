@@ -139,6 +139,12 @@ class AdapterTestTemplate(unittest.TestCase):
         """
         This test try to save a simple record
 
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_1_save_record.svg
+           :align: center
+           :scale: 50 %
+
         **Input-Data**
 
         .. warning::
@@ -194,6 +200,13 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_2_save_relation(self):
         """
         This test try to save a simple relation between 2 identifiers
+
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_2_save_relation.svg
+           :align: center
+           :scale: 50 %
 
         **Input-Data**
 
@@ -285,6 +298,12 @@ class AdapterTestTemplate(unittest.TestCase):
         """
         Create a record and then try to get it back
 
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_4_get_record.svg
+           :align: center
+           :scale: 50 %
+
         **Input-Data**
 
         `"id-333"`
@@ -351,6 +370,13 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_6_get_relation(self):
         """
         create a relation between 2 nodes and try to get the relation back
+
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_6_get_relation.svg
+           :align: center
+           :scale: 50 %
 
 
         **Input-Data**
@@ -430,6 +456,13 @@ class AdapterTestTemplate(unittest.TestCase):
 
         This test is to get a the whole graph without any filter
 
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_8_get_records_by_filter.svg
+           :align: center
+           :scale: 50 %
+
+
         **Input-Data**
 
         We have no input data for the filter function because we want to get the whole graph
@@ -501,6 +534,12 @@ class AdapterTestTemplate(unittest.TestCase):
         """
         This test is to get a specific part of the graph via certain filter criteria
 
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_9_get_records_by_filter_with_properties.svg
+           :align: center
+           :scale: 50 %
 
         *Get single node*
 
@@ -713,6 +752,14 @@ class AdapterTestTemplate(unittest.TestCase):
 
         @todo implement test for filter by metadata
 
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_10_get_records_by_filter_with_metadata.svg
+           :align: center
+           :scale: 50 %
+
+
         .. warning::
             This test is not implemented jet
 
@@ -742,6 +789,12 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_11_get_records_tail(self):
         """
         This test is to get the whole provenance from a starting point
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_11_get_records_tail.svg
+           :align: center
+           :scale: 50 %
 
         **Input-Data**
 
@@ -854,6 +907,14 @@ class AdapterTestTemplate(unittest.TestCase):
     def test_12_get_records_tail_recursive(self):
         """
         Test the same behavior as the `test_get_records_tail` test but with a recursive data structure
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_12_get_records_tail_recursive.svg
+           :align: center
+           :scale: 50 %
+
+        **Input-Data**
 
         .. code-block:: json
 
@@ -1135,6 +1196,15 @@ class AdapterTestTemplate(unittest.TestCase):
 
         Test the same behavior as the `test_get_records_tail` test but with a recursive data structure
 
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_13_get_bundle_records.svg
+           :align: center
+           :scale: 50 %
+
+        **Input-Data**
+
         .. code-block:: json
 
             {
@@ -1323,6 +1393,13 @@ class AdapterTestTemplate(unittest.TestCase):
         """
         This function test the merge abbility of your adapter.
 
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_19_merge_record.svg
+           :align: center
+           :scale: 50 %
+
         **Input-Data**
 
         We try to create the node twice, with the following data
@@ -1425,6 +1502,12 @@ class AdapterTestTemplate(unittest.TestCase):
         In this example we test if we merge different attributes into one node
 
 
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_20_merge_record_complex.svg
+           :align: center
+           :scale: 50 %
+
         **Input-Data**
 
         This is the attributes used to create the entry
@@ -1523,6 +1606,11 @@ class AdapterTestTemplate(unittest.TestCase):
         """
          In this example we test if we merge different attributes into one node
 
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_21_merge_record_complex_fail.svg
+           :align: center
+           :scale: 50 %
 
          **Input-Data**
 
@@ -1578,6 +1666,12 @@ class AdapterTestTemplate(unittest.TestCase):
         This test try to merge the metadata.
         This is important if you add some new attributes that uses other namespaces, so you need to merge the namespaces
         Same behavior for the type_map
+
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_22_merge_record_metadata.svg
+           :align: center
+           :scale: 50 %
 
         **Input-Data**
 
@@ -1708,6 +1802,11 @@ class AdapterTestTemplate(unittest.TestCase):
         Merge a relation is pretty similar to merge records.
         The big difference is the different rules for uniques
 
+        **Graph-Strucutre**
+
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_23_merge_relation.svg
+           :align: center
+           :scale: 50 %
 
         A relation is unique if:
 
