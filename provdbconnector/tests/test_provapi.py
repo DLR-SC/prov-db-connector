@@ -206,6 +206,10 @@ class ProvApiTests(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
+        """
+        Loads the test xml json and provn data
+
+        """
         self.test_resources = {
             'xml': {'package': 'provdbconnector', 'file': '/tests/resources/primer.provx'},
             'json': {'package': 'provdbconnector', 'file': '/tests/resources/primer.json'},
