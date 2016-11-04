@@ -1909,12 +1909,12 @@ class AdapterTestTemplate(unittest.TestCase):
         self.assertIs(type(id), str, "id should be a string ")
 
 class BaseConnectorTests(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
+    """
+    This class is only to test that the BaseConnector is allright
+    """
     def test_instance_abstract_class(self):
+        """
+        Test that the BaseAdapter is abstract
+        """
         with self.assertRaises(TypeError):
             BaseAdapter()
