@@ -43,14 +43,13 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "prov==1.4.1.dev1",
+        "prov==1.5.0",
         "neo4j-driver==1.0.2",
         "networkx==1.11",
         "decorator==4.0.10",
         "lxml==3.6.4",
         "six==1.10.0"
-    ] + tests_require + docs_require, #Remove tests_require and docs_require after prov package on pypi was updated
-    dependency_links = ['https://github.com/B-Stefan/prov/tarball/master#egg=prov-1.4.1.dev1'],
+    ],
     extras_require={
         'test': tests_require,
         'dev': tests_require + docs_require,
