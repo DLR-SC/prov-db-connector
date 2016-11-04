@@ -2,7 +2,7 @@ language: python
 sudo: required
 
 python:
-  - 3.4
+  - 3.5
 
 services:
   - docker
@@ -13,8 +13,7 @@ before_install:
 
 # Install packages
 install:
-  - pip install -r requirements.txt
-  - pip install coveralls
+  - pip install '.[test]'
 
 # Run test
 script:

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="369.6098327636719" height="353.288330078125"
+     viewBox="-105.69771575927734 -54.780792236328125 369.6098327636719 353.288330078125">
+    <title>Neo4j Graph Visualization</title>
+    <desc>Created using Neo4j (http://www.neo4j.com/)</desc>
+    <g class="layer relationships">
+        <g class="relationship" transform="translate(163.18507906316322 75.29852303767015) rotate(309.5439280771269)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 26.909804157000856 0.5 L 26.909804157000856 -0.5 L 25 -0.5 Z M 69.81605415700085 0.5 L 71.72585831400171 0.5 L 71.72585831400171 3.5 L 78.72585831400171 0 L 71.72585831400171 -3.5 L 71.72585831400171 -0.5 L 69.81605415700085 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="48.362929157000856" y="3"
+                  font-family="sans-serif">mentionOf
+            </text>
+        </g>
+        <g class="relationship" transform="translate(229.22418287662845 -4.688291191243369) rotate(191.48720639142044)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 28.0034319168931 0.5 L 28.0034319168931 -0.5 L 25 -0.5 Z M 70.9096819168931 0.5 L 73.9131138337862 0.5 L 73.9131138337862 3.5 L 80.9131138337862 0 L 73.9131138337862 -3.5 L 73.9131138337862 -0.5 L 70.9096819168931 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="49.4565569168931" y="3"
+                  transform="rotate(180 49.4565569168931 0)" font-family="sans-serif">mentionOf
+            </text>
+        </g>
+        <g class="relationship" transform="translate(125.43259374253694 -25.78079476451535) rotate(429.51965809260366)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 28.99657063222604 0.5 L 28.99657063222604 -0.5 L 25 -0.5 Z M 71.90282063222604 0.5 L 75.89939126445208 0.5 L 75.89939126445208 3.5 L 82.89939126445208 0 L 75.89939126445208 -3.5 L 75.89939126445208 -0.5 L 71.90282063222604 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="50.44969563222604" y="3"
+                  font-family="sans-serif">mentionOf
+            </text>
+        </g>
+        <g class="relationship" transform="translate(163.18507906316322 75.29852303767015) rotate(508.9708612820008)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 28.18924170512961 0.5 L 28.18924170512961 -0.5 L 25 -0.5 Z M 71.0954917051296 0.5 L 74.28473341025922 0.5 L 74.28473341025922 3.5 L 81.28473341025922 0 L 74.28473341025922 -3.5 L 74.28473341025922 -0.5 L 71.0954917051296 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="49.64236670512961" y="3"
+                  transform="rotate(180 49.64236670512961 0)" font-family="sans-serif">mentionOf
+            </text>
+        </g>
+    </g>
+    <g class="layer nodes">
+        <g class="node" transform="translate(5.8409177269581,269.5075435920552)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:prov:…
+            </text>
+        </g>
+        <g class="node" transform="translate(234.91210542076863,242.7967465467615)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#6DCE9E" stroke="#60B58B" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">prov:Bu…
+            </text>
+        </g>
+        <g class="node" transform="translate(229.22418287662845,-4.688291191243369)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="0" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:FROM
+            </text>
+            <text text-anchor="middle" pointer-events="none" y="10" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">NODE
+            </text>
+        </g>
+        <g class="node" transform="translate(125.43259374253694,-25.78079476451535)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="0" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:TO
+            </text>
+            <text text-anchor="middle" pointer-events="none" y="10" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">NODE
+            </text>
+        </g>
+        <g class="node" transform="translate(-76.69771756343201,20.44987532564974)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:seco…
+            </text>
+        </g>
+        <g class="node" transform="translate(163.18507906316322,75.29852303767015)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:seco…
+            </text>
+        </g>
+        <g class="node" transform="translate(72.10913208247757,130.0855327905414)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:seco…
+            </text>
+        </g>
+    </g>
+</svg>
