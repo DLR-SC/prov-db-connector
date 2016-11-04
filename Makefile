@@ -13,14 +13,12 @@ help:
 
 setup:
 	pip install -U pip setuptools
-# pip install '.'
-	python setup.py install
+	pip install '.'
 
 dev-setup:
 	mkdir -p docs/source/_static
 	pip install -U pip setuptools
-	python setup.py develop
-# pip install -e '.[dev]'
+	pip install -e '.[dev]'
 
 clean: clean-build clean-pyc
 	rm -fr htmlcov/
