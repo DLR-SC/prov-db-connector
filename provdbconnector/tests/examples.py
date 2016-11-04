@@ -7,20 +7,26 @@ from prov.tests.examples import primer_example, \
     collections, \
     long_literals, \
     datatypes
-import datetime
-from prov.model import ProvDocument, QualifiedName, ProvRecord, ProvRelation, ProvActivity, Literal, Identifier
+from _datetime import datetime
+from collections import namedtuple
+
 from prov.constants import PROV_RECORD_IDS_MAP, PROV
+from prov.model import ProvDocument, ProvActivity, Literal, Identifier
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, \
     METADATA_KEY_TYPE_MAP, METADATA_KEY_IDENTIFIER
-from collections import namedtuple
 
 
 def attributes_dict_example():
+    """
+    Retuns a example dict with some different attributes
+    :return: dict with attributes
+    :rtype: dict
+    """
     attributes = dict()
     attributes.update({"ex:individual attribute": "Some value"})
     attributes.update({"ex:int value": 99})
     attributes.update({"ex:double value": 99.33})
-    attributes.update({"ex:date value": datetime.datetime.now()})
+    attributes.update({"ex:date value": datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')})
     attributes.update({"ex:list value": ["list", "of", "strings"]})
     attributes.update({"ex:dict value": {"dict": "value"}})
 
@@ -28,9 +34,16 @@ def attributes_dict_example():
 
 
 def base_connector_bundle_parameter_example():
+    """
+    This example returns a dict with example arguments for a db_adapter
+
+    :return: dict {attributes, metadata}
+    :rtype: dict
+    """
     doc = ProvDocument()
     doc.add_namespace("ex", "http://example.com")
     attributes = dict()
+    attributes.update({"prov:type": "prov:Bundle"})
 
     namespaces = dict()
     namespaces.update({"ex": "http://example.com"})
@@ -41,7 +54,7 @@ def base_connector_bundle_parameter_example():
 
     metadata = dict()
 
-    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Bundle")})
+    metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Entity")})
     metadata.update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("ex:bundle name")})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
@@ -53,6 +66,11 @@ def base_connector_bundle_parameter_example():
 
 
 def base_connector_record_parameter_example():
+    """
+    Returns a dict with attributes and metadata for a simple node
+    :return:dict with attributes metadata
+    :rtype: dict
+    """
     doc = ProvDocument()
 
     namespaces = dict()
@@ -66,7 +84,7 @@ def base_connector_record_parameter_example():
     metadata = dict()
 
     metadata.update({METADATA_KEY_PROV_TYPE: doc.valid_qualified_name("prov:Activity")})
-    metadata.update({METADATA_KEY_IDENTIFIER: "label for the node"})
+    metadata.update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("prov:example_node")})
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
     metadata.update({METADATA_KEY_NAMESPACES: namespaces})
 
@@ -78,6 +96,12 @@ def base_connector_record_parameter_example():
 
 
 def base_connector_relation_parameter_example():
+    """
+    Returns a example with a start nodes (attributes, metadata) and also a relation dict with attributes metadata
+
+    :return: dict
+    :rtype: dict
+    """
     doc = ProvDocument()
     doc.add_namespace("ex", "http://example.com")
     doc.add_namespace("custom", "http://custom.com")
@@ -107,7 +131,32 @@ def base_connector_relation_parameter_example():
     return return_data
 
 
+def base_connector_merge_example():
+    """
+    This example returns a namedtuple with a from_node relation and to_node
+    to test the merge behavior
+
+    :return: namedtuple(from_node, relation, to_node)
+    :rtype: namedtuple
+    """
+    # noinspection PyPep8Naming
+    ReturnData = namedtuple("base_connector_merge_example_return_data", "from_node,relation,to_node")
+    example_relation = base_connector_relation_parameter_example()
+
+    example_node_a = base_connector_record_parameter_example()
+    example_node_b = base_connector_record_parameter_example()
+
+    example_node_a["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["from_node"]
+    example_node_b["metadata"][METADATA_KEY_IDENTIFIER] = example_relation["to_node"]
+
+    return ReturnData(example_node_a, example_relation, example_node_b)
+
+
 def prov_api_record_example():
+    """
+        This is a more complex record example
+    :return:
+    """
     doc = ProvDocument()
     doc.add_namespace("ex", "http://example.com")
     doc.add_namespace("custom", "http://custom.com")
@@ -156,6 +205,7 @@ def prov_api_record_example():
     metadata.update({METADATA_KEY_TYPE_MAP: type_map})
 
     record = ProvActivity(doc, "ex:record", attributes)
+    # noinspection PyPep8Naming
     Example = namedtuple("prov_api_metadata_record_example", "metadata, attributes, prov_record, expected_attributes")
 
     return Example(metadata, attributes, record, expected_attributes)

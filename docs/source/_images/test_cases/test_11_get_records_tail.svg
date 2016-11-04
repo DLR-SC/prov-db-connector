@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="279.3455810546875" height="277.6091003417969"
+     viewBox="-25.414649963378906 -22.364850997924805 279.3455810546875 277.6091003417969">
+    <title>Neo4j Graph Visualization</title>
+    <desc>Created using Neo4j (http://www.neo4j.com/)</desc>
+    <g class="layer relationships">
+        <g class="relationship" transform="translate(72.07050464005479 6.635148434534396) rotate(490.85823701051856)">
+            <path class="outline" fill="#A5ABB6" stroke="none"
+                  d="M 25 0.5 L 27.390372995532417 0.5 L 27.390372995532417 -0.5 L 25 -0.5 Z M 70.29662299553242 0.5 L 72.68699599106483 0.5 L 72.68699599106483 3.5 L 79.68699599106483 0 L 72.68699599106483 -3.5 L 72.68699599106483 -0.5 L 70.29662299553242 -0.5 Z"/>
+            <text text-anchor="middle" pointer-events="none" font-size="8px" fill="#000000" x="48.84349799553242" y="3"
+                  transform="rotate(180 48.84349799553242 0)" font-family="sans-serif">mentionOf
+            </text>
+        </g>
+    </g>
+    <g class="layer nodes">
+        <g class="node" transform="translate(100.02620066722268,226.24425454781863)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:prov:…
+            </text>
+        </g>
+        <g class="node" transform="translate(224.93095502361126,81.83770431750864)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#6DCE9E" stroke="#60B58B" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="5" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">prov:Bu…
+            </text>
+        </g>
+        <g class="node" transform="translate(72.07050464005479,6.635148434534396)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="0" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:FROM
+            </text>
+            <text text-anchor="middle" pointer-events="none" y="10" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">NODE
+            </text>
+        </g>
+        <g class="node" transform="translate(3.5853504551650115,85.81311750362013)">
+            <circle class="outline" cx="0" cy="0" r="25" fill="#68BDF6" stroke="#5CA8DB" stroke-width="2px"/>
+            <text text-anchor="middle" pointer-events="none" y="0" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">ex:TO
+            </text>
+            <text text-anchor="middle" pointer-events="none" y="10" font-size="10px" fill="#FFFFFF"
+                  font-family="sans-serif">NODE
+            </text>
+        </g>
+    </g>
+</svg>
