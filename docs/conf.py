@@ -56,12 +56,7 @@ class Base():
 
 
 
-MOCK_MODULES = ['prov',
-                'prov.tests'
-                'prov.constants',
-                'prov.model',
-                'prov.tests.examples',
-                'prov.tests.examples.primer_example',
+MOCK_MODULES = [
                 'neo4j',
                 'neo4j.v1',
                 'neo4j.v1.exceptions']
