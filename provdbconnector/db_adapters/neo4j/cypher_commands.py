@@ -1,4 +1,3 @@
-
 NEO4J_TEST_CONNECTION = """MATCH (n) RETURN count(n) as count"""
 
 # create
@@ -42,7 +41,7 @@ NEO4J_GET_RECORDS_TAIL_BY_FILTER = """
                             RETURN DISTINCT re
                         """
 
-NEO4J_GET_BUNDLE_RECORDS = """ 
+NEO4J_GET_BUNDLE_RECORDS = """_
                             MATCH (x {`meta:identifier`: {`meta:identifier`}})-[r *1]-(y)
                             WHERE ALL (rel in r WHERE rel.`prov:type` = 'prov:bundleAssociation')
                             RETURN  DISTINCT y as re
