@@ -17,22 +17,36 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
 import sys
+import os
 
+# If extensions (or modules to document with autodoc) are in another
+# directory, add these directories to sys.path here. If the directory is
+# relative to the documentation root, use os.path.abspath to make it
+# absolute, like shown here.
+#sys.path.insert(0, os.path.abspath('.'))
+
+# Get the project root dir, which is the parent dir of this
 cwd = os.getcwd()
 project_root = os.path.dirname(cwd)
 
+# Insert the project root dir as the first element in the PYTHONPATH.
+# This lets us ensure that the source package is imported, and that its
+# version is used.
+sys.path.insert(0, project_root)
 
-from mock import Mock as MagicMock
+import prov
 
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
-
-MOCK_MODULES = ['prov','prov.constants', 'prov.model', 'abc', "neo4j.v1.exceptions", "neo4j.v1"]
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+#
+# from mock import Mock as MagicMock
+#
+# class Mock(MagicMock):
+#     @classmethod
+#     def __getattr__(cls, name):
+#             return Mock()
+#
+# MOCK_MODULES = ['prov','prov.constants', 'prov.model', 'abc', "neo4j.v1.exceptions", "neo4j.v1"]
+# sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 from recommonmark.parser import CommonMarkParser
 import sphinx_rtd_theme
@@ -78,7 +92,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = 'PROV Database Connector'
+project = 'prov-db-connector'
 copyright = '2016, German Aerospace Center (DLR)'
 author = 'German Aerospace Center (DLR)'
 
