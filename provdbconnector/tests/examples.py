@@ -1,4 +1,4 @@
-from prov.tests.examples import primer_example, \
+from prov.tests.examples import primer_example as primer_example, \
     primer_example_alternate, \
     w3c_publication_1, \
     w3c_publication_2, \
@@ -7,6 +7,7 @@ from prov.tests.examples import primer_example, \
     collections, \
     long_literals, \
     datatypes
+
 from _datetime import datetime
 from collections import namedtuple
 
