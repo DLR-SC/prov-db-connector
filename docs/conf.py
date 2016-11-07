@@ -62,6 +62,7 @@ MOCK_MODULES = ['prov',
                 'neo4j',
                 'neo4j.v1',
                 'neo4j.v1.exceptions',
+                'prov.tests'
                 'prov.tests.examples']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
