@@ -1,5 +1,4 @@
 import logging
-from abc import ABC, abstractmethod
 from collections import namedtuple
 
 log = logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -18,16 +17,14 @@ DbRecord = namedtuple("DbRecord", "attributes, metadata")
 DbRelation = namedtuple("DbRelation", "attributes, metadata")
 
 
-class BaseAdapter(ABC):
+class BaseAdapter():
     """
     Interface class for a prov database adapter
     """
 
-    @abstractmethod
     def __init__(self, *args, **kwargs):
         pass
 
-    @abstractmethod
     def connect(self, authentication_info):
         """
         Establish the database connection / login into the database
@@ -38,9 +35,8 @@ class BaseAdapter(ABC):
         :rtype: boolean
         :raise InvalidOptionsException:
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def save_record(self, attributes, metadata):
         """
         Creates a database node
@@ -52,9 +48,8 @@ class BaseAdapter(ABC):
         :return: Record id
         :rtype: str
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def save_relation(self, from_node, to_node, attributes, metadata):
         """
         Create a relation between 2 nodes
@@ -70,9 +65,8 @@ class BaseAdapter(ABC):
         :return: Record id
         :rtype: str
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
         """
         Returns all records (nodes and relations) based on a filter dict.
@@ -86,9 +80,8 @@ class BaseAdapter(ABC):
         :return: list of relations and nodes
         :rtype: list
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
         """
         Returns all connected nodes and relations based on a filter.
@@ -103,9 +96,8 @@ class BaseAdapter(ABC):
         :return: a list of relations and nodes
         :rtype: list
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def get_bundle_records(self, bundle_identifier):
         """
         Returns the relations and nodes for a specific bundle identifier.
@@ -118,9 +110,8 @@ class BaseAdapter(ABC):
         :return: list of nodes and bundles
         :rtype: list
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def get_record(self, record_id):
         """
         Return a single record
@@ -130,9 +121,8 @@ class BaseAdapter(ABC):
         :return: DbRecord
         :rtype: DbRecord
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def get_relation(self, relation_id):
         """
         Returns a single relation
@@ -142,9 +132,8 @@ class BaseAdapter(ABC):
         :return: DbRelation
         :rtype: DbRelation
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def delete_records_by_filter(self, attributes_dict, metadata_dict):
         """
         Delete records by filter
@@ -157,9 +146,8 @@ class BaseAdapter(ABC):
         :rtype: boolean
         :raise NotFoundException:
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def delete_record(self, record_id):
         """
         Delete a single record
@@ -170,9 +158,8 @@ class BaseAdapter(ABC):
         :rtype: boolean
         :raise NotFoundException:
         """
-        pass
+        NotImplementedError("Abstract method")
 
-    @abstractmethod
     def delete_relation(self, relation_id):
         """
         Delete a single relation
@@ -183,4 +170,4 @@ class BaseAdapter(ABC):
         :rtype: boolean
         :raise NotFoundException:
         """
-        pass
+        NotImplementedError("Abstract method")
