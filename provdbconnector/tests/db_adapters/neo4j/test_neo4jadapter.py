@@ -1,7 +1,7 @@
 import unittest
 
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException
-from provdbconnector.db_adapters.neo4j import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
+from provdbconnector import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
 from provdbconnector.provapi import ProvApi
 from provdbconnector.tests import AdapterTestTemplate
 from provdbconnector.tests import ProvApiTestTemplate

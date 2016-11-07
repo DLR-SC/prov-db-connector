@@ -7,7 +7,7 @@ from prov.model import ProvDocument
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvApi
 from provdbconnector.exceptions.database import InvalidOptionsException
-from provdbconnector.db_adapters.neo4j import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
+from provdbconnector import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP, METADATA_KEY_PROV_TYPE, \
     METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
 from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException

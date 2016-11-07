@@ -1,5 +1,5 @@
 from provdbconnector import ProvApi
-from provdbconnector.db_adapters.neo4j import Neo4jAdapter
+from provdbconnector import Neo4jAdapter
 from prov.tests.examples import primer_example
 import os
 
