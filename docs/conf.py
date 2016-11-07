@@ -35,10 +35,7 @@ project_root = os.path.dirname(cwd)
 # version is used.
 sys.path.insert(0, project_root)
 
-import provdbconnector
-
 from mock import Mock as MagicMock
-
 class Mock(MagicMock):
  @classmethod
  def __getattr__(cls, name):
@@ -46,6 +43,10 @@ class Mock(MagicMock):
 
 MOCK_MODULES = ['prov','prov.constants', 'prov.model']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
+import provdbconnector
+
+
 
 from recommonmark.parser import CommonMarkParser
 import sphinx_rtd_theme
