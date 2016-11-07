@@ -19,7 +19,7 @@
 #
 import os
 import sys
-#sys.path.insert(0, os.path.abspath('./..'))
+sys.path.insert(0, os.path.abspath('./..'))
 #sys.path.insert(1, os.path.abspath('./../../provdbconnector'))
 #sys.path.insert(2, os.path.abspath('./../../'))
 
@@ -31,7 +31,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
-MOCK_MODULES = ['prov', 'prov.constants', 'prov.model', 'abc', "neo4j", "neo4j.v1.exceptions", "neo4j.v1", "."]
+MOCK_MODULES = ['prov.constants', 'prov.model', 'abc', "neo4j.v1.exceptions", "neo4j.v1", "."]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 from recommonmark.parser import CommonMarkParser
