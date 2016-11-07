@@ -2015,5 +2015,6 @@ class BaseConnectorTests(unittest.TestCase):
         """
         Test that the BaseAdapter is abstract
         """
-        with self.assertRaises(TypeError):
-            BaseAdapter()
+        base = BaseAdapter()
+        with self.assertRaises(NotImplementedError):
+            base.connect()
