@@ -62,7 +62,7 @@ sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
 import provdbconnector
-import abc
+from abc import ABC, ABCMeta
 
 
 
