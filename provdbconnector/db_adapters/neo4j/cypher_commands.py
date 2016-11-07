@@ -41,7 +41,7 @@ NEO4J_GET_RECORDS_TAIL_BY_FILTER = """
                             RETURN DISTINCT re
                         """
 
-NEO4J_GET_BUNDLE_RECORDS = """_
+NEO4J_GET_BUNDLE_RECORDS = """
                             MATCH (x {`meta:identifier`: {`meta:identifier`}})-[r *1]-(y)
                             WHERE ALL (rel in r WHERE rel.`prov:type` = 'prov:bundleAssociation')
                             RETURN  DISTINCT y as re
