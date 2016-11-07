@@ -2017,4 +2017,4 @@ class BaseConnectorTests(unittest.TestCase):
         """
         base = BaseAdapter()
         with self.assertRaises(NotImplementedError):
-            base.connect()
+            base.connect(None)
