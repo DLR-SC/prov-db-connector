@@ -61,7 +61,6 @@ MOCK_MODULES = ['prov',
                 'prov.model',
                 'prov.tests'
                 'prov.tests.examples',
-                'provdbconnector.tests.examples',
                 'neo4j',
                 'neo4j.v1',
                 'neo4j.v1.exceptions']
