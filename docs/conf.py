@@ -31,7 +31,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
-MOCK_MODULES = ['prov', 'prov.constants', 'prov.model']
+MOCK_MODULES = ['prov', 'prov.constants', 'prov.model', 'ABC']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 from recommonmark.parser import CommonMarkParser
