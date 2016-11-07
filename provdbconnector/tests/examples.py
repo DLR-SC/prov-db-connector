@@ -1,12 +1,16 @@
-from prov.tests.examples import primer_example as primer_example, \
-    primer_example_alternate, \
-    w3c_publication_1, \
-    w3c_publication_2, \
-    bundles1, \
-    bundles2, \
-    collections, \
-    long_literals, \
-    datatypes
+import os
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+
+if on_rtd:
+    from prov.tests.examples import primer_example as primer_example, \
+        primer_example_alternate, \
+        w3c_publication_1, \
+        w3c_publication_2, \
+        bundles1, \
+        bundles2, \
+        collections, \
+        long_literals, \
+        datatypes
 
 from _datetime import datetime
 from collections import namedtuple
