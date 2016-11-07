@@ -41,7 +41,7 @@ class Mock(MagicMock):
  def __getattr__(cls, name):
          return Mock()
 
-MOCK_MODULES = ['prov','prov.constants', 'prov.model', 'abc', 'neo4j.v1.exceptions', 'neo4j.v1']
+MOCK_MODULES = ['prov','prov.constants', 'prov.model', 'abc','neo4j', 'neo4j.v1.exceptions', 'neo4j.v1']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 import provdbconnector
