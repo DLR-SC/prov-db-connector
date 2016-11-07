@@ -21,6 +21,7 @@ provdbconnector.provapi module
     :members:
     :undoc-members:
     :show-inheritance:
+    :autodoc_mock_imports: prov
 
 
 Module contents
