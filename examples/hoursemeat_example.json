@@ -1,0 +1,708 @@
+{
+  "prefix": {
+    "xsd_1": "http://www.w3.org/2001/XMLSchema",
+    "schema": "http://schema.org/",
+    "dbpedia": "http://dbpedia.org/resource/",
+    "rasff": "http://ec.europa.eu/food/safety/rasff#"
+  },
+  "bundle": {
+    "rasff:commercial": {
+      "wasAssociatedWith": {
+        "_:id5": {
+          "prov:agent": "rasff:CyprusSubcontractor",
+          "prov:activity": "rasff:place_order_carcass_2"
+        },
+        "_:id4": {
+          "prov:agent": "rasff:Spanghero",
+          "prov:activity": "rasff:place_order_carcass_1"
+        },
+        "_:id6": {
+          "prov:agent": "rasff:NetherlandsTrader",
+          "prov:activity": "rasff:place_order_carcass_3"
+        },
+        "_:id1": {
+          "prov:agent": "rasff:Findus",
+          "prov:activity": "rasff:place_order_product_1"
+        },
+        "_:id3": {
+          "prov:agent": "rasff:Tavola",
+          "prov:activity": "rasff:place_order_meat"
+        },
+        "_:id2": {
+          "prov:agent": "rasff:Comigel",
+          "prov:activity": "rasff:place_order_product_2"
+        }
+      },
+      "wasAttributedTo": {
+        "_:id7": {
+          "prov:entity": "rasff:order_product_2",
+          "prov:agent": "rasff:Comigel"
+        },
+        "_:id9": {
+          "prov:entity": "rasff:order_carcass_1",
+          "prov:agent": "rasff:Spanghero"
+        },
+        "_:id8": {
+          "prov:entity": "rasff:order_product_1",
+          "prov:agent": "rasff:Findus"
+        },
+        "_:id11": {
+          "prov:entity": "rasff:order_carcass_3",
+          "prov:agent": "rasff:NetherlandsTrader"
+        },
+        "_:id10": {
+          "prov:entity": "rasff:order_meat",
+          "prov:agent": "rasff:Tavola"
+        },
+        "_:id12": {
+          "prov:entity": "rasff:order_carcass_2",
+          "prov:agent": "rasff:CyprusSubcontractor"
+        }
+      },
+      "entity": {
+        "rasff:order_meat": {
+          "schema:seller": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Spanghero"
+          },
+          "schema:customer": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Tavola"
+          },
+          "schema:orderedItem": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:meat"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "schema:Order"
+          }
+        },
+        "rasff:order_product_1": {
+          "schema:seller": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Comigel"
+          },
+          "schema:customer": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Findus"
+          },
+          "schema:orderedItem": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:product"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "schema:Order"
+          }
+        },
+        "rasff:order_product_2": {
+          "schema:seller": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Tavola"
+          },
+          "schema:customer": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Comigel"
+          },
+          "schema:orderedItem": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:product"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "schema:Order"
+          }
+        },
+        "rasff:order_carcass_1": {
+          "schema:seller": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:CyprusSubcontractor"
+          },
+          "schema:customer": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Spanghero"
+          },
+          "schema:orderedItem": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:carcass"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "schema:Order"
+          }
+        },
+        "rasff:order_carcass_3": {
+          "schema:seller": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:RomaniaAbattoir"
+          },
+          "schema:customer": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:NetherlandsTrader"
+          },
+          "schema:orderedItem": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:carcass"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "schema:Order"
+          }
+        },
+        "rasff:order_carcass_2": {
+          "schema:seller": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:NetherlandsTrader"
+          },
+          "schema:customer": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:CyprusSubcontractor"
+          },
+          "schema:orderedItem": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:carcass"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "schema:Order"
+          }
+        }
+      },
+      "prefix": {
+        "schema": "http://schema.org/",
+        "xsd_1": "http://www.w3.org/2001/XMLSchema",
+        "rasff": "http://ec.europa.eu/food/safety/rasff#"
+      },
+      "activity": {
+        "rasff:place_order_carcass_3": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:PlaceOrder"
+          }
+        },
+        "rasff:place_order_carcass_2": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:PlaceOrder"
+          }
+        },
+        "rasff:place_order_carcass_1": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:PlaceOrder"
+          }
+        },
+        "rasff:place_order_meat": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:PlaceOrder"
+          }
+        },
+        "rasff:place_order_product_2": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:PlaceOrder"
+          }
+        },
+        "rasff:place_order_product_1": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:PlaceOrder"
+          }
+        }
+      },
+      "wasInformedBy": {
+        "_:id15": {
+          "prov:informed": "rasff:place_order_carcass_3",
+          "prov:informant": "rasff:place_order_carcass_2"
+        },
+        "_:id14": {
+          "prov:informed": "rasff:place_order_carcass_2",
+          "prov:informant": "rasff:place_order_carcass_1"
+        },
+        "_:id17": {
+          "prov:informed": "rasff:place_order_meat",
+          "prov:informant": "rasff:place_order_product_2"
+        },
+        "_:id16": {
+          "prov:informed": "rasff:place_order_product_2",
+          "prov:informant": "rasff:place_order_product_1"
+        },
+        "_:id13": {
+          "prov:informed": "rasff:place_order_carcass_1",
+          "prov:informant": "rasff:place_order_meat"
+        }
+      },
+      "wasGeneratedBy": {
+        "_:id20": {
+          "prov:entity": "rasff:order_carcass_1",
+          "prov:activity": "rasff:place_order_carcass_1"
+        },
+        "_:id21": {
+          "prov:entity": "rasff:order_meat",
+          "prov:activity": "rasff:place_order_meat"
+        },
+        "_:id22": {
+          "prov:entity": "rasff:order_carcass_3",
+          "prov:activity": "rasff:place_order_carcass_3"
+        },
+        "_:id23": {
+          "prov:entity": "rasff:order_carcass_2",
+          "prov:activity": "rasff:place_order_carcass_2"
+        },
+        "_:id19": {
+          "prov:entity": "rasff:order_product_1",
+          "prov:activity": "rasff:place_order_product_1"
+        },
+        "_:id18": {
+          "prov:entity": "rasff:order_product_2",
+          "prov:activity": "rasff:place_order_product_2"
+        }
+      }
+    },
+    "rasff:production": {
+      "wasAssociatedWith": {
+        "_:id1": {
+          "prov:agent": "rasff:RomaniaAbattoir",
+          "prov:activity": "rasff:slaughter"
+        },
+        "_:id3": {
+          "prov:agent": "rasff:Tavola",
+          "prov:activity": "rasff:process_2"
+        },
+        "_:id2": {
+          "prov:agent": "rasff:Spanghero",
+          "prov:activity": "rasff:process_1"
+        }
+      },
+      "wasDerivedFrom": {
+        "_:id5": {
+          "prov:usedEntity": "rasff:carcass",
+          "prov:generatedEntity": "rasff:meat",
+          "prov:activity": "rasff:process_1"
+        },
+        "_:id4": {
+          "prov:usedEntity": "rasff:meat",
+          "prov:generatedEntity": "rasff:product",
+          "prov:activity": "rasff:process_2"
+        }
+      },
+      "used": {
+        "_:id7": {
+          "prov:entity": "rasff:product",
+          "prov:activity": "rasff:transport_product"
+        },
+        "_:id6": {
+          "prov:entity": "rasff:meat",
+          "prov:activity": "rasff:process_2"
+        },
+        "_:id9": {
+          "prov:entity": "rasff:carcass",
+          "prov:activity": "rasff:process_1"
+        },
+        "_:id8": {
+          "prov:entity": "rasff:carcass",
+          "prov:activity": "rasff:transport_carcass"
+        },
+        "_:id10": {
+          "prov:entity": "rasff:meat",
+          "prov:activity": "rasff:transport_meat"
+        }
+      },
+      "wasAttributedTo": {
+        "_:id11": {
+          "prov:entity": "rasff:carcass",
+          "prov:agent": "rasff:RomaniaAbattoir"
+        },
+        "_:id13": {
+          "prov:entity": "rasff:meat",
+          "prov:agent": "rasff:Spanghero"
+        },
+        "_:id12": {
+          "prov:entity": "rasff:product",
+          "prov:agent": "rasff:Tavola"
+        }
+      },
+      "entity": {
+        "rasff:carcass": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Carcass"
+          }
+        },
+        "rasff:product": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:MeatProduct"
+          }
+        },
+        "rasff:meat": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Meat"
+          }
+        }
+      },
+      "prefix": {
+        "xsd_1": "http://www.w3.org/2001/XMLSchema",
+        "dbpedia": "http://dbpedia.org/resource/",
+        "rasff": "http://ec.europa.eu/food/safety/rasff#"
+      },
+      "activity": {
+        "rasff:transport_carcass": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Shipping"
+          },
+          "rasff:from": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:Romania"
+          },
+          "rasff:to": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:France"
+          }
+        },
+        "rasff:slaughter": {
+          "prov:atLocation": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:Romania"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Slaughter"
+          }
+        },
+        "rasff:transport_product": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Shipping"
+          },
+          "rasff:from": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:Luxembourg"
+          },
+          "rasff:to": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:United_Kingdom"
+          }
+        },
+        "rasff:process_1": {
+          "prov:atLocation": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:France"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Processing"
+          }
+        },
+        "rasff:process_2": {
+          "prov:atLocation": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:Luxembourg"
+          },
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Processing"
+          }
+        },
+        "rasff:transport_meat": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:Shipping"
+          },
+          "rasff:from": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:France"
+          },
+          "rasff:to": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "dbpedia:Luxembourg"
+          }
+        }
+      },
+      "wasInformedBy": {
+        "_:id15": {
+          "prov:informed": "rasff:process_1",
+          "prov:informant": "rasff:transport_carcass"
+        },
+        "_:id14": {
+          "prov:informed": "rasff:transport_carcass",
+          "prov:informant": "rasff:slaughter"
+        },
+        "_:id17": {
+          "prov:informed": "rasff:process_2",
+          "prov:informant": "rasff:transport_meat"
+        },
+        "_:id16": {
+          "prov:informed": "rasff:transport_meat",
+          "prov:informant": "rasff:process_1"
+        },
+        "_:id18": {
+          "prov:informed": "rasff:transport_product",
+          "prov:informant": "rasff:process_2"
+        }
+      },
+      "wasGeneratedBy": {
+        "_:id20": {
+          "prov:entity": "rasff:product",
+          "prov:activity": "rasff:process_2"
+        },
+        "_:id21": {
+          "prov:entity": "rasff:meat",
+          "prov:activity": "rasff:process_1"
+        },
+        "_:id19": {
+          "prov:entity": "rasff:carcass",
+          "prov:activity": "rasff:slaughter"
+        }
+      }
+    },
+    "rasff:mix": {
+      "wasAssociatedWith": {
+        "_:id5": {
+          "prov:agent": "rasff:NetherlandsTrader",
+          "prov:activity": "rasff:fulfil_order_carcass_2"
+        },
+        "_:id4": {
+          "prov:agent": "rasff:Tavola",
+          "prov:activity": "rasff:fulfil_order_product_2"
+        },
+        "_:id6": {
+          "prov:agent": "rasff:RomaniaAbattoir",
+          "prov:activity": "rasff:fulfil_order_carcass_3"
+        },
+        "_:id1": {
+          "prov:agent": "rasff:Spanghero",
+          "prov:activity": "rasff:fulfil_order_meat"
+        },
+        "_:id3": {
+          "prov:agent": "rasff:Comigel",
+          "prov:activity": "rasff:fulfil_order_product_1"
+        },
+        "_:id2": {
+          "prov:agent": "rasff:CyprusSubcontractor",
+          "prov:activity": "rasff:fulfil_order_carcass_1"
+        }
+      },
+      "used": {
+        "_:id7": {
+          "prov:entity": "rasff:product",
+          "prov:activity": "rasff:fulfil_order_product_1"
+        },
+        "_:id9": {
+          "prov:entity": "rasff:product",
+          "prov:activity": "rasff:fulfil_order_product_2"
+        },
+        "_:id8": {
+          "prov:entity": "rasff:order_product_1",
+          "prov:activity": "rasff:fulfil_order_product_1"
+        },
+        "_:id15": {
+          "prov:entity": "rasff:carcass",
+          "prov:activity": "rasff:fulfil_order_carcass_3"
+        },
+        "_:id14": {
+          "prov:entity": "rasff:order_carcass_1",
+          "prov:activity": "rasff:fulfil_order_carcass_1"
+        },
+        "_:id17": {
+          "prov:entity": "rasff:carcass",
+          "prov:activity": "rasff:fulfil_order_carcass_2"
+        },
+        "_:id16": {
+          "prov:entity": "rasff:order_carcass_3",
+          "prov:activity": "rasff:fulfil_order_carcass_3"
+        },
+        "_:id11": {
+          "prov:entity": "rasff:meat",
+          "prov:activity": "rasff:fulfil_order_meat"
+        },
+        "_:id10": {
+          "prov:entity": "rasff:order_product_2",
+          "prov:activity": "rasff:fulfil_order_product_2"
+        },
+        "_:id13": {
+          "prov:entity": "rasff:carcass",
+          "prov:activity": "rasff:fulfil_order_carcass_1"
+        },
+        "_:id12": {
+          "prov:entity": "rasff:order_meat",
+          "prov:activity": "rasff:fulfil_order_meat"
+        },
+        "_:id18": {
+          "prov:entity": "rasff:order_carcass_2",
+          "prov:activity": "rasff:fulfil_order_carcass_2"
+        }
+      },
+      "entity": {
+        "rasff:carcass": {},
+        "rasff:order_meat": {},
+        "rasff:meat": {},
+        "rasff:product": {},
+        "rasff:order_product_1": {},
+        "rasff:order_product_2": {},
+        "rasff:order_carcass_1": {},
+        "rasff:order_carcass_3": {},
+        "rasff:order_carcass_2": {}
+      },
+      "prefix": {
+        "xsd_1": "http://www.w3.org/2001/XMLSchema",
+        "rasff": "http://ec.europa.eu/food/safety/rasff#"
+      },
+      "activity": {
+        "rasff:transport_carcass": {},
+        "rasff:fulfil_order_meat": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:FulfilOrder"
+          }
+        },
+        "rasff:fulfil_order_product_2": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:FulfilOrder"
+          }
+        },
+        "rasff:fulfil_order_carcass_3": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:FulfilOrder"
+          }
+        },
+        "rasff:fulfil_order_product_1": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:FulfilOrder"
+          }
+        },
+        "rasff:transport_product": {},
+        "rasff:fulfil_order_carcass_2": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:FulfilOrder"
+          }
+        },
+        "rasff:fulfil_order_carcass_1": {
+          "prov:type": {
+            "type": "prov:QUALIFIED_NAME",
+            "$": "rasff:FulfilOrder"
+          }
+        },
+        "rasff:place_order_carcass_3": {},
+        "rasff:slaughter": {},
+        "rasff:transport_meat": {}
+      },
+      "wasInformedBy": {
+        "_:id20": {
+          "prov:informed": "rasff:fulfil_order_carcass_2",
+          "prov:informant": "rasff:fulfil_order_carcass_1"
+        },
+        "_:id21": {
+          "prov:informed": "rasff:slaughter",
+          "prov:informant": "rasff:place_order_carcass_3"
+        },
+        "_:id22": {
+          "prov:informed": "rasff:fulfil_order_product_2",
+          "prov:informant": "rasff:fulfil_order_product_1"
+        },
+        "_:id23": {
+          "prov:informed": "rasff:fulfil_order_product_1",
+          "prov:informant": "rasff:transport_product"
+        },
+        "_:id24": {
+          "prov:informed": "rasff:fulfil_order_carcass_1",
+          "prov:informant": "rasff:transport_carcass"
+        },
+        "_:id25": {
+          "prov:informed": "rasff:fulfil_order_meat",
+          "prov:informant": "rasff:transport_meat"
+        },
+        "_:id19": {
+          "prov:informed": "rasff:fulfil_order_carcass_3",
+          "prov:informant": "rasff:fulfil_order_carcass_2"
+        }
+      }
+    }
+  },
+  "agent": {
+    "rasff:NetherlandsTrader": {
+      "prov:atLocation": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "dbpedia:Netherlands"
+      },
+      "prov:type": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "schema:Organization"
+      }
+    },
+    "rasff:Comigel": {
+      "prov:atLocation": [
+        {
+          "type": "prov:QUALIFIED_NAME",
+          "$": "dbpedia:Metz"
+        },
+        {
+          "type": "prov:QUALIFIED_NAME",
+          "$": "dbpedia:France"
+        }
+      ],
+      "prov:type": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "schema:Organization"
+      }
+    },
+    "rasff:RomaniaAbattoir": {
+      "prov:atLocation": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "dbpedia:Romania"
+      },
+      "prov:type": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "schema:Organization"
+      }
+    },
+    "rasff:Spanghero": {
+      "prov:atLocation": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "dbpedia:France"
+      },
+      "prov:type": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "schema:Organization"
+      }
+    },
+    "rasff:Findus": {
+      "prov:atLocation": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "dbpedia:United_Kingdom"
+      },
+      "prov:type": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "schema:Organization"
+      }
+    },
+    "rasff:Tavola": {
+      "prov:atLocation": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "dbpedia:Luxembourg"
+      },
+      "prov:type": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "schema:Organization"
+      }
+    },
+    "rasff:CyprusSubcontractor": {
+      "prov:atLocation": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "dbpedia:Cyprus"
+      },
+      "prov:type": {
+        "type": "prov:QUALIFIED_NAME",
+        "$": "schema:Organization"
+      }
+    }
+  }
+}
