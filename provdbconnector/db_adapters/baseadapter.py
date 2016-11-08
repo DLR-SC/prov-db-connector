@@ -35,7 +35,7 @@ class BaseAdapter():
         :rtype: boolean
         :raise InvalidOptionsException:
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def save_record(self, attributes, metadata):
         """
@@ -48,7 +48,7 @@ class BaseAdapter():
         :return: Record id
         :rtype: str
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def save_relation(self, from_node, to_node, attributes, metadata):
         """
@@ -65,7 +65,7 @@ class BaseAdapter():
         :return: Record id
         :rtype: str
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def get_records_by_filter(self, attributes_dict=None, metadata_dict=None):
         """
@@ -80,7 +80,7 @@ class BaseAdapter():
         :return: list of relations and nodes
         :rtype: list
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
         """
@@ -96,7 +96,7 @@ class BaseAdapter():
         :return: a list of relations and nodes
         :rtype: list
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def get_bundle_records(self, bundle_identifier):
         """
@@ -110,7 +110,7 @@ class BaseAdapter():
         :return: list of nodes and bundles
         :rtype: list
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def get_record(self, record_id):
         """
@@ -121,7 +121,7 @@ class BaseAdapter():
         :return: DbRecord
         :rtype: DbRecord
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def get_relation(self, relation_id):
         """
@@ -132,7 +132,7 @@ class BaseAdapter():
         :return: DbRelation
         :rtype: DbRelation
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def delete_records_by_filter(self, attributes_dict, metadata_dict):
         """
@@ -146,7 +146,7 @@ class BaseAdapter():
         :rtype: boolean
         :raise NotFoundException:
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def delete_record(self, record_id):
         """
@@ -158,7 +158,7 @@ class BaseAdapter():
         :rtype: boolean
         :raise NotFoundException:
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
 
     def delete_relation(self, relation_id):
         """
@@ -170,4 +170,4 @@ class BaseAdapter():
         :rtype: boolean
         :raise NotFoundException:
         """
-        NotImplementedError("Abstract method")
+        raise NotImplementedError("Abstract method")
