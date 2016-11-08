@@ -32,8 +32,8 @@ setup(
         'Development Status :: 1 - Planning',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language:: Python:: 3.4',
-        'Programming Language:: Python:: 3.5'
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'
     ],
     license="Apache License 2.0",
 
