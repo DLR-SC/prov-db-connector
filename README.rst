@@ -66,14 +66,14 @@ Usage
 Save and get prov document example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ./examples/simple_example.py
+.. literalinclude:: /examples/simple_example.py
    :linenos:
    :language: python
 
 File Buffer example
 ~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ./examples/file_buffer_example.py
+.. literalinclude:: /examples/file_buffer_example.py
    :linenos:
    :language: python
 
