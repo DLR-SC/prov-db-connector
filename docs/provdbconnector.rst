@@ -21,7 +21,7 @@ provdbconnector.provapi module
     :members:
     :undoc-members:
     :show-inheritance:
-    :autodoc_mock_imports: prov
+    :autodoc_mock_imports: prov, prov.test.examples, prov.model, prov.constants, neo4j, neo4j.v1, neo4j.v1.exceptions
 
 
 Module contents
