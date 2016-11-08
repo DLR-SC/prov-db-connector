@@ -1,5 +1,5 @@
 from prov.model import ProvDocument
-from provdbconnector import ProvApi
+from provdbconnector import ProvDb
 from provdbconnector import Neo4jAdapter
 import os
 
@@ -15,7 +15,7 @@ auth_info = {"user_name": NEO4J_USER,
              "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
              }
 
-prov_api = ProvApi(adapter=Neo4jAdapter, auth_info=auth_info)
+prov_api = ProvDb(adapter=Neo4jAdapter, auth_info=auth_info)
 
 # create the prov document
 prov_document = ProvDocument()
