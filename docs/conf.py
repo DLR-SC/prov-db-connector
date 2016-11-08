@@ -111,7 +111,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = 'prov-db-connector'
+project = 'PROV Database Connector'
 copyright = '2016, German Aerospace Center (DLR)'
 author = 'German Aerospace Center (DLR)'
 
