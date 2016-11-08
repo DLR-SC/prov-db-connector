@@ -31,7 +31,7 @@ setup(
     classifiers=[
         'Development Status :: 1 - Planning',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: Apache License 2.0',
+        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python 3.4',
     ],
     license="Apache License 2.0",
