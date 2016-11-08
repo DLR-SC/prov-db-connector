@@ -67,12 +67,6 @@ Save and get prov document example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
-.. literalinclude:: ./examples/simple_example.py
-   :language: python
-
-
-
 .. code-block:: python
 
     from prov.model import ProvDocument
