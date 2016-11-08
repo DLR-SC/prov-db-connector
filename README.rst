@@ -67,14 +67,12 @@ Save and get prov document example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: examples/simple_example.py
-   :linenos:
    :language: python
 
 File Buffer example
 ~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: examples/file_buffer_example.py
-   :linenos:
    :language: python
 
 You find all examples in the `examples <https://github.com/DLR-SC/prov-db-connector/tree/master/examples>`_ folder
