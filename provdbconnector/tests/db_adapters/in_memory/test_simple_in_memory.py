@@ -2,7 +2,7 @@ from provdbconnector.exceptions.database import InvalidOptionsException
 from provdbconnector.db_adapters.in_memory import SimpleInMemoryAdapter
 from provdbconnector.provDb import ProvDb
 from provdbconnector.tests import AdapterTestTemplate
-from provdbconnector.tests import ProvApiTestTemplate
+from provdbconnector.tests import ProvDbTestTemplate
 
 
 class SimpleInMemoryAdapterTest(AdapterTestTemplate):
@@ -39,13 +39,13 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
         del self.instance
 
 
-class SimpleInMemoryAdapterProvApiTests(ProvApiTestTemplate):
+class SimpleInMemoryAdapterProvDbTests(ProvDbTestTemplate):
     """
     This is the high level test for the SimpleInMemoryAdapter
     """
     def setUp(self):
         """
-        Setup a ProvApi instance
+        Setup a ProvDb instance
         """
         self.provapi = ProvDb(api_id=1, adapter=SimpleInMemoryAdapter, auth_info=None)
 

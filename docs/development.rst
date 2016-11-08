@@ -56,7 +56,7 @@ If you are consider to build your own adapter please keep in mind:
 * All adapters **must** enhance the :py:class:`~provdbconnector.db_adapters.baseadapter.Baseadapter` class.
 * You **must** implement all specified functions in BaseAdapter
 * You **should** test it via the :py:class:`~provdbconnector.tests.db_adapters.test_baseadapter.AdapterTestTemplate` class template.
-* You **should** test it also via the :py:class:`~provdbconnector.tests.test_provapi.ProvApiTestTemplate` class template.
+* You **should** test it also via the :py:class:`~provdbconnector.tests.test_provapi.ProvDbTestTemplate` class template.
 
 1. - Create your database adapter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +76,7 @@ To test your adapter you should create two test suits:
 
  * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterTest` : Unit test for the low level functions in your adapter.
  * For further introduction on testing your database adapter have a look at the :ref:`test_howto`.
- * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterProvApiTests` : Integration test for the adapter with the api.
+ * :py:class:`~provdbconnector.tests.db_adapters.in_memory.test_simple_in_memory.SimpleInMemoryAdapterProvDbTests` : Integration test for the adapter with the api.
 
 See this example tests for the :py:class:`~provdbconnector.db_adapters.in_memory.simple_in_memory.SimpleInMemoryAdapter`
 

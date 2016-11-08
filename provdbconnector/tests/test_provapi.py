@@ -13,7 +13,7 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP, METAD
 from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException
 
 
-class ProvApiTestTemplate(unittest.TestCase):
+class ProvDbTestTemplate(unittest.TestCase):
     """
     This abstract test class to test the high level function of you database adapter.
     To use this unitest Template extend from this class.
@@ -33,13 +33,13 @@ class ProvApiTestTemplate(unittest.TestCase):
         :param args:
         :param kwargs:
         """
-        super(ProvApiTestTemplate, self).__init__(*args, **kwargs)
+        super(ProvDbTestTemplate, self).__init__(*args, **kwargs)
         self.helper = None
         # Kludge alert: We want this class to carry test cases without being run
         # by the unit test framework, so the `run' method is overridden to do
         # nothing.  But in order for sub-classes to be able to do something when
         # run is invoked, the constructor will rebind `run' from TestCase.
-        if self.__class__ != ProvApiTestTemplate:
+        if self.__class__ != ProvDbTestTemplate:
             # Rebind `run' from the parent class.
             self.run = unittest.TestCase.run.__get__(self, self.__class__)
         else:
@@ -198,9 +198,9 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
 
-class ProvApiTests(unittest.TestCase):
+class ProvDbTests(unittest.TestCase):
     """
-    This tests are only for the ProvApi itself. You don't have to extend this test in case you want to write your own
+    This tests are only for the ProvDb itself. You don't have to extend this test in case you want to write your own
     adapter
     """
     maxDiff = None

@@ -4,7 +4,7 @@ from provdbconnector.exceptions.database import InvalidOptionsException, AuthExc
 from provdbconnector import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
 from provdbconnector.provDb import ProvDb
 from provdbconnector.tests import AdapterTestTemplate
-from provdbconnector.tests import ProvApiTestTemplate
+from provdbconnector.tests import ProvDbTestTemplate
 
 
 class Neo4jAdapterTests(AdapterTestTemplate):
@@ -59,7 +59,7 @@ class Neo4jAdapterTests(AdapterTestTemplate):
         del self.instance
 
 
-class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
+class Neo4jAdapterProvDbTests(ProvDbTestTemplate):
     """
     High level api test for the neo4j adapter
     """
