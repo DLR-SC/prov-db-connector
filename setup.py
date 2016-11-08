@@ -44,11 +44,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "prov==1.5.0",
-        "neo4j-driver==1.0.2",
-        "networkx==1.11",
-        "decorator==4.0.10",
-        "lxml==3.6.4",
-        "six==1.10.0"
+        "neo4j-driver==1.0.2"
     ],
     extras_require={
         'test': tests_require,
