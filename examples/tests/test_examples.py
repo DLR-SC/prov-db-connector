@@ -47,3 +47,9 @@ class ExamplesTest(unittest.TestCase):
         Test the merge fail example
         """
         import examples.merge_fail_example
+
+    def test_horsemeat_example(self):
+        """
+        Test the merge fail example
+        """
+        import examples.merge_fail_example
