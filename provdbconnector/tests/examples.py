@@ -8,7 +8,7 @@ from prov.tests.examples import primer_example as primer_example, \
     long_literals, \
     datatypes
 
-from _datetime import datetime
+from datetime import datetime
 from collections import namedtuple
 
 from prov.constants import PROV_RECORD_IDS_MAP, PROV
