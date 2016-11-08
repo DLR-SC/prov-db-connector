@@ -66,6 +66,10 @@ Usage
 Save and get prov document example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. include:: /examples/simple_example.py
+    :literal:
+    :language: python
+
 .. literalinclude:: /examples/simple_example.py
    :language: python
 
