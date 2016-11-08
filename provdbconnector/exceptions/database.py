@@ -1,7 +1,7 @@
-from .provapi import ProvApiException
+from .provapi import ProvDbException
 
 
-class AdapterException(ProvApiException):
+class AdapterException(ProvDbException):
     """
     Base exception class for database adapters.
     """

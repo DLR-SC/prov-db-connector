@@ -1,9 +1,9 @@
-from provdbconnector import ProvApi
+from provdbconnector import ProvDb
 from provdbconnector.db_adapters.in_memory import SimpleInMemoryAdapter
 import pkg_resources
 
 # create the api
-prov_api = ProvApi(adapter=SimpleInMemoryAdapter, auth_info=None)
+prov_api = ProvDb(adapter=SimpleInMemoryAdapter, auth_info=None)
 
 # create the prov document from examples
 prov_document_buffer = pkg_resources.resource_stream("examples", "file_buffer_example_primer.json")

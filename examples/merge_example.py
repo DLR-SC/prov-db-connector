@@ -1,8 +1,8 @@
 from prov.model import ProvDocument
-from provdbconnector import ProvApi
+from provdbconnector import ProvDb
 from provdbconnector.db_adapters.in_memory import SimpleInMemoryAdapter
 
-prov_api = ProvApi(adapter=SimpleInMemoryAdapter, auth_info=None)
+prov_api = ProvDb(adapter=SimpleInMemoryAdapter, auth_info=None)
 
 # create the prov first document
 first_prov_document = ProvDocument()

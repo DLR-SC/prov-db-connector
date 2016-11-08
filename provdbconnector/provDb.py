@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 PROV_API_BUNDLE_IDENTIFIER_PREFIX = "prov:bundle:{}"
 
 
-class ProvApi(object):
+class ProvDb(object):
     """
     The public api class. This class provide methods to save and get documents or part of ProvDocuments
 

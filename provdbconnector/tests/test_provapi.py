@@ -5,7 +5,7 @@ import pkg_resources
 from prov.model import ProvDocument
 
 from provdbconnector.tests import examples as examples
-from provdbconnector import ProvApi
+from provdbconnector import ProvDb
 from provdbconnector.exceptions.database import InvalidOptionsException
 from provdbconnector import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP, METADATA_KEY_PROV_TYPE, \
@@ -13,7 +13,7 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP, METAD
 from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException
 
 
-class ProvApiTestTemplate(unittest.TestCase):
+class ProvDbTestTemplate(unittest.TestCase):
     """
     This abstract test class to test the high level function of you database adapter.
     To use this unitest Template extend from this class.
@@ -33,13 +33,13 @@ class ProvApiTestTemplate(unittest.TestCase):
         :param args:
         :param kwargs:
         """
-        super(ProvApiTestTemplate, self).__init__(*args, **kwargs)
+        super(ProvDbTestTemplate, self).__init__(*args, **kwargs)
         self.helper = None
         # Kludge alert: We want this class to carry test cases without being run
         # by the unit test framework, so the `run' method is overridden to do
         # nothing.  But in order for sub-classes to be able to do something when
         # run is invoked, the constructor will rebind `run' from TestCase.
-        if self.__class__ != ProvApiTestTemplate:
+        if self.__class__ != ProvDbTestTemplate:
             # Rebind `run' from the parent class.
             self.run = unittest.TestCase.run.__get__(self, self.__class__)
         else:
@@ -55,7 +55,7 @@ class ProvApiTestTemplate(unittest.TestCase):
         :return:
         """
         # this function will never be executed !!!!
-        self.provapi = ProvApi()
+        self.provapi = ProvDb()
 
     def clear_database(self):
         """
@@ -198,9 +198,9 @@ class ProvApiTestTemplate(unittest.TestCase):
         self.assertEqual(stored_document, prov_document)
 
 
-class ProvApiTests(unittest.TestCase):
+class ProvDbTests(unittest.TestCase):
     """
-    This tests are only for the ProvApi itself. You don't have to extend this test in case you want to write your own
+    This tests are only for the ProvDb itself. You don't have to extend this test in case you want to write your own
     adapter
     """
     maxDiff = None
@@ -221,7 +221,7 @@ class ProvApiTests(unittest.TestCase):
                           "user_password": NEO4J_PASS,
                           "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
                           }
-        self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
+        self.provapi = ProvDb(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
     def tearDown(self):
         """
@@ -239,14 +239,14 @@ class ProvApiTests(unittest.TestCase):
         Try to create a test instnace
         :return:
         """
-        self.assertRaises(NoDataBaseAdapterException, lambda: ProvApi())
-        self.assertRaises(InvalidOptionsException, lambda: ProvApi(api_id=1, adapter=Neo4jAdapter))
+        self.assertRaises(NoDataBaseAdapterException, lambda: ProvDb())
+        self.assertRaises(InvalidOptionsException, lambda: ProvDb(api_id=1, adapter=Neo4jAdapter))
 
-        obj = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
-        self.assertIsInstance(obj, ProvApi)
+        obj = ProvDb(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
+        self.assertIsInstance(obj, ProvDb)
         self.assertEqual(obj.api_id, 1)
 
-        obj = ProvApi(adapter=Neo4jAdapter, auth_info=self.auth_info)
+        obj = ProvDb(adapter=Neo4jAdapter, auth_info=self.auth_info)
         self.assertIsInstance(obj.api_id, UUID)
 
     # Methods that automatically convert to ProvDocument

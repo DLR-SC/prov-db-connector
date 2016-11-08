@@ -1,7 +1,7 @@
-from .provapi import ProvApiException
+from .provapi import ProvDbException
 
 
-class ConverterException(ProvApiException):
+class ConverterException(ProvDbException):
     """
     Base exception class for document converter.
     """
@@ -22,14 +22,14 @@ class NoDocumentException(ConverterException):
     pass
 
 
-class SerializerException(ProvApiException):
+class SerializerException(ProvDbException):
     """
     Base exception class for serializer.
     """
     pass
 
 
-class ValidatorException(ProvApiException):
+class ValidatorException(ProvDbException):
     """
     Base exception class for validator.
     """
