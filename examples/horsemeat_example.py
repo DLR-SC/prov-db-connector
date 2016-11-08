@@ -1,4 +1,4 @@
-from provdbconnector import ProvApi
+from provdbconnector import ProvDb
 from provdbconnector import Neo4jAdapter
 import  os
 import pkg_resources
@@ -19,7 +19,7 @@ auth_info = {"user_name": NEO4J_USER,
 
 
 # create the api
-prov_api = ProvApi(adapter=Neo4jAdapter, auth_info=auth_info)
+prov_api = ProvDb(adapter=Neo4jAdapter, auth_info=auth_info)
 
 # create the prov document from examples
 prov_document_buffer = pkg_resources.resource_stream("examples", "horsemeat_example.json")

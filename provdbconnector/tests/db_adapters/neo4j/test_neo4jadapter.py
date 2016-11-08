@@ -2,7 +2,7 @@ import unittest
 
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException
 from provdbconnector import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
-from provdbconnector.provapi import ProvApi
+from provdbconnector.provDb import ProvDb
 from provdbconnector.tests import AdapterTestTemplate
 from provdbconnector.tests import ProvApiTestTemplate
 
@@ -68,7 +68,7 @@ class Neo4jAdapterProvApiTests(ProvApiTestTemplate):
                           "user_password": NEO4J_PASS,
                           "host": NEO4J_HOST + ":" + NEO4J_BOLT_PORT
                           }
-        self.provapi = ProvApi(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
+        self.provapi = ProvDb(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
     def clear_database(self):
         """
