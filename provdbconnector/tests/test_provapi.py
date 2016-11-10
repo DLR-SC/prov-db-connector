@@ -2,7 +2,7 @@ import unittest
 from uuid import UUID
 
 import pkg_resources
-from prov.model import ProvDocument
+from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity
 
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvDb
@@ -416,6 +416,47 @@ class ProvDbTests(unittest.TestCase):
         """
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi._create_bundle(None)
+
+    def test_save_record(self):
+        """
+        Try to save a single record without document_di
+
+        """
+
+        doc = examples.primer_example()
+        agent = list(doc.get_records(ProvAgent)).pop()
+        entity = list(doc.get_records(ProvEntity)).pop()
+        activity = list(doc.get_records(ProvActivity)).pop()
+
+        #Try to save the 3 class types
+        self.provapi.save_record(agent)
+        self.provapi.save_record(entity)
+        self.provapi.save_record(activity)
+
+    def test_get_record(self):
+        """
+        Try to save a single record without document_id
+        and get the record back from the db
+
+        """
+        doc = examples.primer_example()
+        agent = list(doc.get_records(ProvAgent)).pop()
+        entity = list(doc.get_records(ProvEntity)).pop()
+        activity = list(doc.get_records(ProvActivity)).pop()
+
+        #Try to save the 3 class types
+        agent_id = self.provapi.save_record(agent)
+        entity_id = self.provapi.save_record(entity)
+        activity_id = self.provapi.save_record(activity)
+
+        agent_restored = self.provapi.get_record(agent_id)
+        entity_restored = self.provapi.get_record(entity_id)
+        activity_restored = self.provapi.get_record(activity_id)
+
+        self.assertEqual(agent_restored,agent)
+        self.assertEqual(entity_restored,entity)
+        self.assertEqual(activity_restored,activity)
+
 
     def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
         """
