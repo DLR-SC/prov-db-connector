@@ -1307,7 +1307,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         with self.assertRaises(NotFoundException):
             to_record_id  = ids["to_record_id"]
-            self.instance.get_record(from_record_id)
+            self.instance.get_record(to_record_id)
 
 
         #Bundle node should be there because not all attributes are match the filter

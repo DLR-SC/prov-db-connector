@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE
 from prov.model import ProvDocument, ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, \
-    ProvAssociation
+    ProvAssociation, PROV_REC_CLS, ProvActivity, ProvAgent, PROV_ATTR_AGENT,PROV_ATTR_ACTIVITY, PROV_ATTR_ENTITY
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
@@ -16,7 +16,7 @@ from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, Inval
 from provdbconnector.exceptions.utils import ParseException
 from provdbconnector.exceptions.database import NotFoundException
 from provdbconnector.utils.converter import form_string, to_json, to_provn, to_xml
-from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
+from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record,PROV_ATTR_BASE_CLS
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', '')
 NUMERIC_LEVEL = getattr(logging, LOG_LEVEL.upper(), None)
@@ -162,7 +162,7 @@ class ProvDb(object):
         doc_id = self._create_bundle(prov_document)
 
         for bundle in prov_document.bundles:
-            bundle_record = ProvEntity(bundle, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
+            bundle_record = ProvEntity(prov_document, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
             self.save_element(record=bundle_record,bundle_id=doc_id)
 
             self._create_bundle(bundle)
@@ -232,6 +232,11 @@ class ProvDb(object):
 
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id=bundle_id)
         self._adapter.save_record(attributes=attributes, metadata=metadata)
+
+        #Add bundle relation only if the record belongs to a bundle not to document
+        if not isinstance(record.bundle, ProvDocument):
+            self._create_bundle_association([record], record.bundle.identifier)
+
         return record.identifier
 
     def get_element(self, identifier):
@@ -282,10 +287,6 @@ class ProvDb(object):
         prov_type = raw_record.metadata[METADATA_KEY_PROV_TYPE]
         prov_type = prov_bundle.valid_qualified_name(prov_type)
 
-        # skip record if prov:type "prov:Unknown"
-        if prov_type is prov_bundle.valid_qualified_name("prov:Unknown"):
-            return
-
         # skip connections between bundle entities and all records that belong to the bundle
         prov_label = raw_record.attributes.get(str(PROV_LABEL))
         if prov_label is not None and prov_label == "belongsToBundle":
@@ -293,6 +294,10 @@ class ProvDb(object):
 
         prov_id = raw_record.metadata[METADATA_KEY_IDENTIFIER]
         prov_id_qualified = prov_bundle.valid_qualified_name(prov_id)
+
+        # skip record if prov:identifier starts with "prov:Unknown"
+        if str(prov_id).startswith("prov:Unknown-"):
+            return
 
         # set identifier only if it is not a prov type
         if prov_id_qualified == prov_type:
@@ -368,10 +373,36 @@ class ProvDb(object):
 
         # if target or origin record is unknown, create node "Unknown"
         if from_qualified_name is None:
-            from_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier, bundle_id=bundle_id)
+            uid = uuid4()
+            from_qualified_name = prov_relation.bundle.valid_qualified_name("prov:Unknown-{}".format(uid))
+            del uid
 
         if to_qualified_name is None:
-            to_qualified_name = self._create_unknown_node(bundle_identifier=bundle_identifier, bundle_id=bundle_id)
+            uid = uuid4()
+            to_qualified_name = prov_relation.bundle.valid_qualified_name("prov:Unknown-{}".format(uid))
+            del uid
+
+        # Ensure that the from and to node exists
+        relation_cls = PROV_REC_CLS[prov_relation.get_type()]
+        from_type,to_type = relation_cls.FORMAL_ATTRIBUTES[:2]
+
+        # get the class types
+        from_type_cls = PROV_ATTR_BASE_CLS[from_type]
+        to_type_cls = PROV_ATTR_BASE_CLS[to_type]
+
+        if from_type_cls is None or to_type_cls is None:
+            log.info("Something went wrong ")
+        #save from and to node
+        self.save_element(record=from_type_cls(prov_relation.bundle,identifier=from_qualified_name),bundle_id=bundle_id)
+
+        # If it is a link between bundle the to node not belongs to the current bundle, the to node belongs only to the document
+        to_bundle = prov_relation.bundle
+        if prov_relation.get_type() is PROV_MENTION:
+            to_bundle = prov_relation.bundle.document
+
+
+        self.save_element(record=to_type_cls(to_bundle,identifier=to_qualified_name),bundle_id=bundle_id)
+
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
@@ -399,30 +430,6 @@ class ProvDb(object):
             self._adapter.save_relation(from_qualified_name, to_qualified_name,
                                         belong_attributes, belong_metadata)
 
-    def _create_unknown_node(self, bundle_identifier=None, bundle_id=None):
-        """
-        If a relation end or start is "Unknown" (yes this is allowed in PROV) we create a specific node to create the relation
-
-        :param bundle_identifier: The bundle identifier
-        :type bundle_identifier: str
-        :param bundle_id: The bundle id
-        :type bundle_id: str
-        :return: The identifier of the Unknown node
-        :rtype: str
-        """
-        uid = uuid4()
-        doc = ProvDocument()
-        identifier = doc.valid_qualified_name("prov:Unknown-{}".format(uid))
-        record = ProvRecord(bundle=doc, identifier=identifier)
-
-        (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id)
-        self._adapter.save_record(attributes, metadata)
-
-        # Create bundle association for unknown node if this node is for a bundle, ugly but working
-        if bundle_identifier is not None:
-            self._create_bundle_association([record], bundle_identifier)
-
-        return identifier
 
     def _create_bundle_links(self, prov_bundle):
         """
