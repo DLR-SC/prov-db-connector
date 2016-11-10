@@ -4,15 +4,22 @@ PROV Database Connector
 Introduction
 ------------
 
+.. image:: https://badge.fury.io/py/prov-db-connector.svg
+    :target: (http://badge.fury.io/py/prov-db-connector
+    :alt: PyPI version
 .. image:: https://travis-ci.org/DLR-SC/prov-db-connector.svg?branch=master
-  :target: https://travis-ci.org/DLR-SC/prov-db-connector
-  :alt: Build Status
+    :target: https://travis-ci.org/DLR-SC/prov-db-connector
+    :alt: Build Status
 .. image:: https://coveralls.io/repos/github/DLR-SC/prov-db-connector/badge.svg?branch=master
-  :target: https://coveralls.io/github/DLR-SC/prov-db-connector?branch=master
-  :alt: Coverage Status
+    :target: https://coveralls.io/github/DLR-SC/prov-db-connector?branch=master
+    :alt: Coverage Status
+.. image:: https://pyup.io/repos/github/dlr-sc/prov-db-connector/shield.svg
+    :target: https://pyup.io/repos/github/dlr-sc/prov-db-connector/
+    :alt: Updates
 .. image:: https://www.quantifiedcode.com/api/v1/project/3ee099c99b0340728ca4d54392caae83/badge.svg
-  :target: https://www.quantifiedcode.com/app/project/3ee099c99b0340728ca4d54392caae83
-  :alt: Code Issues
+    :target: https://www.quantifiedcode.com/app/project/3ee099c99b0340728ca4d54392caae83
+    :alt: Code Issues
+
 
 This python module provides a general interface to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into databases.
 Currently we support the `Neo4j <https://neo4j.com/>`_ graph database.
@@ -33,10 +40,6 @@ Installation
 
 PyPi
 ~~~~
-
-.. warning::
-
-    Not published, yet.
 
 Install it by running::
 
