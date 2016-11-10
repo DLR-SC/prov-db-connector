@@ -19,7 +19,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
     For exmaple to use the simple db_adapter use the following script
 
-    .. literalinclude:: ../../examples/simple_example.py
+    .. literalinclude:: ../examples/simple_example.py
             :linenos:
             :language: python
 
@@ -470,7 +470,3 @@ class SimpleInMemoryAdapter(BaseAdapter):
                 return False
 
         return True
-
-
-
-
