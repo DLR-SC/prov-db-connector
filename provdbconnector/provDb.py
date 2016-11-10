@@ -231,7 +231,7 @@ class ProvDb(object):
             raise InvalidArgumentTypeException("Should be {} but was {}".format(ProvElement, type(record)))
 
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id=bundle_id)
-        self._adapter.save_record(attributes=attributes, metadata=metadata)
+        self._adapter.save_element(attributes=attributes, metadata=metadata)
 
         #Add bundle relation only if the record belongs to a bundle not to document
         if not isinstance(record.bundle, ProvDocument):
