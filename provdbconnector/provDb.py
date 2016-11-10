@@ -35,7 +35,7 @@ class ProvDb(object):
 
     def __init__(self, api_id=None, adapter=None, auth_info=None, *args):
         """
-        Create a new instance of ProvAPI
+        Save a new instance of ProvAPI
 
         :param api_id: The id of the api, optional
         :type api_id: int or str
@@ -55,9 +55,9 @@ class ProvDb(object):
         self._adapter.connect(auth_info)
 
     # Converter Methods
-    def create_document_from_json(self, content=None):
+    def save_document_from_json(self, content=None):
         """
-        Creates a new document in the database
+        Saves a new document in the database
 
         :param content: The content
         :type content: str or buffer
@@ -65,7 +65,7 @@ class ProvDb(object):
         :rtype: str or buffer
         """
         prov_document = form_string(content=content)
-        return self.create_document(content=prov_document)
+        return self.save_document(content=prov_document)
 
     def get_document_as_json(self, document_id=None):
         """
@@ -79,9 +79,9 @@ class ProvDb(object):
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_json(prov_document)
 
-    def create_document_from_xml(self, content=None):
+    def save_document_from_xml(self, content=None):
         """
-        Creates a prov document in the database based on the xml file
+        Saves a prov document in the database based on the xml file
 
         :param content: The content
         :type content: str or buffer
@@ -89,7 +89,7 @@ class ProvDb(object):
         :rtype: str
         """
         prov_document = form_string(content=content)
-        return self.create_document(content=prov_document)
+        return self.save_document(content=prov_document)
 
     def get_document_as_xml(self, document_id=None):
         """
@@ -103,9 +103,9 @@ class ProvDb(object):
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_xml(prov_document)
 
-    def create_document_from_provn(self, content=None):
+    def save_document_from_provn(self, content=None):
         """
-        Creates a prov document in the database based on the provn string or buffer
+        Saves a prov document in the database based on the provn string or buffer
 
         :param content: provn object
         :type content: str or buffer
@@ -113,7 +113,7 @@ class ProvDb(object):
         :rtype: str
         """
         prov_document = form_string(content=content)
-        return self.create_document(content=prov_document)
+        return self.save_document(content=prov_document)
 
     def get_document_as_provn(self, document_id=None):
         """
@@ -127,9 +127,9 @@ class ProvDb(object):
         prov_document = self.get_document_as_prov(document_id=document_id)
         return to_provn(prov_document)
 
-    def create_document_from_prov(self, content=None):
+    def save_document_from_prov(self, content=None):
         """
-        Creates a prov document in the database based on the prov document
+        Saves a prov document in the database based on the prov document
 
         :param content: Prov document
         :type content: ProvDocument
@@ -138,12 +138,12 @@ class ProvDb(object):
         """
         if not isinstance(content, ProvDocument):
             raise InvalidArgumentTypeException()
-        return self.create_document(content=content)
+        return self.save_document(content=content)
 
     # Methods that consume ProvDocument instances and produce ProvDocument instances
-    def create_document(self, content=None):
+    def save_document(self, content=None):
         """
-        The main method to create a document in the db
+        The main method to Save a document in the db
 
         :param content: The content can be a xml, json or provn string or buffer or a ProvDocument instance
         :type content: str or buffer or ProvDocument
@@ -159,18 +159,18 @@ class ProvDb(object):
 
         prov_document = content
 
-        doc_id = self._create_bundle(prov_document)
+        doc_id = self._save_bundle(prov_document)
 
         for bundle in prov_document.bundles:
             bundle_record = ProvEntity(prov_document, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
             self.save_element(record=bundle_record,bundle_id=doc_id)
 
-            self._create_bundle(bundle)
+            self._save_bundle(bundle)
             self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
                                             prov_bundle_identifier=bundle.identifier)
 
         for bundle in prov_document.bundles:
-            self._create_bundle_links(bundle)
+            self._save_bundle_links(bundle)
 
         return doc_id
 
@@ -273,7 +273,7 @@ class ProvDb(object):
     @staticmethod
     def _parse_record(prov_bundle, raw_record):
         """
-        This method creates a ProvRecord in the ProvBundle based on the raw database response
+        This method Saves a ProvRecord in the ProvBundle based on the raw database response
 
         :param prov_bundle: ProvBundle instance
         :type prov_bundle: ProvBundle
@@ -325,7 +325,7 @@ class ProvDb(object):
         add_namespaces_to_bundle(prov_bundle, raw_record.metadata)
         return create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
 
-    def _create_bundle(self, prov_bundle):
+    def _save_bundle(self, prov_bundle):
         """
         Private method to create a bundle in the database
 
@@ -349,13 +349,13 @@ class ProvDb(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
-            self._create_relation(relation, bundle_id, prov_bundle.identifier)
+            self._save_relation(relation, bundle_id, prov_bundle.identifier)
 
         return bundle_id
 
-    def _create_relation(self, prov_relation, bundle_id=None, bundle_identifier=None):
+    def _save_relation(self, prov_relation, bundle_id=None, bundle_identifier=None):
         """
-        Creates a relation between 2 nodes that are already in the database.
+        Saves a relation between 2 nodes that are already in the database.
 
         :param prov_relation: The ProvRelation instance
         :type prov_relation: ProvRelation
@@ -371,7 +371,7 @@ class ProvDb(object):
         from_qualified_name = from_tuple[1]
         to_qualified_name = to_tuple[1]
 
-        # if target or origin record is unknown, create node "Unknown"
+        # if target or origin record is unknown, save node "Unknown"
         if from_qualified_name is None:
             uid = uuid4()
             from_qualified_name = prov_relation.bundle.valid_qualified_name("prov:Unknown-{}".format(uid))
@@ -411,7 +411,7 @@ class ProvDb(object):
 
     def _create_bundle_association(self, prov_elements, prov_bundle_identifier):
         """
-        This method creates a relation between the bundle entity and all nodes in the bundle
+        This method saves a relation between the bundle entity and all nodes in the bundle
 
         :param prov_bundle_identifier: The bundle identifier
         :type prov_bundle_identifier: str
@@ -431,9 +431,9 @@ class ProvDb(object):
                                         belong_attributes, belong_metadata)
 
 
-    def _create_bundle_links(self, prov_bundle):
+    def _save_bundle_links(self, prov_bundle):
         """
-        This function creates the links between nodes in bundles, see https://www.w3.org/TR/prov-links/
+        This function saves the links between nodes in bundles, see https://www.w3.org/TR/prov-links/
 
         :param prov_bundle: For this bundle we will create the links
         :type prov_bundle: ProvBundle
@@ -443,7 +443,7 @@ class ProvDb(object):
             if mention.get_type() is not PROV_MENTION:
                 continue
 
-            self._create_relation(mention)
+            self._save_relation(mention)
 
     @staticmethod
     def _get_metadata_and_attributes_for_record(prov_record, bundle_id=None):

@@ -9,7 +9,7 @@ prov_api = ProvDb(adapter=SimpleInMemoryAdapter, auth_info=None)
 prov_document_buffer = pkg_resources.resource_stream("examples", "file_buffer_example_primer.json")
 
 # Save document
-document_id = prov_api.create_document(prov_document_buffer)
+document_id = prov_api.save_document(prov_document_buffer)
 # This is similar to:
 # prov_api.create_document_from_json(prov_document_buffer)
 

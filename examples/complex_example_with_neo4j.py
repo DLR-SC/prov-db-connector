@@ -21,7 +21,7 @@ prov_api = ProvDb(adapter=Neo4jAdapter, auth_info=auth_info)
 prov_document = primer_example()
 
 # Save document
-document_id = prov_api.create_document(prov_document)
+document_id = prov_api.save_document(prov_document)
 
 # get document
 print(prov_api.get_document_as_provn(document_id))

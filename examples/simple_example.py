@@ -13,7 +13,7 @@ prov_document.activity("ex:Alice")
 
 prov_document.association("ex:Alice", "ex:Bob")
 
-document_id = prov_api.create_document(prov_document)
+document_id = prov_api.save_document(prov_document)
 
 print(prov_api.get_document_as_provn(document_id))
 
