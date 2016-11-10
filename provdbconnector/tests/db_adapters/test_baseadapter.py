@@ -86,7 +86,7 @@ class AdapterTestTemplate(unittest.TestCase):
     This test class is a template for each database adapter.
     The following example show how you implement the test for your adapter:
 
-        .. literalinclude:: ../../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
+        .. literalinclude:: ../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
            :linenos:
            :language: python
            :lines: 1-25
@@ -141,7 +141,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_1_save_record.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_1_save_record.svg
            :align: center
            :scale: 50 %
 
@@ -204,7 +204,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_2_save_relation.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_2_save_relation.svg
            :align: center
            :scale: 50 %
 
@@ -300,7 +300,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_4_get_record.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_4_get_record.svg
            :align: center
            :scale: 50 %
 
@@ -374,7 +374,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_6_get_relation.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_6_get_relation.svg
            :align: center
            :scale: 50 %
 
@@ -458,7 +458,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_8_get_records_by_filter.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_8_get_records_by_filter.svg
            :align: center
            :scale: 50 %
 
@@ -537,7 +537,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_9_get_records_by_filter_with_properties.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_9_get_records_by_filter_with_properties.svg
            :align: center
            :scale: 50 %
 
@@ -755,7 +755,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_10_get_records_by_filter_with_metadata.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_10_get_records_by_filter_with_metadata.svg
            :align: center
            :scale: 50 %
 
@@ -792,7 +792,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_11_get_records_tail.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_11_get_records_tail.svg
            :align: center
            :scale: 50 %
 
@@ -910,7 +910,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_12_get_records_tail_recursive.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_12_get_records_tail_recursive.svg
            :align: center
            :scale: 50 %
 
@@ -1196,10 +1196,9 @@ class AdapterTestTemplate(unittest.TestCase):
 
         Test the same behavior as the `test_get_records_tail` test but with a recursive data structure
 
-
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_13_get_bundle_records.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_13_get_bundle_records.svg
            :align: center
            :scale: 50 %
 
@@ -1396,7 +1395,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_19_merge_record.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_19_merge_record.svg
            :align: center
            :scale: 50 %
 
@@ -1504,7 +1503,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_20_merge_record_complex.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_20_merge_record_complex.svg
            :align: center
            :scale: 50 %
 
@@ -1608,7 +1607,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_21_merge_record_complex_fail.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_21_merge_record_complex_fail.svg
            :align: center
            :scale: 50 %
 
@@ -1669,7 +1668,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_22_merge_record_metadata.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_22_merge_record_metadata.svg
            :align: center
            :scale: 50 %
 
@@ -1804,7 +1803,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_23_merge_relation.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_23_merge_relation.svg
            :align: center
            :scale: 50 %
 
@@ -1902,7 +1901,6 @@ class AdapterTestTemplate(unittest.TestCase):
         """
         Same behavior as the merge_node_fail test
 
-
         """
         self.clear_database()
         example = base_connector_merge_example()
@@ -1999,6 +1997,7 @@ class AdapterTestTemplate(unittest.TestCase):
         """
         .. warning:
             Don't start with this function
+
         :return:
         """
         self.clear_database()
@@ -2009,7 +2008,8 @@ class AdapterTestTemplate(unittest.TestCase):
 
 class BaseConnectorTests(unittest.TestCase):
     """
-    This class is only to test that the BaseConnector is allright
+    This class is only to test that the BaseConnector is alright
+
     """
     def test_instance_abstract_class(self):
         """

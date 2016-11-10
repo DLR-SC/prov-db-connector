@@ -18,7 +18,7 @@ class ProvDbTestTemplate(unittest.TestCase):
     This abstract test class to test the high level function of you database adapter.
     To use this unitest Template extend from this class.
 
-    .. literalinclude:: ../../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
+    .. literalinclude:: ../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
        :linenos:
        :language: python
        :lines: 25-40
@@ -52,6 +52,7 @@ class ProvDbTestTemplate(unittest.TestCase):
         .. warning::
             Override this function if you extend this test!
             Otherwise the test will fail.
+
         :return:
         """
         # this function will never be executed !!!!

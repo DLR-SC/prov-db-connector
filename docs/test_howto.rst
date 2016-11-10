@@ -34,6 +34,11 @@ Alternative you can set the env. variables:
 - NEO4J_BOLT_PORT: Default: 7687
 - NEO4J_HTTP_PORT: Default: 7474
 
+Alternative use docker-compose
+
+.. code:: sh
+
+    docker-compose up
 
 3. Run your tests
 ~~~~~~~~~~~~~~~~~
@@ -44,3 +49,6 @@ Alternative you can set the env. variables:
     source env/bin/activate
     #Start tests
     make test
+
+.. note::
+    If some tests fail because of certificate issues, delete or rename the known_hosts file in ~/.neo4j.
