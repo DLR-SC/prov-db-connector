@@ -26,7 +26,7 @@ Currently we support the `Neo4j <https://neo4j.com/>`_ graph database.
 
 We transform a PROV document into a graph structure and the result looks like this:
 
-.. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_prov_primer_example.svg
+.. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_prov_primer_example.svg
    :align: center
    :scale: 50 %
    :alt: Complex example in Neo4j

@@ -63,7 +63,7 @@ If you are consider to build your own adapter please keep in mind:
 
 First you must create a class that extend from :py:class:`~provdbconnector.db_adapters.baseadapter.Baseadapter` and implement all functions.
 
-.. literalinclude:: ../../provdbconnector/db_adapters/in_memory/simple_in_memory.py
+.. literalinclude:: ../provdbconnector/db_adapters/in_memory/simple_in_memory.py
    :linenos:
    :lines: 1-30
    :language: python
@@ -80,7 +80,7 @@ To test your adapter you should create two test suits:
 
 See this example tests for the :py:class:`~provdbconnector.db_adapters.in_memory.simple_in_memory.SimpleInMemoryAdapter`
 
-.. literalinclude:: ../../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
+.. literalinclude:: ../provdbconnector/tests/db_adapters/in_memory/test_simple_in_memory.py
    :linenos:
    :language: python
 
@@ -97,7 +97,7 @@ Now you are ready to implement all other functions.
    Start with the first test and try to implement functions successively according to the tests
    and look into the documentation of the :py:class:`~provdbconnector.tests.db_adapters.test_baseadapter.AdapterTestTemplate`
 
-.. literalinclude:: ../../provdbconnector/db_adapters/in_memory/simple_in_memory.py
+.. literalinclude:: ../provdbconnector/db_adapters/in_memory/simple_in_memory.py
    :linenos:
    :lines: 32-56, 105-115
    :language: python

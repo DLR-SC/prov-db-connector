@@ -104,6 +104,7 @@ def literal_json_representation(literal):
 def encode_json_representation(value):
     """
     Get the type of a value
+
     :param value:
     :return:
     """
@@ -281,7 +282,6 @@ def decode_json_representation(value, type, bundle):
     :param bundle:
     :return:
     """
-
     if isinstance(type, dict):
         # complex type
         datatype = type['type'] if 'type' in type else None
@@ -309,9 +309,8 @@ def split_into_formal_and_other_attributes(attributes, metadata):
     :param attributes:
     :param metadata:
     :return: namedtuple(formal_attributes, other_attributes)
-    :rtype FormalAndOtherAttributes
+    :rtype: FormalAndOtherAttributes
     """
-
     prov_type = metadata[METADATA_KEY_PROV_TYPE]
 
     if str(prov_type) == "prov:Unknown":
@@ -325,18 +324,16 @@ def split_into_formal_and_other_attributes(attributes, metadata):
 
     return FormalAndOtherAttributes(formal_attributes, other_attributes)
 
-
 def merge_record(attributes, metadata, other_attributes, other_metadata):
     """
     Merge 2 records into one
-
 
     :param attributes: The original attributes
     :param metadata: The original metadata
     :param other_attributes: The attributes to merge
     :param other_metadata:  The metadata to merge
     :return: tuple(attributes, metadata)
-    :rtype Tuple(attributes,metadata)
+    :rtype: Tuple(attributes,metadata)
     """
     attributes_merged = attributes.copy()
     attributes_merged.update(other_attributes)
