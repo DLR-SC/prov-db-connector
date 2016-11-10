@@ -163,8 +163,7 @@ class ProvDb(object):
 
         for bundle in prov_document.bundles:
             bundle_record = ProvEntity(bundle, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
-            (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record, bundle_id=doc_id)
-            self._adapter.save_record(attributes=attributes, metadata=metadata)
+            self.save_element(record=bundle_record,bundle_id=doc_id)
 
             self._create_bundle(bundle)
             self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
@@ -337,8 +336,7 @@ class ProvDb(object):
 
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
-            (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id)
-            self._adapter.save_record(attributes, metadata)
+            self.save_element(record=record,bundle_id=bundle_id)
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
