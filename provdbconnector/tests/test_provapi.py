@@ -2,7 +2,7 @@ import unittest
 from uuid import UUID
 
 import pkg_resources
-from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName
+from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName, ProvRelation
 
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvDb
@@ -485,6 +485,15 @@ class ProvDbTests(unittest.TestCase):
         self.assertEqual(entity_restored,entity)
         self.assertEqual(activity_restored,activity)
 
+    def test_create_relation_with_unknown_nodes(self):
+        """
+        Test to create a relation were the start and end node dose not exist
+        This should also work
+        """
+        doc = examples.primer_example()
+        relation = list(doc.get_records(ProvRelation)).pop()
+
+        self.provapi._create_relation(prov_relation=relation)
 
     def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
         """
