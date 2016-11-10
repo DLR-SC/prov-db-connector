@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     provdbconnector.tests.db_adapters
-    provdbconnector.tests.resources
     provdbconnector.tests.utils
 
 Submodules
@@ -21,10 +20,10 @@ provdbconnector.tests.examples module
     :undoc-members:
     :show-inheritance:
 
-provdbconnector.tests.test_provapi module
------------------------------------------
+provdbconnector.tests.test_provDb module
+----------------------------------------
 
-.. automodule:: provdbconnector.tests.test_provapi
+.. automodule:: provdbconnector.tests.test_provDb
     :members:
     :undoc-members:
     :show-inheritance:

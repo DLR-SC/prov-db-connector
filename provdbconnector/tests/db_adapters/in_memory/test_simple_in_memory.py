@@ -13,6 +13,7 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
     def setUp(self):
         """
         Connect to your database
+
         """
         self.instance = SimpleInMemoryAdapter()
         self.instance.connect(None)
@@ -20,6 +21,7 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
     def test_connect_invalid_options(self):
         """
         Test your connect function with invalid data
+
         """
         auth_info = {"invalid": "Invalid"}
         with self.assertRaises(InvalidOptionsException):
@@ -28,6 +30,7 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
     def clear_database(self):
         """
         Clear the database
+
         """
         self.instance.all_nodes = dict()
         self.instance.all_relations= dict()
@@ -35,6 +38,7 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
     def tearDown(self):
         """
         Delete your instance
+
         """
         del self.instance
 
@@ -42,6 +46,7 @@ class SimpleInMemoryAdapterTest(AdapterTestTemplate):
 class SimpleInMemoryAdapterProvDbTests(ProvDbTestTemplate):
     """
     This is the high level test for the SimpleInMemoryAdapter
+
     """
     def setUp(self):
         """
@@ -52,6 +57,7 @@ class SimpleInMemoryAdapterProvDbTests(ProvDbTestTemplate):
     def clear_database(self):
         """
         Clear function get called before each test starts
+
         """
         self.provapi._adapter.all_nodes = dict()
         self.provapi._adapter.all_relations = dict()
