@@ -14,6 +14,7 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, META
 from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException, \
     InvalidProvRecordException
 from provdbconnector.exceptions.utils import ParseException
+from provdbconnector.exceptions.database import NotFoundException
 from provdbconnector.utils.converter import form_string, to_json, to_provn, to_xml
 from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record
 
@@ -162,8 +163,7 @@ class ProvDb(object):
 
         for bundle in prov_document.bundles:
             bundle_record = ProvEntity(bundle, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
-            (metadata, attributes) = self._get_metadata_and_attributes_for_record(bundle_record, bundle_id=doc_id)
-            self._adapter.save_record(attributes=attributes, metadata=metadata)
+            self.save_element(record=bundle_record,bundle_id=doc_id)
 
             self._create_bundle(bundle)
             self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
@@ -217,6 +217,54 @@ class ProvDb(object):
                 self._parse_record(prov_bundle, record)
         return prov_document
 
+    def save_element(self,record,bundle_id=None):
+        """
+        Saves a activity, entity, agent
+        :param record: The ProvElement
+        :type record: prov.model.ProvElement
+        :param bundle_id:
+        :type bundle_id: str
+        :return: Identifier of the element
+        :rtype: prov.model.QualifiedName
+        """
+        if not isinstance(record, ProvElement):
+            raise InvalidArgumentTypeException("Should be {} but was {}".format(ProvElement, type(record)))
+
+        (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id=bundle_id)
+        self._adapter.save_record(attributes=attributes, metadata=metadata)
+        return record.identifier
+
+    def get_element(self, identifier):
+        """
+        Get a element (activity, agent, entity) from the database
+        :param identifier:
+        :type identifier: prov.model.QualifiedName
+        :return: A prov Element class
+        """
+
+        if not isinstance(identifier, QualifiedName):
+            raise InvalidArgumentTypeException("Should be {} but was {}".format(QualifiedName, type(identifier)))
+
+
+        # Setup filter
+        meta_filter = dict()
+        meta_filter.update({METADATA_KEY_IDENTIFIER: identifier})
+
+        # Get the result
+        results = self._adapter.get_records_by_filter(metadata_dict=meta_filter)
+
+        # Check if there is some unexpected result
+        if len(results) > 1:
+            raise InvalidProvRecordException("Invalid data result, len should be only one")
+        if len(results) == 0:
+            raise NotFoundException("Can't find the element with identifier {}".format(identifier))
+
+        # get the lonely element in the list
+        element = list(results).pop()
+
+        doc = ProvDocument()
+        return self._parse_record(doc,element)
+
     @staticmethod
     def _parse_record(prov_bundle, raw_record):
         """
@@ -226,6 +274,8 @@ class ProvDb(object):
         :type prov_bundle: ProvBundle
         :param raw_record: DbRelation or DbRecord instance as (namedtuple)
         :type raw_record: DbRelation or DbRecord
+        :return ProvRecord
+        :rtype prov.model.ProvRecord
         """
 
         # check if record belongs to this bundle
@@ -268,7 +318,7 @@ class ProvDb(object):
             raise InvalidArgumentTypeException("The type_map must be a dict or json string got: {}".format(type_map))
 
         add_namespaces_to_bundle(prov_bundle, raw_record.metadata)
-        create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
+        return create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
 
     def _create_bundle(self, prov_bundle):
         """
@@ -286,8 +336,7 @@ class ProvDb(object):
 
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
-            (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id)
-            self._adapter.save_record(attributes, metadata)
+            self.save_element(record=record,bundle_id=bundle_id)
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
