@@ -2,11 +2,11 @@ import unittest
 from uuid import UUID
 
 import pkg_resources
-from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity
+from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName
 
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvDb
-from provdbconnector.exceptions.database import InvalidOptionsException
+from provdbconnector.exceptions.database import InvalidOptionsException, NotFoundException
 from provdbconnector import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP, METADATA_KEY_PROV_TYPE, \
     METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
@@ -417,7 +417,16 @@ class ProvDbTests(unittest.TestCase):
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi._create_bundle(None)
 
-    def test_save_record(self):
+    def test_save_element_invalid(self):
+        """
+        Test save_element with invalid args
+
+        """
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_element("Some cool invalid argument")
+
+    def test_save_element(self):
         """
         Try to save a single record without document_di
 
@@ -429,11 +438,26 @@ class ProvDbTests(unittest.TestCase):
         activity = list(doc.get_records(ProvActivity)).pop()
 
         #Try to save the 3 class types
-        self.provapi.save_record(agent)
-        self.provapi.save_record(entity)
-        self.provapi.save_record(activity)
+        self.provapi.save_element(agent)
+        self.provapi.save_element(entity)
+        self.provapi.save_element(activity)
 
-    def test_get_record(self):
+    def test_get_element_invalid(self):
+        """
+        Test get element with error
+
+        """
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.get_element(None)
+
+
+        with self.assertRaises(NotFoundException):
+            doc = ProvDocument()
+            name = doc.valid_qualified_name("prov:Some unused name")
+            self.provapi.get_element(name)
+
+    def test_get_element(self):
         """
         Try to save a single record without document_id
         and get the record back from the db
@@ -445,13 +469,17 @@ class ProvDbTests(unittest.TestCase):
         activity = list(doc.get_records(ProvActivity)).pop()
 
         #Try to save the 3 class types
-        agent_id = self.provapi.save_record(agent)
-        entity_id = self.provapi.save_record(entity)
-        activity_id = self.provapi.save_record(activity)
+        agent_id = self.provapi.save_element(agent)
+        entity_id = self.provapi.save_element(entity)
+        activity_id = self.provapi.save_element(activity)
 
-        agent_restored = self.provapi.get_record(agent_id)
-        entity_restored = self.provapi.get_record(entity_id)
-        activity_restored = self.provapi.get_record(activity_id)
+        self.assertIsInstance(agent_id,QualifiedName)
+        self.assertIsInstance(entity_id,QualifiedName)
+        self.assertIsInstance(activity_id,QualifiedName)
+
+        agent_restored = self.provapi.get_element(agent_id)
+        entity_restored = self.provapi.get_element(entity_id)
+        activity_restored = self.provapi.get_element(activity_id)
 
         self.assertEqual(agent_restored,agent)
         self.assertEqual(entity_restored,entity)
