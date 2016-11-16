@@ -349,11 +349,11 @@ class ProvDb(object):
             if relation.get_type() is PROV_MENTION:
                 continue
 
-            self._save_relation(relation, bundle_id, prov_bundle.identifier)
+            self.save_relation(relation, bundle_id)
 
         return bundle_id
 
-    def _save_relation(self, prov_relation, bundle_id=None, bundle_identifier=None):
+    def save_relation(self, prov_relation, bundle_id=None):
         """
         Saves a relation between 2 nodes that are already in the database.
 
@@ -361,11 +361,15 @@ class ProvDb(object):
         :type prov_relation: ProvRelation
         :param bundle_id
         :type bundle_id: str
-        :param bundle_identifier
-        :type bundle_identifier: str
         :return: Relation id
         :rtype: str
         """
+
+        if not isinstance(prov_relation, ProvRelation):
+            raise InvalidArgumentTypeException(
+                "prov_relation was {}, expected: {}".format(type(prov_relation), type(ProvRelation)))
+
+
         # get from and to node
         from_tuple, to_tuple = prov_relation.formal_attributes[:2]
         from_qualified_name = from_tuple[1]
@@ -443,7 +447,7 @@ class ProvDb(object):
             if mention.get_type() is not PROV_MENTION:
                 continue
 
-            self._save_relation(mention)
+            self.save_relation(mention)
 
     @staticmethod
     def _get_metadata_and_attributes_for_record(prov_record, bundle_id=None):
