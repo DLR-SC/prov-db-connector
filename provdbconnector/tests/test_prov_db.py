@@ -2,7 +2,7 @@ import unittest
 from uuid import UUID
 
 import pkg_resources
-from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName, ProvRelation, ProvRecord
+from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName, ProvRelation, ProvRecord, ProvBundle
 
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvDb
@@ -521,6 +521,51 @@ class ProvDbTests(unittest.TestCase):
         self.assertEqual(agent_restored,agent)
         self.assertEqual(entity_restored,entity)
         self.assertEqual(activity_restored,activity)
+
+    def test_save_bundle(self):
+        """
+        Test the public method to save bundles
+        """
+        doc = examples.bundles2()
+        bundle = list(doc.bundles).pop()
+
+        self.provapi.save_bundle(bundle)
+
+    def test_save_bundle_invalid(self):
+        """
+        Test the public method to save bundles with invalid arguments
+        """
+        doc = examples.primer_example()
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_bundle(doc)
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_bundle(None)
+
+    def test_get_bundle(self):
+        """
+        Test the public method to get bundles
+        """
+        doc = examples.bundles2()
+        bundle = list(doc.bundles).pop()
+
+        self.provapi.save_bundle(bundle)
+
+        db_bundle = self.provapi.get_bundle(bundle.identifier)
+        self.assertIsNotNone(db_bundle)
+        self.assertIsInstance(db_bundle,ProvBundle)
+        self.assertEqual(db_bundle,bundle)
+
+    def test_get_bundle_invalid(self):
+        """
+        Test with invalid arguemnts
+        """
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.get_bundle("prov:str") #not allowed
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.get_bundle(None)  # not allowed
 
     def test_save_relation_with_unknown_nodes(self):
         """
