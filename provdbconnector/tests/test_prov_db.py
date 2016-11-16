@@ -427,6 +427,33 @@ class ProvDbTests(unittest.TestCase):
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.save_element("Some cool invalid argument")
 
+    def test_save_record(self):
+        """
+        Test to save a record (a element or a relation)
+        """
+        doc = examples.primer_example()
+        element = list(doc.get_records(ProvActivity)).pop()
+        relation = list(doc.get_records(ProvRelation)).pop()
+
+        #save element
+        self.provapi.save_record(element)
+        db_element = self.provapi.get_element(element.identifier)
+
+        self.assertEqual(db_element,element)
+
+        #Save relation
+        self.provapi.save_record(relation)
+        db_relation = self.provapi.get_relation(relation.identifier)
+
+        self.assertEqual(db_element, element)
+
+    def test_save_record_invalid(self):
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_record(list())
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_record(examples.primer_example())
+
     def test_save_element(self):
         """
         Try to save a single record without document_di
@@ -494,7 +521,18 @@ class ProvDbTests(unittest.TestCase):
         doc = examples.primer_example()
         relation = list(doc.get_records(ProvRelation)).pop()
 
-        self.provapi._save_relation(prov_relation=relation)
+        self.provapi.save_relation(relation)
+
+    def test_save_relation_invalid(self):
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_relation(None)
+
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            doc = examples.primer_example()
+            element = list(doc.get_records(ProvEntity)).pop()
+            self.provapi.save_relation(element)
 
     def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
         """
