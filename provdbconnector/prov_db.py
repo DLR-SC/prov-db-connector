@@ -166,11 +166,6 @@ class ProvDb(object):
             self.save_element(record=bundle_record,bundle_id=doc_id)
 
             self._save_bundle(bundle)
-            self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
-                                            prov_bundle_identifier=bundle.identifier)
-
-        for bundle in prov_document.bundles:
-            self._save_bundle_links(bundle)
 
         return doc_id
 
@@ -345,9 +340,6 @@ class ProvDb(object):
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
-            # skip relations of the type "prov:mentionOf" https://www.w3.org/TR/prov-links/
-            if relation.get_type() is PROV_MENTION:
-                continue
 
             self._save_relation(relation, bundle_id, prov_bundle.identifier)
 
@@ -430,20 +422,6 @@ class ProvDb(object):
             self._adapter.save_relation(from_qualified_name, to_qualified_name,
                                         belong_attributes, belong_metadata)
 
-
-    def _save_bundle_links(self, prov_bundle):
-        """
-        This function saves the links between nodes in bundles, see https://www.w3.org/TR/prov-links/
-
-        :param prov_bundle: For this bundle we will create the links
-        :type prov_bundle: ProvBundle
-        """
-
-        for mention in prov_bundle.get_records(ProvRelation):
-            if mention.get_type() is not PROV_MENTION:
-                continue
-
-            self._save_relation(mention)
 
     @staticmethod
     def _get_metadata_and_attributes_for_record(prov_record, bundle_id=None):
