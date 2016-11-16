@@ -17,7 +17,7 @@ Submodules
 provdbconnector.provDb module
 -----------------------------
 
-.. automodule:: provdbconnector.provDb
+.. automodule:: provdbconnector.prov_db
     :members:
     :undoc-members:
     :show-inheritance:

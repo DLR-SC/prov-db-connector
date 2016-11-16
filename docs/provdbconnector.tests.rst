@@ -23,7 +23,7 @@ provdbconnector.tests.examples module
 provdbconnector.tests.test_provDb module
 ----------------------------------------
 
-.. automodule:: provdbconnector.tests.test_provDb
+.. automodule:: provdbconnector.tests.test_prov_db
     :members:
     :undoc-members:
     :show-inheritance:
