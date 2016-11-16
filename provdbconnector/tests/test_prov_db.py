@@ -459,7 +459,9 @@ class ProvDbTests(unittest.TestCase):
             pass
 
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi.save_record(InvalidProvRecordExtend())
+            doc = examples.primer_example()
+            identifier = doc.valid_qualified_name("prov:example")
+            self.provapi.save_record(InvalidProvRecordExtend(bundle=doc,identifier=identifier))
 
     def test_save_element(self):
         """
