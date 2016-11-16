@@ -2,7 +2,7 @@ import unittest
 from uuid import UUID
 
 import pkg_resources
-from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName, ProvRelation
+from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName, ProvRelation, ProvRecord
 
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvDb
@@ -443,9 +443,10 @@ class ProvDbTests(unittest.TestCase):
 
         #Save relation
         self.provapi.save_record(relation)
-        db_relation = self.provapi.get_relation(relation.identifier)
 
-        self.assertEqual(db_element, element)
+        # @todo discuss if it a get_relation method is useful, see  https://github.com/DLR-SC/prov-db-connector/issues/45
+        # db_relation = self.provapi.get_relation(relation.identifier)
+        # self.assertEqual(db_element, element)
 
     def test_save_record_invalid(self):
         with self.assertRaises(InvalidArgumentTypeException):
@@ -453,6 +454,12 @@ class ProvDbTests(unittest.TestCase):
 
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.save_record(examples.primer_example())
+
+        class InvalidProvRecordExtend(ProvRecord):
+            pass
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_record(InvalidProvRecordExtend())
 
     def test_save_element(self):
         """
