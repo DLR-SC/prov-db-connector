@@ -286,8 +286,8 @@ class Neo4jAdapter(BaseAdapter):
 
         relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
-        command = cypher_commands.NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=from_node,
-                                                         to_identifier=to_node,
+        command = cypher_commands.NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=str(from_node),
+                                                         to_identifier=str(to_node),
                                                          relation_type=relationtype,
                                                          formal_attributes=cypher_merge_relevant_str,
                                                          merge_check_statement=cypher_merge_check_statement,
