@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE
 from prov.model import ProvDocument, ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, \
-    ProvAssociation, PROV_REC_CLS, ProvActivity, ProvAgent, PROV_ATTR_AGENT,PROV_ATTR_ACTIVITY, PROV_ATTR_ENTITY,PROV_ATTR_BUNDLE
+    ProvAssociation, PROV_REC_CLS, ProvActivity, ProvAgent, PROV_AGENT,PROV_ENTITY,PROV_ACTIVITY, PROV_ATTR_AGENT,PROV_ATTR_ACTIVITY, PROV_ATTR_ENTITY,PROV_ATTR_BUNDLE
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
@@ -230,6 +230,31 @@ class ProvDb(object):
             self._create_bundle_association([prov_element], prov_element.bundle.identifier)
 
         return prov_element.identifier
+    def get_elements(self, prov_element_cls):
+        """
+        Return a document that contains the requested type
+        :param prov_element_cls:
+        :return:
+        """
+        if prov_element_cls is ProvAgent:
+            prov_type = PROV_AGENT
+        elif prov_element_cls is ProvActivity:
+            prov_type = PROV_ACTIVITY
+        elif prov_element_cls is ProvEntity:
+            prov_type = PROV_ENTITY
+        else:
+            raise InvalidArgumentTypeException("You provide a wrong type : {}".format(type(prov_element_cls)))
+
+        meta_filter = dict()
+        meta_filter.update({METADATA_KEY_PROV_TYPE: prov_type})
+
+        doc = ProvDocument()
+        raw_results = self._adapter.get_records_by_filter(metadata_dict=meta_filter)
+
+        for element in raw_results:
+            if element.metadata[METADATA_KEY_PROV_TYPE] == str(prov_type):
+                self._parse_record(doc,element)
+        return doc
 
     def get_element(self, identifier):
         """

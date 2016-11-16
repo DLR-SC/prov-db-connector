@@ -507,18 +507,18 @@ class ProvDbTests(unittest.TestCase):
 
         activities = self.provapi.get_elements(ProvActivity)
         self.assertIsNotNone(activities)
-        self.assertIsInstance(activities,list)
-        self.assertEqual(len(activities),4)
+        self.assertIsInstance(activities,ProvDocument)
+        self.assertEqual(len(activities.get_records()),0) # document contains only 4 unknown activities
 
         entities = self.provapi.get_elements(ProvEntity)
         self.assertIsNotNone(entities)
-        self.assertIsInstance(entities, list)
-        self.assertEqual(len(entities), 5)
+        self.assertIsInstance(entities, ProvDocument)
+        self.assertEqual(len(entities.get_records()), 5)
 
         agents = self.provapi.get_elements(ProvAgent)
         self.assertIsNotNone(agents)
-        self.assertIsInstance(agents, list)
-        self.assertEqual(len(agents), 2)
+        self.assertIsInstance(agents, ProvDocument)
+        self.assertEqual(len(agents.get_records()), 2)
 
     def test_get_element_invalid(self):
         """
