@@ -22,6 +22,7 @@ script:
   - curl --output /dev/null --silent --head --fail http://localhost:7474
   - coverage run --source=provdbconnector setup.py test
   - make docs-travis
+  - . ./.travis_docs.sh
 
 after_success:
   - coveralls

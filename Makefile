@@ -47,7 +47,6 @@ docs:
 
 docs-travis:
 	$(MAKE) -C docs clean
-	$(shell . ./.travis_docs.sh)
 
 release: clean
 	python setup.py sdist upload
