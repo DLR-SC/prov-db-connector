@@ -449,7 +449,7 @@ class Neo4jAdapter(BaseAdapter):
 
         session = self._create_session()
         result_set = session.run(cypher_commands.NEO4J_GET_BUNDLE_RECORDS,
-                                 {'meta:{}'.format(METADATA_KEY_IDENTIFIER): bundle_identifier})
+                                 {'meta:{}'.format(METADATA_KEY_IDENTIFIER): str(bundle_identifier)})
         records = list()
         for result in result_set:
             record = result["re"]
