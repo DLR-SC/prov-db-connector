@@ -163,7 +163,7 @@ class ProvDb(object):
 
         for bundle in prov_document.bundles:
             bundle_record = ProvEntity(prov_document, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
-            self.save_element(record=bundle_record,bundle_id=doc_id)
+            self.save_element(prov_element=bundle_record, bundle_id=doc_id)
 
             self._save_bundle(bundle)
             self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
@@ -217,27 +217,27 @@ class ProvDb(object):
                 self._parse_record(prov_bundle, record)
         return prov_document
 
-    def save_element(self,record,bundle_id=None):
+    def save_element(self, prov_element, bundle_id=None):
         """
         Saves a activity, entity, agent
-        :param record: The ProvElement
-        :type record: prov.model.ProvElement
+        :param prov_element: The ProvElement
+        :type prov_element: prov.model.ProvElement
         :param bundle_id:
         :type bundle_id: str
         :return: Identifier of the element
         :rtype: prov.model.QualifiedName
         """
-        if not isinstance(record, ProvElement):
-            raise InvalidArgumentTypeException("Should be {} but was {}".format(ProvElement, type(record)))
+        if not isinstance(prov_element, ProvElement):
+            raise InvalidArgumentTypeException("Should be {} but was {}".format(ProvElement, type(prov_element)))
 
-        (metadata, attributes) = self._get_metadata_and_attributes_for_record(record, bundle_id=bundle_id)
+        (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_element, bundle_id=bundle_id)
         self._adapter.save_element(attributes=attributes, metadata=metadata)
 
         #Add bundle relation only if the record belongs to a bundle not to document
-        if not isinstance(record.bundle, ProvDocument):
-            self._create_bundle_association([record], record.bundle.identifier)
+        if not isinstance(prov_element.bundle, ProvDocument):
+            self._create_bundle_association([prov_element], prov_element.bundle.identifier)
 
-        return record.identifier
+        return prov_element.identifier
 
     def get_element(self, identifier):
         """
@@ -269,6 +269,17 @@ class ProvDb(object):
 
         doc = ProvDocument()
         return self._parse_record(doc,element)
+
+    def save_record(self, prov_record):
+        if not isinstance(prov_record,ProvRecord):
+            raise InvalidArgumentTypeException("Wrong type, expected: {}, got {}".format(type(ProvRecord), type(prov_record)))
+
+        if isinstance(prov_record,ProvRelation):
+            return self.save_relation(prov_relation=prov_record)
+        elif isinstance(prov_record,ProvElement):
+            return self.save_element(prov_element=prov_record)
+        else:
+            raise InvalidArgumentTypeException("Oh no... you provided a not supported prov_record type. The type was: {}".format(type(prov_record)))
 
     @staticmethod
     def _parse_record(prov_bundle, raw_record):
@@ -341,7 +352,7 @@ class ProvDb(object):
 
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
-            self.save_element(record=record,bundle_id=bundle_id)
+            self.save_element(prov_element=record, bundle_id=bundle_id)
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
@@ -397,7 +408,7 @@ class ProvDb(object):
         if from_type_cls is None or to_type_cls is None:
             log.info("Something went wrong ")
         #save from and to node
-        self.save_element(record=from_type_cls(prov_relation.bundle,identifier=from_qualified_name),bundle_id=bundle_id)
+        self.save_element(prov_element=from_type_cls(prov_relation.bundle, identifier=from_qualified_name), bundle_id=bundle_id)
 
         # If it is a link between bundle the to node not belongs to the current bundle, the to node belongs only to the document
         to_bundle = prov_relation.bundle
@@ -405,7 +416,7 @@ class ProvDb(object):
             to_bundle = prov_relation.bundle.document
 
 
-        self.save_element(record=to_type_cls(to_bundle,identifier=to_qualified_name),bundle_id=bundle_id)
+        self.save_element(prov_element=to_type_cls(to_bundle, identifier=to_qualified_name), bundle_id=bundle_id)
 
 
         # split metadata and attributes
