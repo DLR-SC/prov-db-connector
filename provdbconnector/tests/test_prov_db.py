@@ -416,7 +416,7 @@ class ProvDbTests(unittest.TestCase):
         :return:
         """
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi._save_bundle(None)
+            self.provapi._save_bundle_internal(None)
 
     def test_save_element_invalid(self):
         """
