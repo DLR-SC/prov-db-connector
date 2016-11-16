@@ -43,10 +43,11 @@ coverage:
 docs:
 	$(MAKE) -C docs clean
 	sphinx-apidoc -o docs provdbconnector
-	sphinx-build -b html -d docs/build/doctrees docs/ docs/build/html
+	sphinx-build -a -b html -d docs/build/doctrees docs/ docs/build/html
 
 docs-travis:
 	$(MAKE) -C docs clean
+	./.travis_docs.sh
 
 release: clean
 	python setup.py sdist upload
