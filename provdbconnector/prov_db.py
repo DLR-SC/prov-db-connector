@@ -270,7 +270,7 @@ class ProvDb(object):
         doc = ProvDocument()
         return self._parse_record(doc,element)
 
-    def save_record(self, prov_record, bundle_id):
+    def save_record(self, prov_record, bundle_id=None):
         """
         Saves a realtion or a element (Entity, Agent or Activity)
 
