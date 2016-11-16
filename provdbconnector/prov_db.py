@@ -166,8 +166,6 @@ class ProvDb(object):
             self.save_element(record=bundle_record,bundle_id=doc_id)
 
             self._save_bundle(bundle)
-            self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
-                                            prov_bundle_identifier=bundle.identifier)
 
         return doc_id
 
