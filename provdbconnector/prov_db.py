@@ -191,6 +191,8 @@ class ProvDb(object):
         for record in document_records:
             self._parse_record(prov_document, record)
 
+        bundle_doc = ProvDocument()# Document with all bundle entities
+
         for bundle_record in bundle_entities:
 
             # skip if we got some relations instead of only the bundle nodes
@@ -200,13 +202,11 @@ class ProvDb(object):
             if str(bundle_record.attributes[str(PROV_TYPE)]) != str(PROV_BUNDLE):
                 continue
 
-            identifier = bundle_record.metadata[METADATA_KEY_IDENTIFIER]
-            prov_bundle = prov_document.bundle(identifier=identifier)
+            bundle_entity= self._parse_record(bundle_doc,bundle_record)
+            prov_bundle = self.get_bundle(bundle_entity.identifier)
+            prov_document.add_bundle(prov_bundle,identifier=bundle_entity.identifier)
 
-            bundle_records = self._adapter.get_bundle_records(identifier)
 
-            for record in bundle_records:
-                self._parse_record(prov_bundle, record)
         return prov_document
 
     def save_element(self, prov_element, bundle_id=None):
@@ -336,6 +336,32 @@ class ProvDb(object):
 
         add_namespaces_to_bundle(prov_bundle, raw_record.metadata)
         return create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
+
+    def get_bundle(self,identifier):
+        """
+        Returns the whole bundle for the provided identifier
+        :param identifier: The identifier
+        :type identifier: prov.model.QualifiedName
+        :return: The prov bundle instance
+        :rtype prov.model.ProvBundle
+        """
+        if not isinstance(identifier, QualifiedName):
+            raise InvalidArgumentTypeException()
+
+
+        bundle_entity = self.get_element(identifier)
+
+        doc = ProvDocument()
+        doc.add_record(bundle_entity)#Add bundle entity to document
+
+        prov_bundle = doc.bundle(identifier=bundle_entity.identifier)
+
+        bundle_records = self._adapter.get_bundle_records(identifier)
+
+        for record in bundle_records:
+            self._parse_record(prov_bundle, record)
+
+        return prov_bundle
 
     def save_bundle(self,prov_bundle):
         """
