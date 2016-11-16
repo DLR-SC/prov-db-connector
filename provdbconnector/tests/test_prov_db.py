@@ -497,6 +497,29 @@ class ProvDbTests(unittest.TestCase):
         self.provapi.save_element(entity)
         self.provapi.save_element(activity)
 
+    def test_get_elements(self):
+        """
+        Test for the get_elements function
+        """
+        self.clear_database()
+        doc = examples.bundles2()
+        self.provapi.save_document(doc)
+
+        activities = self.provapi.get_elements(ProvActivity)
+        self.assertIsNotNone(activities)
+        self.assertIsInstance(activities,list)
+        self.assertEqual(len(activities),4)
+
+        entities = self.provapi.get_elements(ProvEntity)
+        self.assertIsNotNone(entities)
+        self.assertIsInstance(entities, list)
+        self.assertEqual(len(entities), 5)
+
+        agents = self.provapi.get_elements(ProvAgent)
+        self.assertIsNotNone(agents)
+        self.assertIsInstance(agents, list)
+        self.assertEqual(len(agents), 2)
+
     def test_get_element_invalid(self):
         """
         Test get element with error
