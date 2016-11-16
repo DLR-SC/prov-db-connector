@@ -14,12 +14,14 @@ before_install:
 # Install packages
 install:
   - pip install '.[test]'
+  - pip install '.[docs]'
 
 # Run test
 script:
   - docker ps | grep -q 'provdbconnector_neo4j_1'
   - curl --output /dev/null --silent --head --fail http://localhost:7474
   - coverage run --source=provdbconnector setup.py test
+  - make docs
 
 after_success:
   - coveralls
