@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE
 from prov.model import ProvDocument, ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, \
-    ProvAssociation, PROV_REC_CLS, ProvActivity, ProvAgent, PROV_ATTR_AGENT,PROV_ATTR_ACTIVITY, PROV_ATTR_ENTITY
+    ProvAssociation, PROV_REC_CLS, ProvActivity, ProvAgent, PROV_ATTR_AGENT,PROV_ATTR_ACTIVITY, PROV_ATTR_ENTITY,PROV_ATTR_BUNDLE
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
     METADATA_KEY_TYPE_MAP
@@ -452,10 +452,18 @@ class ProvDb(object):
         #save from and to node
         self.save_element(prov_element=from_type_cls(prov_relation.bundle, identifier=from_qualified_name), bundle_id=bundle_id)
 
-        # If it is a link between bundle the to node not belongs to the current bundle, the to node belongs only to the document
         to_bundle = prov_relation.bundle
+
+        # If it is a link between bundle the to node not belongs to the current bundle, the to node belongs only to the bundle defined as FORMAL_ATTR[3]
         if prov_relation.get_type() is PROV_MENTION:
-            to_bundle = prov_relation.bundle.document
+
+            #Try to get the destination bundle
+            to_bundle_identifier = list(prov_relation.get_attribute(PROV_ATTR_BUNDLE)).pop()
+
+            if not isinstance(to_bundle_identifier,QualifiedName):
+                raise InvalidProvRecordException("Should be a qualified name {}, mention: {}".format(to_bundle_identifier, prov_relation))
+            # Create the bundle, it will be automatically created during the save_element method
+            to_bundle = ProvBundle(identifier=to_bundle_identifier)
 
 
         self.save_element(prov_element=to_type_cls(to_bundle, identifier=to_qualified_name), bundle_id=bundle_id)
@@ -475,8 +483,13 @@ class ProvDb(object):
         :param prov_elements: List of prov elements
         :type prov_elements: list
         """
-        bundle = ProvBundle()
-        belong_relation = ProvAssociation(bundle=bundle, identifier=None,
+
+        # Ensure that the bundle entity exist
+        doc = ProvDocument()
+        to_bundle = ProvBundle(document=doc,identifier=prov_bundle_identifier)
+        self.save_bundle(to_bundle) # Save the empty bundle to create the bundle entity if necessary
+
+        belong_relation = ProvAssociation(bundle=to_bundle, identifier=None,
                                           attributes={PROV_TYPE: "prov:bundleAssociation"})
         (belong_metadata, belong_attributes) = self._get_metadata_and_attributes_for_record(belong_relation)
         to_qualified_name = prov_bundle_identifier
