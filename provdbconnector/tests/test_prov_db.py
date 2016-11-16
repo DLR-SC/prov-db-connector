@@ -2,7 +2,7 @@ import unittest
 from uuid import UUID
 
 import pkg_resources
-from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName, ProvRelation, ProvRecord
+from prov.model import ProvDocument, ProvAgent, ProvEntity, ProvActivity, QualifiedName, ProvRelation, ProvRecord, ProvBundle
 
 from provdbconnector.tests import examples as examples
 from provdbconnector import ProvDb
@@ -224,14 +224,17 @@ class ProvDbTests(unittest.TestCase):
                           }
         self.provapi = ProvDb(api_id=1, adapter=Neo4jAdapter, auth_info=self.auth_info)
 
+    def clear_database(self):
+        session = self.provapi._adapter._create_session()
+        session.run("MATCH (x) DETACH DELETE x")
+
     def tearDown(self):
         """
         Destroy the prov api and remove all data from neo4j
         :return:
         """
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
-        session = self.provapi._adapter._create_session()
-        session.run("MATCH (x) DETACH DELETE x")
+        self.clear_database()
         del self.provapi
 
     # Test create instnace
@@ -256,6 +259,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a document from a json buffer
         :return:
         """
+        self.clear_database()
         json_buffer = self.test_prov_files["json"]
         self.provapi.save_document_from_json(json_buffer)
 
@@ -264,6 +268,7 @@ class ProvDbTests(unittest.TestCase):
         try to get the document as json
         :return:
         """
+        self.clear_database()
         example = examples.primer_example()
         document_id = self.provapi.save_document_from_prov(example)
 
@@ -278,6 +283,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a document from xml
         :return:
         """
+        self.clear_database()
         json_buffer = self.test_prov_files["xml"]
         self.provapi.save_document_from_json(json_buffer)
 
@@ -286,6 +292,7 @@ class ProvDbTests(unittest.TestCase):
         try to get the document as xml
         :return:
         """
+        self.clear_database()
         example = examples.primer_example()
         document_id = self.provapi.save_document_from_prov(example)
 
@@ -301,6 +308,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a document from provn
         :return:
         """
+        self.clear_database()
         json_buffer = self.test_prov_files["provn"]
         with self.assertRaises(NotImplementedError):
             self.provapi.save_document_from_provn(json_buffer)
@@ -310,6 +318,7 @@ class ProvDbTests(unittest.TestCase):
         Try to get a document in provn
         :return:
         """
+        self.clear_database()
         example = examples.primer_example()
         document_id = self.provapi.save_document_from_prov(example)
 
@@ -328,6 +337,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a document from a prov instnace
         :return:
         """
+        self.clear_database()
         # test prov document input
         example = examples.primer_example()
         document_id = self.provapi.save_document_from_prov(example)
@@ -343,6 +353,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a primer example document
         :return:
         """
+        self.clear_database()
         example = examples.primer_example()
         document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
@@ -353,6 +364,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a prov_alternative
         :return:
         """
+        self.clear_database()
         example = examples.primer_example_alternate()
         document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
@@ -363,6 +375,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a document with bundles
         :return:
         """
+        self.clear_database()
         example = examples.bundles1()
         document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
@@ -373,6 +386,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create more bundles
         :return:
         """
+        self.clear_database()
         example = examples.bundles2()
         document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
@@ -383,6 +397,7 @@ class ProvDbTests(unittest.TestCase):
         Try to create a prov with some invalid arguments
         :return:
         """
+        self.clear_database()
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.save_document_from_prov(None)
 
@@ -392,6 +407,7 @@ class ProvDbTests(unittest.TestCase):
 
         :return:
         """
+        self.clear_database()
         example = examples.bundles2()
         document_id = self.provapi.save_document_from_prov(example)
 
@@ -416,7 +432,7 @@ class ProvDbTests(unittest.TestCase):
         :return:
         """
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi._save_bundle(None)
+            self.provapi._save_bundle_internal(None)
 
     def test_save_element_invalid(self):
         """
@@ -431,6 +447,7 @@ class ProvDbTests(unittest.TestCase):
         """
         Test to save a record (a element or a relation)
         """
+        self.clear_database()
         doc = examples.primer_example()
         element = list(doc.get_records(ProvActivity)).pop()
         relation = list(doc.get_records(ProvRelation)).pop()
@@ -468,6 +485,7 @@ class ProvDbTests(unittest.TestCase):
         Try to save a single record without document_di
 
         """
+        self.clear_database()
 
         doc = examples.primer_example()
         agent = list(doc.get_records(ProvAgent)).pop()
@@ -478,6 +496,29 @@ class ProvDbTests(unittest.TestCase):
         self.provapi.save_element(agent)
         self.provapi.save_element(entity)
         self.provapi.save_element(activity)
+
+    def test_get_elements(self):
+        """
+        Test for the get_elements function
+        """
+        self.clear_database()
+        doc = examples.bundles2()
+        self.provapi.save_document(doc)
+
+        activities = self.provapi.get_elements(ProvActivity)
+        self.assertIsNotNone(activities)
+        self.assertIsInstance(activities,ProvDocument)
+        self.assertEqual(len(activities.get_records()),0) # document contains only 4 unknown activities
+
+        entities = self.provapi.get_elements(ProvEntity)
+        self.assertIsNotNone(entities)
+        self.assertIsInstance(entities, ProvDocument)
+        self.assertEqual(len(entities.get_records()), 5)
+
+        agents = self.provapi.get_elements(ProvAgent)
+        self.assertIsNotNone(agents)
+        self.assertIsInstance(agents, ProvDocument)
+        self.assertEqual(len(agents.get_records()), 2)
 
     def test_get_element_invalid(self):
         """
@@ -500,6 +541,7 @@ class ProvDbTests(unittest.TestCase):
         and get the record back from the db
 
         """
+        self.clear_database()
         doc = examples.primer_example()
         agent = list(doc.get_records(ProvAgent)).pop()
         entity = list(doc.get_records(ProvEntity)).pop()
@@ -522,11 +564,59 @@ class ProvDbTests(unittest.TestCase):
         self.assertEqual(entity_restored,entity)
         self.assertEqual(activity_restored,activity)
 
+    def test_save_bundle(self):
+        """
+        Test the public method to save bundles
+        """
+        self.clear_database()
+        doc = examples.bundles2()
+        bundle = list(doc.bundles).pop()
+
+        self.provapi.save_bundle(bundle)
+
+    def test_save_bundle_invalid(self):
+        """
+        Test the public method to save bundles with invalid arguments
+        """
+        doc = examples.primer_example()
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_bundle(doc)
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.save_bundle(None)
+
+    def test_get_bundle(self):
+        """
+        Test the public method to get bundles
+        """
+        self.clear_database()
+        doc = examples.bundles2()
+        bundle = list(doc.bundles).pop()
+
+        self.provapi.save_bundle(bundle)
+
+        db_bundle = self.provapi.get_bundle(bundle.identifier)
+        self.assertIsNotNone(db_bundle)
+        self.assertIsInstance(db_bundle,ProvBundle)
+        self.assertEqual(db_bundle,bundle)
+
+    def test_get_bundle_invalid(self):
+        """
+        Test with invalid arguemnts
+        """
+
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.get_bundle("prov:str") #not allowed
+        with self.assertRaises(InvalidArgumentTypeException):
+            self.provapi.get_bundle(None)  # not allowed
+
     def test_save_relation_with_unknown_nodes(self):
         """
         Test to create a relation were the start and end node dose not exist
         This should also work
         """
+        self.clear_database()
         doc = examples.primer_example()
         relation = list(doc.get_records(ProvRelation)).pop()
 
