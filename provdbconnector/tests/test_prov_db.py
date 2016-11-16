@@ -76,7 +76,7 @@ class ProvDbTestTemplate(unittest.TestCase):
         """
         self.clear_database()
         prov_document = examples.primer_example()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -90,7 +90,7 @@ class ProvDbTestTemplate(unittest.TestCase):
         """
         self.clear_database()
         prov_document = examples.primer_example_alternate()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -103,7 +103,7 @@ class ProvDbTestTemplate(unittest.TestCase):
         """
         self.clear_database()
         prov_document = examples.w3c_publication_1()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -117,7 +117,7 @@ class ProvDbTestTemplate(unittest.TestCase):
 
         self.clear_database()
         prov_document = examples.w3c_publication_2()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -132,7 +132,7 @@ class ProvDbTestTemplate(unittest.TestCase):
         """
         self.clear_database()
         prov_document = examples.bundles1()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
         stored_document_unified = stored_document.flattened().unified()
         prov_document_unified= prov_document.flattened().unified()
@@ -151,7 +151,7 @@ class ProvDbTestTemplate(unittest.TestCase):
         """
         self.clear_database()
         prov_document = examples.bundles2()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -165,7 +165,7 @@ class ProvDbTestTemplate(unittest.TestCase):
 
         self.clear_database()
         prov_document = examples.collections()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -179,7 +179,7 @@ class ProvDbTestTemplate(unittest.TestCase):
 
         self.clear_database()
         prov_document = examples.long_literals()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -193,7 +193,7 @@ class ProvDbTestTemplate(unittest.TestCase):
 
         self.clear_database()
         prov_document = examples.datatypes()
-        stored_document_id = self.provapi.create_document_from_prov(prov_document)
+        stored_document_id = self.provapi.save_document_from_prov(prov_document)
         stored_document = self.provapi.get_document_as_prov(stored_document_id)
 
         self.assertEqual(stored_document, prov_document)
@@ -251,13 +251,13 @@ class ProvDbTests(unittest.TestCase):
         self.assertIsInstance(obj.api_id, UUID)
 
     # Methods that automatically convert to ProvDocument
-    def test_create_document_from_json(self):
+    def test_save_document_from_json(self):
         """
         Try to create a document from a json buffer
         :return:
         """
         json_buffer = self.test_prov_files["json"]
-        self.provapi.create_document_from_json(json_buffer)
+        self.provapi.save_document_from_json(json_buffer)
 
     def test_get_document_as_json(self):
         """
@@ -265,7 +265,7 @@ class ProvDbTests(unittest.TestCase):
         :return:
         """
         example = examples.primer_example()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
 
         prov_str = self.provapi.get_document_as_json(document_id)
         self.assertIsNotNone(prov_str)
@@ -273,13 +273,13 @@ class ProvDbTests(unittest.TestCase):
         prov_document_reverse = ProvDocument.deserialize(content=prov_str, format="json")
         self.assertEqual(prov_document_reverse, example)
 
-    def test_create_document_from_xml(self):
+    def test_save_document_from_xml(self):
         """
         Try to create a document from xml
         :return:
         """
         json_buffer = self.test_prov_files["xml"]
-        self.provapi.create_document_from_json(json_buffer)
+        self.provapi.save_document_from_json(json_buffer)
 
     def test_get_document_as_xml(self):
         """
@@ -287,7 +287,7 @@ class ProvDbTests(unittest.TestCase):
         :return:
         """
         example = examples.primer_example()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
 
         prov_str = self.provapi.get_document_as_xml(document_id)
         self.assertIsNotNone(prov_str)
@@ -296,14 +296,14 @@ class ProvDbTests(unittest.TestCase):
         prov_document_reverse = ProvDocument.deserialize(content=prov_str, format="xml")
         self.assertEqual(prov_document_reverse, example)
 
-    def test_create_document_from_provn(self):
+    def test_save_document_from_provn(self):
         """
         Try to create a document from provn
         :return:
         """
         json_buffer = self.test_prov_files["provn"]
         with self.assertRaises(NotImplementedError):
-            self.provapi.create_document_from_provn(json_buffer)
+            self.provapi.save_document_from_provn(json_buffer)
 
     def test_get_document_as_provn(self):
         """
@@ -311,7 +311,7 @@ class ProvDbTests(unittest.TestCase):
         :return:
         """
         example = examples.primer_example()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
 
         prov_str = self.provapi.get_document_as_provn(document_id)
         self.assertIsNotNone(prov_str)
@@ -323,68 +323,68 @@ class ProvDbTests(unittest.TestCase):
         # self.assertEqual(prov_document_reverse, example)
 
     # Methods with ProvDocument input / output
-    def test_create_document(self):
+    def test_save_document(self):
         """
         Try to create a document from a prov instnace
         :return:
         """
         # test prov document input
         example = examples.primer_example()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
         # test invalid options input
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi.create_document(1)
+            self.provapi.save_document(1)
 
-    def test_create_document_from_prov(self):
+    def test_save_document_from_prov(self):
         """
         Try to create a primer example document
         :return:
         """
         example = examples.primer_example()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
-    def test_create_document_from_prov_alternate(self):
+    def test_save_document_from_prov_alternate(self):
         """
         Try to create a prov_alternative
         :return:
         """
         example = examples.primer_example_alternate()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
-    def test_create_document_from_prov_bundles(self):
+    def test_save_document_from_prov_bundles(self):
         """
         Try to create a document with bundles
         :return:
         """
         example = examples.bundles1()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
-    def test_create_document_from_prov_bundles2(self):
+    def test_save_document_from_prov_bundles2(self):
         """
         Try to create more bundles
         :return:
         """
         example = examples.bundles2()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
         self.assertIsNotNone(document_id)
         self.assertIsInstance(document_id, str)
 
-    def test_create_document_from_prov_invalid_arguments(self):
+    def test_save_document_from_prov_invalid_arguments(self):
         """
         Try to create a prov with some invalid arguments
         :return:
         """
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi.create_document_from_prov(None)
+            self.provapi.save_document_from_prov(None)
 
     def test_get_document_as_prov(self):
         """
@@ -393,7 +393,7 @@ class ProvDbTests(unittest.TestCase):
         :return:
         """
         example = examples.bundles2()
-        document_id = self.provapi.create_document_from_prov(example)
+        document_id = self.provapi.save_document_from_prov(example)
 
         prov_document = self.provapi.get_document_as_prov(document_id)
         self.assertIsNotNone(prov_document)
@@ -410,13 +410,13 @@ class ProvDbTests(unittest.TestCase):
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi.get_document_as_prov()
 
-    def test_create_bundle_invalid_arguments(self):
+    def test_save_bundle_invalid_arguments(self):
         """
         Try to create a bundle with invalid arguments
         :return:
         """
         with self.assertRaises(InvalidArgumentTypeException):
-            self.provapi._create_bundle(None)
+            self.provapi._save_bundle(None)
 
     def test_save_element_invalid(self):
         """
@@ -486,7 +486,7 @@ class ProvDbTests(unittest.TestCase):
         self.assertEqual(entity_restored,entity)
         self.assertEqual(activity_restored,activity)
 
-    def test_create_relation_with_unknown_nodes(self):
+    def test_save_relation_with_unknown_nodes(self):
         """
         Test to create a relation were the start and end node dose not exist
         This should also work
@@ -494,7 +494,7 @@ class ProvDbTests(unittest.TestCase):
         doc = examples.primer_example()
         relation = list(doc.get_records(ProvRelation)).pop()
 
-        self.provapi._create_relation(prov_relation=relation)
+        self.provapi._save_relation(prov_relation=relation)
 
     def test_get_metadata_and_attributes_for_record_invalid_arguments(self):
         """

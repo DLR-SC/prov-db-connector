@@ -25,7 +25,7 @@ prov_api = ProvDb(adapter=Neo4jAdapter, auth_info=auth_info)
 prov_document_buffer = pkg_resources.resource_stream("examples", "horsemeat_example.json")
 
 # Save document
-document_id = prov_api.create_document(prov_document_buffer)
+document_id = prov_api.save_document(prov_document_buffer)
 # This is similar to:
 # prov_api.create_document_from_json(prov_document_buffer)
 

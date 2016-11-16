@@ -14,7 +14,7 @@ first_prov_document .activity("ex:Alice")
 
 first_prov_document .association("ex:Alice", "ex:Bob")
 
-first_document_id = prov_api.create_document(first_prov_document )
+first_document_id = prov_api.save_document(first_prov_document)
 
 #Create the second prov document and merge the ex:Bob entry
 second_prov_document = ProvDocument()
@@ -23,7 +23,7 @@ second_prov_document.add_namespace("ex", "http://example.com")
 second_prov_document.agent("ex:Bob", other_attributes={"ex:age": 42, "ex:last_name": "Müller"})
 
 try:
-    second_document_id = prov_api.create_document(second_prov_document)
+    second_document_id = prov_api.save_document(second_prov_document)
 except MergeException as e:
     print ("Got the merge exception: {}".format(e))
 

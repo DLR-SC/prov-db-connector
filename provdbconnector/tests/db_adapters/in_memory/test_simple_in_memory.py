@@ -1,6 +1,6 @@
 from provdbconnector.exceptions.database import InvalidOptionsException
 from provdbconnector.db_adapters.in_memory import SimpleInMemoryAdapter
-from provdbconnector.provDb import ProvDb
+from provdbconnector.prov_db import ProvDb
 from provdbconnector.tests import AdapterTestTemplate
 from provdbconnector.tests import ProvDbTestTemplate
 

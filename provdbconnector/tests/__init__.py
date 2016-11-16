@@ -1,5 +1,5 @@
 from provdbconnector.tests.db_adapters.test_baseadapter import AdapterTestTemplate
-from provdbconnector.tests.test_provDb import ProvDbTestTemplate
+from provdbconnector.tests.test_prov_db import ProvDbTestTemplate
 import unittest
 
 

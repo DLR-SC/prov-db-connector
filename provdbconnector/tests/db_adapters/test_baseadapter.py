@@ -47,11 +47,11 @@ def insert_document_with_bundles(instance, identifier_prefix=""):
     # document with 1 record
 
     args_record["metadata"].update({METADATA_KEY_IDENTIFIER: doc.valid_qualified_name("ex:" + identifier_prefix + str(args_record["metadata"][METADATA_KEY_IDENTIFIER]))})
-    doc_record_id = instance.save_record(args_record["attributes"], args_record["metadata"])
+    doc_record_id = instance.save_element(args_record["attributes"], args_record["metadata"])
 
     #bundle with 1 record
     args_bundle["metadata"].update({METADATA_KEY_IDENTIFIER: args_bundle["metadata"][METADATA_KEY_IDENTIFIER]})
-    bundle_id = instance.save_record(args_bundle["attributes"], args_bundle["metadata"])
+    bundle_id = instance.save_element(args_bundle["attributes"], args_bundle["metadata"])
 
     # add relation
 
@@ -64,8 +64,8 @@ def insert_document_with_bundles(instance, identifier_prefix=""):
     from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_label
     to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_label
 
-    from_record_id = instance.save_record(from_record_args["attributes"], from_record_args["metadata"])
-    to_record_id = instance.save_record(to_record_args["attributes"], to_record_args["metadata"])
+    from_record_id = instance.save_element(from_record_args["attributes"], from_record_args["metadata"])
+    to_record_id = instance.save_element(to_record_args["attributes"], to_record_args["metadata"])
 
 
     relation_id = instance.save_relation(from_label, to_label, relation_args["attributes"], relation_args["metadata"])
@@ -135,13 +135,13 @@ class AdapterTestTemplate(unittest.TestCase):
 
 
     #Create section
-    def test_1_save_record(self):
+    def test_1_save_element(self):
         """
         This test try to save a simple record
 
         **Graph-Strucutre**
 
-        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_1_save_record.svg
+        .. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_1_save_element.svg
            :align: center
            :scale: 50 %
 
@@ -193,7 +193,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.clear_database()
         args = base_connector_record_parameter_example()
 
-        record_id  = self.instance.save_record(args["attributes"], args["metadata"])
+        record_id  = self.instance.save_element(args["attributes"], args["metadata"])
         self.assertIsNotNone(record_id)
         self.assertIs(type(record_id), str, "id should be a string ")
 
@@ -265,11 +265,11 @@ class AdapterTestTemplate(unittest.TestCase):
 
         from_meta = args_records["metadata"].copy()
         from_meta.update({METADATA_KEY_IDENTIFIER: args_relation["from_node"]})
-        self.instance.save_record( args_records["attributes"], from_meta)
+        self.instance.save_element(args_records["attributes"], from_meta)
 
         to_meta = args_records["metadata"].copy()
         to_meta.update({METADATA_KEY_IDENTIFIER: args_relation["to_node"]})
-        self.instance.save_record(args_records["attributes"], to_meta)
+        self.instance.save_element(args_records["attributes"], to_meta)
 
 
         relation_id = self.instance.save_relation(args_relation["from_node"], args_relation["to_node"], args_relation["attributes"], args_relation["metadata"])
@@ -339,7 +339,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.clear_database()
         args = base_connector_record_parameter_example()
 
-        record_id = self.instance.save_record( args["attributes"], args["metadata"])#
+        record_id = self.instance.save_element(args["attributes"], args["metadata"])#
 
         record_raw = self.instance.get_record(record_id)
 
@@ -421,8 +421,8 @@ class AdapterTestTemplate(unittest.TestCase):
         from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_identifier
         to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_identifier
 
-        from_record_id = self.instance.save_record(from_record_args["attributes"], from_record_args["metadata"])  #
-        to_record_id = self.instance.save_record(to_record_args["attributes"], to_record_args["metadata"])  #
+        from_record_id = self.instance.save_element(from_record_args["attributes"], from_record_args["metadata"])  #
+        to_record_id = self.instance.save_element(to_record_args["attributes"], to_record_args["metadata"])  #
 
         relation_id = self.instance.save_relation(from_identifier, to_identifier, relation_args["attributes"], relation_args["metadata"])
 
@@ -510,7 +510,7 @@ class AdapterTestTemplate(unittest.TestCase):
         args = base_connector_record_parameter_example()
         base_connector_bundle_parameter_example()
 
-        record_id = self.instance.save_record(args["attributes"], args["metadata"])
+        record_id = self.instance.save_element(args["attributes"], args["metadata"])
 
         raw_result = self.instance.get_records_by_filter()
 
@@ -768,7 +768,7 @@ class AdapterTestTemplate(unittest.TestCase):
         self.clear_database()
         args = base_connector_record_parameter_example()
 
-        record_id = self.instance.save_record(args["attributes"], args["metadata"])
+        record_id = self.instance.save_element(args["attributes"], args["metadata"])
 
         raw_records = self.instance.get_records_by_filter()
 
@@ -1236,8 +1236,8 @@ class AdapterTestTemplate(unittest.TestCase):
         from_record_args["metadata"][METADATA_KEY_IDENTIFIER] = from_identifier
         to_record_args["metadata"][METADATA_KEY_IDENTIFIER] = to_identifier
 
-        from_record_id = self.instance.save_record(from_record_args["attributes"], from_record_args["metadata"])  #
-        to_record_id = self.instance.save_record(to_record_args["attributes"], to_record_args["metadata"])  #
+        from_record_id = self.instance.save_element(from_record_args["attributes"], from_record_args["metadata"])  #
+        to_record_id = self.instance.save_element(to_record_args["attributes"], to_record_args["metadata"])  #
 
         relation_id = self.instance.save_relation(to_identifier, from_identifier, relation_args["attributes"], relation_args["metadata"])
 
@@ -1248,7 +1248,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         relation_args["metadata"][METADATA_KEY_PROV_TYPE] = PROV_RECORD_IDS_MAP["wasAssociatedWith"]
 
-        record_id = self.instance.save_record(args["attributes"], args["metadata"])
+        record_id = self.instance.save_element(args["attributes"], args["metadata"])
         relation_id = self.instance.save_relation(identifier, from_identifier, relation_args["attributes"], relation_args["metadata"])
 
 
@@ -1468,8 +1468,8 @@ class AdapterTestTemplate(unittest.TestCase):
         #Skip test if this merge mode is not supported
 
         #save record test
-        rec_id1 = self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
-        rec_id2 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        rec_id1 = self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
+        rec_id2 = self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
 
         self.assertEqual(rec_id1,rec_id2)
 
@@ -1571,13 +1571,13 @@ class AdapterTestTemplate(unittest.TestCase):
         # Skip test if this merge mode is not supported
 
         # Save record with different attributes
-        rec_id1 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        rec_id1 = self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
 
         attr_modified = dict()
         attr_modified.update({"ex:a other attribute": True})
         metadata_modified = example.from_node["metadata"].copy()
 
-        rec_id2 = self.instance.save_record(attr_modified, metadata_modified)
+        rec_id2 = self.instance.save_element(attr_modified, metadata_modified)
 
         self.assertEqual(rec_id1, rec_id2)
 
@@ -1650,7 +1650,7 @@ class AdapterTestTemplate(unittest.TestCase):
         # Skip test if this merge mode is not supported
 
         # Save record with different attributes
-        rec_id1 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        rec_id1 = self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
 
         attr_modified = dict()
         attr_modified.update({"ex:int value": 1}) # set int value to 1 instead of 99, should throw exception
@@ -1658,7 +1658,7 @@ class AdapterTestTemplate(unittest.TestCase):
 
         #should raise exception because otherwise the attribute would be overridden
         with self.assertRaises(MergeException):
-            self.instance.save_record(attr_modified, metadata_modified)
+            self.instance.save_element(attr_modified, metadata_modified)
 
     def test_22_merge_record_metadata(self):
         """
@@ -1742,13 +1742,13 @@ class AdapterTestTemplate(unittest.TestCase):
         # Skip test if this merge mode is not supported
 
         # Save record with different attributes
-        rec_id1 = self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
+        rec_id1 = self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
 
 
         metadata_modified = example.from_node["metadata"].copy()
         metadata_modified.update({METADATA_KEY_TYPE_MAP: {"custom_attr_1": "xds:some_value"}})
 
-        rec_id2 = self.instance.save_record(example.from_node["attributes"], metadata_modified)
+        rec_id2 = self.instance.save_element(example.from_node["attributes"], metadata_modified)
 
 
         self.assertEqual(rec_id1, rec_id2)
@@ -1821,8 +1821,8 @@ class AdapterTestTemplate(unittest.TestCase):
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
         #save relation test
-        self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
-        self.instance.save_record(example.to_node["attributes"],example.to_node["metadata"])
+        self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
+        self.instance.save_element(example.to_node["attributes"], example.to_node["metadata"])
 
         from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
         to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
@@ -1862,8 +1862,8 @@ class AdapterTestTemplate(unittest.TestCase):
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
         #save relation test
-        self.instance.save_record(example.from_node["attributes"],example.from_node["metadata"])
-        self.instance.save_record(example.to_node["attributes"],example.to_node["metadata"])
+        self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
+        self.instance.save_element(example.to_node["attributes"], example.to_node["metadata"])
 
         from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
         to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
@@ -1907,8 +1907,8 @@ class AdapterTestTemplate(unittest.TestCase):
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
         # save relation test
-        self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
-        self.instance.save_record(example.to_node["attributes"], example.to_node["metadata"])
+        self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
+        self.instance.save_element(example.to_node["attributes"], example.to_node["metadata"])
 
         from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
         to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
@@ -1934,8 +1934,8 @@ class AdapterTestTemplate(unittest.TestCase):
         prim = primer_example()
         self.assertEqual(len(prim.get_records()), len(prim.unified().get_records()))
         # save relation test
-        self.instance.save_record(example.from_node["attributes"], example.from_node["metadata"])
-        self.instance.save_record(example.to_node["attributes"], example.to_node["metadata"])
+        self.instance.save_element(example.from_node["attributes"], example.from_node["metadata"])
+        self.instance.save_element(example.to_node["attributes"], example.to_node["metadata"])
 
         from_label = example.from_node["metadata"][METADATA_KEY_IDENTIFIER]
         to_label = example.to_node["metadata"][METADATA_KEY_IDENTIFIER]
@@ -2002,7 +2002,7 @@ class AdapterTestTemplate(unittest.TestCase):
         """
         self.clear_database()
         args = base_connector_bundle_parameter_example()
-        id = self.instance.save_record(args["attributes"], args["metadata"])
+        id = self.instance.save_element(args["attributes"], args["metadata"])
         self.assertIsNotNone(id)
         self.assertIs(type(id), str, "id should be a string ")
 

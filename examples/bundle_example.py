@@ -19,7 +19,7 @@ b1.agent("ex:Yoda")
 b2 = prov_document.bundle("ex:bundle2")
 b2.agent("ex:Jabba the Hutt")
 
-document_id = prov_api.create_document(prov_document)
+document_id = prov_api.save_document(prov_document)
 
 print(prov_api.get_document_as_provn(document_id))
 

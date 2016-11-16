@@ -147,7 +147,7 @@ class Neo4jAdapter(BaseAdapter):
             statements.append(cypher_template.format(attr_name=key))
         return " ".join(statements)
 
-    def save_record(self, attributes, metadata):
+    def save_element(self, attributes, metadata):
         """
         Saves a single record
 

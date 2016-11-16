@@ -57,7 +57,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-    def save_record(self, attributes, metadata):
+    def save_element(self, attributes, metadata):
         """
         Store a single node in the database and if necessary and possible merge the node
 
