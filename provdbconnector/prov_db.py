@@ -270,14 +270,23 @@ class ProvDb(object):
         doc = ProvDocument()
         return self._parse_record(doc,element)
 
-    def save_record(self, prov_record):
+    def save_record(self, prov_record, bundle_id):
+        """
+        Saves a realtion or a element (Entity, Agent or Activity)
+
+        :param prov_record: The prov record
+        :type prov.model.ProvRecord
+        :param bundle_id: The bundle id that you got back if you created a bundle or document
+        :type str
+        :return:
+        """
         if not isinstance(prov_record,ProvRecord):
             raise InvalidArgumentTypeException("Wrong type, expected: {}, got {}".format(type(ProvRecord), type(prov_record)))
 
         if isinstance(prov_record,ProvRelation):
-            return self.save_relation(prov_relation=prov_record)
+            return self.save_relation(prov_relation=prov_record,bundle_id=bundle_id)
         elif isinstance(prov_record,ProvElement):
-            return self.save_element(prov_element=prov_record)
+            return self.save_element(prov_element=prov_record,bundle_id=bundle_id)
         else:
             raise InvalidArgumentTypeException("Oh no... you provided a not supported prov_record type. The type was: {}".format(type(prov_record)))
 
