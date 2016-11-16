@@ -166,11 +166,6 @@ class ProvDb(object):
             self.save_element(prov_element=bundle_record, bundle_id=doc_id)
 
             self._save_bundle(bundle)
-            self._create_bundle_association(prov_elements=bundle.get_records(ProvElement),
-                                            prov_bundle_identifier=bundle.identifier)
-
-        for bundle in prov_document.bundles:
-            self._save_bundle_links(bundle)
 
         return doc_id
 
@@ -365,9 +360,6 @@ class ProvDb(object):
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
-            # skip relations of the type "prov:mentionOf" https://www.w3.org/TR/prov-links/
-            if relation.get_type() is PROV_MENTION:
-                continue
 
             self.save_relation(relation, bundle_id)
 
