@@ -159,13 +159,10 @@ class ProvDb(object):
 
         prov_document = content
 
-        doc_id = self._save_bundle(prov_document)
+        doc_id = self._save_bundle_internal(prov_document)
 
         for bundle in prov_document.bundles:
-            bundle_record = ProvEntity(prov_document, identifier=bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
-            self.save_element(prov_element=bundle_record, bundle_id=doc_id)
-
-            self._save_bundle(bundle)
+            self.save_bundle(prov_bundle=bundle)
 
         return doc_id
 
@@ -340,7 +337,26 @@ class ProvDb(object):
         add_namespaces_to_bundle(prov_bundle, raw_record.metadata)
         return create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
 
-    def _save_bundle(self, prov_bundle):
+    def save_bundle(self,prov_bundle):
+        """
+        Public method to save a bundle
+        :param prov_bundle:
+        :type prov_bundle: prov.model.ProvBundle
+        :return:
+        """
+
+        if not isinstance(prov_bundle, ProvBundle):
+            raise InvalidArgumentTypeException()
+        if isinstance(prov_bundle, ProvDocument):
+            raise  InvalidArgumentTypeException()
+
+        # create bundle entity
+        bundle_record = ProvEntity(prov_bundle.document, identifier=prov_bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
+        self.save_element(prov_element=bundle_record)
+
+        return self._save_bundle_internal(prov_bundle)
+
+    def _save_bundle_internal(self, prov_bundle):
         """
         Private method to create a bundle in the database
 
@@ -349,11 +365,10 @@ class ProvDb(object):
         :return bundle_id: The bundle from the database adapter
         :rtype: str
         """
-        bundle_id = str(uuid4())
-
         if not isinstance(prov_bundle, ProvBundle):
             raise InvalidArgumentTypeException()
 
+        bundle_id = str(uuid4())
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
             self.save_element(prov_element=record, bundle_id=bundle_id)
