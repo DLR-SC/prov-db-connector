@@ -277,7 +277,7 @@ class ProvDb(object):
 
         # Check if there is some unexpected result
         if len(results) > 1:
-            raise InvalidProvRecordException("Invalid data result, len should be only one")
+            raise InvalidProvRecordException("Invalid data result, len should be only one, result was: {}".format(list(results)))
         if len(results) == 0:
             raise NotFoundException("Can't find the element with identifier {}".format(identifier))
 
