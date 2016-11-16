@@ -44,7 +44,10 @@ docs:
 	$(MAKE) -C docs clean
 	sphinx-apidoc -o docs provdbconnector
 	sphinx-build -b html -d docs/build/doctrees docs/ docs/build/html
-		
+
+docs-travis:
+	$(MAKE) -C docs clean
+	$(shell . .travis_docs.sh)
 
 release: clean
 	python setup.py sdist upload

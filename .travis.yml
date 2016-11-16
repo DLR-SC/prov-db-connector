@@ -21,7 +21,7 @@ script:
   - docker ps | grep -q 'provdbconnector_neo4j_1'
   - curl --output /dev/null --silent --head --fail http://localhost:7474
   - coverage run --source=provdbconnector setup.py test
-  - make docs
+  - make docs-travis
 
 after_success:
   - coveralls
