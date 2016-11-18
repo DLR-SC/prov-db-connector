@@ -20,7 +20,7 @@ prov_document_buffer = pkg_resources.resource_stream("examples", "horsemeat_exam
 doc  = form_string(prov_document_buffer)
 
 def doWork(element):
-    provapi = ProvDb(adapter=Neo4jAdapter, auth_info=n)
+    provapi = ProvDb(adapter=Neo4jAdapter, auth_info=auth_info)
     provapi.save_record(element)
 
 

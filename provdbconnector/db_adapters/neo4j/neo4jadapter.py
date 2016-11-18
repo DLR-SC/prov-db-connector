@@ -13,7 +13,7 @@ from prov.constants import PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive, \
     split_into_formal_and_other_attributes
-
+import threading
 import logging
 
 logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
@@ -29,6 +29,7 @@ NEO4J_META_PREFIX = "meta:"
 
 
 
+lock = threading.Semaphore()
 class Neo4jAdapter(BaseAdapter):
     """
     This is the neo4j adapter to store prov. data in a neo4j database
@@ -51,10 +52,13 @@ class Neo4jAdapter(BaseAdapter):
         :return: Session
         :rtype Session
         """
+        lock.acquire()
         try:
             session = self.driver.session()
         except OSError as e:
             raise AuthException(e)
+        finally:
+            lock.release()
 
         if not session.healthy:
             raise AuthException()

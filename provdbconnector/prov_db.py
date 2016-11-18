@@ -4,7 +4,8 @@ import os
 from collections import namedtuple
 from io import StringIO
 from uuid import uuid4
-
+import  asyncio
+from concurrent import futures
 from prov.constants import PROV_ATTRIBUTES, PROV_MENTION, PROV_BUNDLE, PROV_LABEL, PROV_TYPE
 from prov.model import ProvDocument, ProvEntity, ProvBundle, ProvRecord, ProvElement, ProvRelation, QualifiedName, \
     ProvAssociation, PROV_REC_CLS, ProvActivity, ProvAgent, PROV_AGENT,PROV_ENTITY,PROV_ACTIVITY, PROV_ATTR_AGENT,PROV_ATTR_ACTIVITY, PROV_ATTR_ENTITY,PROV_ATTR_BUNDLE
@@ -53,6 +54,7 @@ class ProvDb(object):
             raise NoDataBaseAdapterException()
         self._adapter = adapter()
         self._adapter.connect(auth_info)
+        self.executor = futures.ProcessPoolExecutor()
 
     # Converter Methods
     def save_document_from_json(self, content=None):
@@ -141,7 +143,7 @@ class ProvDb(object):
         return self.save_document(content=content)
 
     # Methods that consume ProvDocument instances and produce ProvDocument instances
-    def save_document(self, content=None):
+    async def save_document(self, content=None):
         """
         The main method to Save a document in the db
 
@@ -162,7 +164,7 @@ class ProvDb(object):
         doc_id = self._save_bundle_internal(prov_document)
 
         for bundle in prov_document.bundles:
-            self.save_bundle(prov_bundle=bundle)
+            await self.save_bundle(prov_bundle=bundle)
 
         return doc_id
 
@@ -388,7 +390,7 @@ class ProvDb(object):
 
         return prov_bundle
 
-    def save_bundle(self,prov_bundle):
+    async def save_bundle(self,prov_bundle):
         """
         Public method to save a bundle
         :param prov_bundle:
@@ -405,9 +407,9 @@ class ProvDb(object):
         bundle_record = ProvEntity(prov_bundle.document, identifier=prov_bundle.identifier, attributes={PROV_TYPE: PROV_BUNDLE})
         self.save_element(prov_element=bundle_record)
 
-        return self._save_bundle_internal(prov_bundle)
+        return await self._save_bundle_internal(prov_bundle)
 
-    def _save_bundle_internal(self, prov_bundle):
+    async def _save_bundle_internal(self, prov_bundle):
         """
         Private method to create a bundle in the database
 
@@ -420,15 +422,18 @@ class ProvDb(object):
             raise InvalidArgumentTypeException()
 
         bundle_id = str(uuid4())
+
+        pending_result = list()
         # create nodes
         for record in prov_bundle.get_records(ProvElement):
-            self.save_element(prov_element=record, bundle_id=bundle_id)
+            pending_result.append(self.do_work_async(self.save_element,prov_element=record, bundle_id=bundle_id))
 
         # create relations
         for relation in prov_bundle.get_records(ProvRelation):
 
             self.save_relation(relation, bundle_id)
 
+        await asyncio.wait(pending_result)
         return bundle_id
 
     def save_relation(self, prov_relation, bundle_id=None):
@@ -638,3 +643,12 @@ class ProvDb(object):
         meta_and_attributes = namedtuple("MetaAndAttributes", "metadata, attributes")
 
         return meta_and_attributes(metadata, attributes)
+
+    async def do_work_async(self,adapter_func, *args, **kwargs):
+        print ("Start async,work")
+        with self.executor as executor:
+            job = executor.submit(adapter_func,  *args, **kwargs)
+            result = (await asyncio.wrap_future(job))
+            print ("End async,work")
+            return result
+
