@@ -47,6 +47,7 @@ setup(
     install_requires=[
         "prov==1.5.0",
         "neo4j-driver==1.0.2"
+        "rx"
     ],
     extras_require={
         'test': tests_require,
