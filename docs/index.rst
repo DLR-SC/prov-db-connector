@@ -13,7 +13,6 @@ Contents
   development.rst
   changelog.rst
   test_howto.rst
-  status.rst
   provdbconnector.rst
   modules.rst
 
