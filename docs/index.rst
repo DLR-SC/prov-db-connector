@@ -11,6 +11,7 @@ Contents
 
   readme.rst
   development.rst
+  changelog.rst
   test_howto.rst
   status.rst
   provdbconnector.rst
