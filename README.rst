@@ -5,7 +5,7 @@ Introduction
 ------------
 
 .. image:: https://badge.fury.io/py/prov-db-connector.svg
-    :target: (http://badge.fury.io/py/prov-db-connector
+    :target: (https://pypi.python.org/pypi/prov-db-connector
     :alt: PyPI version
 .. image:: https://travis-ci.org/DLR-SC/prov-db-connector.svg?branch=master
     :target: https://travis-ci.org/DLR-SC/prov-db-connector
