@@ -44,6 +44,20 @@ prov\_api.save\_bundle(bundle) \`\`\`
 
 -  Introduced new methods
 
+**prov\_db.save\_relation(prov\_relation)**
+
+.. code:: python
+
+
+    doc = ProvDocument()
+
+    activity    = doc.activity("ex:yourActivity")
+    entity      = doc.entity("ex:yourEntity")
+    wasGeneratedBy = entity.wasGeneratedBy("ex:yourAgent")
+
+    # Save the elements
+    rel_id = prov_db.save_relation(wasGeneratedBy)
+
 **prov\_db.save\_element(prov\_element, [bundle\_id])**
 
 .. code:: python
@@ -92,17 +106,30 @@ prov\_api.save\_bundle(bundle) \`\`\`
 
     doc = ProvDocument()
 
-    bundle = doc.bundle("ex:bundle1") 
+    bundle = doc.bundle("ex:bundle1")
     # Save the bundle
     prov_db.save_bundle(bundle)
 
-**prov\_api.get\_bundle(identifier)**
+**prov\_db.get\_elements([ProvCLS])**
 
 .. code:: python
 
+    from prov.model import ProvEntity, ProvAgent, ProvActivity
+
+    document_with_all_entities = prov_db.get_elements(ProvEntity)
+    document_with_all_agents = prov_db.get_elements(ProvAgent)
+    document_with_all_activities = prov_db.get_elements(ProvActivity)
+
+    print(document_with_all_entities)
+    print(document_with_all_agents)
+    print(document_with_all_activities)
+
+**prov\_db.get\_bundle(identifier)**
+
+.. code:: python
 
     doc = ProvDocument()
-    bundle_name = doc.valid_qualified_name("ex:YourBundleName") 
+    bundle_name = doc.valid_qualified_name("ex:YourBundleName")
     # get the bundle
     prov_bundle = prov_db.get_bundle(bundle_name)
     doc.add_bundle(prov_bundle)
