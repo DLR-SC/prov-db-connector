@@ -14,8 +14,8 @@ Subpackages
 Submodules
 ----------
 
-provdbconnector.provDb module
------------------------------
+provdbconnector.prov_db module
+------------------------------
 
 .. automodule:: provdbconnector.prov_db
     :members:
