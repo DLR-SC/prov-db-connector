@@ -26,7 +26,7 @@ Currently we support the `Neo4j <https://neo4j.com/>`_ graph database.
 
 We transform a PROV document into a graph structure and the result looks like this:
 
-.. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/develop/docs/source/_images/test_cases/test_prov_primer_example.svg
+.. figure:: https://cdn.rawgit.com/dlr-sc/prov-db-connector/master/docs/_images/test_cases/test_prov_primer_example.svg
    :align: center
    :scale: 50 %
    :alt: Complex example in Neo4j
@@ -87,7 +87,7 @@ Save and get prov document example
 
     prov_document.association("ex:Alice", "ex:Bob")
 
-    document_id = prov_api.create_document(prov_document)
+    document_id = prov_api.save_document(prov_document)
 
     print(prov_api.get_document_as_provn(document_id))
 
@@ -120,7 +120,7 @@ File Buffer example
     prov_document_buffer = pkg_resources.resource_stream("examples", "file_buffer_example_primer.json")
 
     # Save document
-    document_id = prov_api.create_document(prov_document_buffer)
+    document_id = prov_api.save_document(prov_document_buffer)
     # This is similar to:
     # prov_api.create_document_from_json(prov_document_buffer)
 

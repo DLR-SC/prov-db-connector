@@ -19,7 +19,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
     For exmaple to use the simple db_adapter use the following script
 
-    .. literalinclude:: ../../examples/simple_example.py
+    .. literalinclude:: ../examples/simple_example.py
             :linenos:
             :language: python
 
@@ -57,7 +57,7 @@ class SimpleInMemoryAdapter(BaseAdapter):
 
         return True
 
-    def save_record(self, attributes, metadata):
+    def save_element(self, attributes, metadata):
         """
         Store a single node in the database and if necessary and possible merge the node
 
@@ -223,8 +223,8 @@ class SimpleInMemoryAdapter(BaseAdapter):
         metadata_filter_dict = encode_dict_values_to_primitive(metadata_dict.copy())
         for (identifier, (attributes, metadata)) in self.all_nodes.items():
 
-            if self._check_attribute_metadata_filter(attributes_filter=attributes_dict,
-                                                     metadata_filter=metadata_dict,
+            if self._check_attribute_metadata_filter(attributes_filter=properties_filter_dict,
+                                                     metadata_filter=metadata_filter_dict,
                                                      metadata=metadata,
                                                      attributes=attributes):
 
@@ -244,10 +244,11 @@ class SimpleInMemoryAdapter(BaseAdapter):
             if from_id in return_keys:
 
                 for (relation_id, (to_id, attributes, metadata)) in relations.items():
-                    attributes = encode_dict_values_to_primitive(attributes)
-                    metadata = encode_dict_values_to_primitive(metadata)
+                    if to_id in return_keys:
+                        attributes = encode_dict_values_to_primitive(attributes)
+                        metadata = encode_dict_values_to_primitive(metadata)
 
-                    return_records.append(DbRelation(attributes, metadata))
+                        return_records.append(DbRelation(attributes, metadata))
 
         return return_records
 
@@ -470,7 +471,3 @@ class SimpleInMemoryAdapter(BaseAdapter):
                 return False
 
         return True
-
-
-
-

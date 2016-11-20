@@ -147,7 +147,7 @@ class Neo4jAdapter(BaseAdapter):
             statements.append(cypher_template.format(attr_name=key))
         return " ".join(statements)
 
-    def save_record(self, attributes, metadata):
+    def save_element(self, attributes, metadata):
         """
         Saves a single record
 
@@ -286,8 +286,8 @@ class Neo4jAdapter(BaseAdapter):
 
         relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
-        command = cypher_commands.NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=from_node,
-                                                         to_identifier=to_node,
+        command = cypher_commands.NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=str(from_node),
+                                                         to_identifier=str(to_node),
                                                          relation_type=relationtype,
                                                          formal_attributes=cypher_merge_relevant_str,
                                                          merge_check_statement=cypher_merge_check_statement,
@@ -449,7 +449,7 @@ class Neo4jAdapter(BaseAdapter):
 
         session = self._create_session()
         result_set = session.run(cypher_commands.NEO4J_GET_BUNDLE_RECORDS,
-                                 {'meta:{}'.format(METADATA_KEY_IDENTIFIER): bundle_identifier})
+                                 {'meta:{}'.format(METADATA_KEY_IDENTIFIER): str(bundle_identifier)})
         records = list()
         for result in result_set:
             record = result["re"]

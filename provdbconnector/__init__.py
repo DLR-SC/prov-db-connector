@@ -1,4 +1,4 @@
-from provdbconnector.provDb import ProvDb
+from provdbconnector.prov_db import ProvDb
 
 from provdbconnector.exceptions.provapi import ProvDbException
 

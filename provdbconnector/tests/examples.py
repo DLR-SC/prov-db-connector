@@ -20,6 +20,7 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, MET
 def attributes_dict_example():
     """
     Retuns a example dict with some different attributes
+
     :return: dict with attributes
     :rtype: dict
     """
@@ -69,6 +70,7 @@ def base_connector_bundle_parameter_example():
 def base_connector_record_parameter_example():
     """
     Returns a dict with attributes and metadata for a simple node
+
     :return:dict with attributes metadata
     :rtype: dict
     """
@@ -155,7 +157,8 @@ def base_connector_merge_example():
 
 def prov_api_record_example():
     """
-        This is a more complex record example
+    This is a more complex record example
+
     :return:
     """
     doc = ProvDocument()

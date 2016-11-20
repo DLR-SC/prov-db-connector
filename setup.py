@@ -15,11 +15,12 @@ docs_require = [
     'sphinx-rtd-theme>=0.1.9',
     'sphinxcontrib-napoleon>=0.4.4',
     'sphinxcontrib-httpdomain>=1.5.0',
+    'mock',
 ]
 
 setup(
     name='prov-db-connector',
-    version='0.2',
+    version='0.3',
     description='PROV Database Connector',
     keywords=[
         'provenance', 'graph', 'model', 'PROV', 'PROV-DM', 'PROV-JSON', 'JSON',

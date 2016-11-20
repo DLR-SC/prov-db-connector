@@ -37,9 +37,9 @@ class BaseAdapter():
         """
         raise NotImplementedError("Abstract method")
 
-    def save_record(self, attributes, metadata):
+    def save_element(self, attributes, metadata):
         """
-        Creates a database node
+        Saves a entity, activity or entity into the database
 
         :param attributes: Attributes as dict for the record. Be careful you have to encode the dict
         :type attributes: dict

@@ -16,7 +16,7 @@ setup:
 	pip install '.'
 
 dev-setup:
-	mkdir -p docs/source/_static
+	mkdir -p docs/_static
 	pip install -U pip setuptools
 	pip install -e '.[dev]'
 
@@ -41,12 +41,13 @@ coverage:
 	coverage html
 
 docs:
-	rm -f docs/prov.rst
-	rm -f docs/modules.rst
-	which sphinx-apidoc
-	sphinx-apidoc -o docs/source provdbconnector
 	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	sphinx-apidoc -o docs provdbconnector
+	sphinx-build -a -b html -d docs/build/doctrees docs/ docs/build/html
+
+docs-travis:
+	$(MAKE) -C docs clean
+	./.travis_docs.sh
 
 release: clean
 	python setup.py sdist upload

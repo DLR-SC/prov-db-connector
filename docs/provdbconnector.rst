@@ -14,14 +14,13 @@ Subpackages
 Submodules
 ----------
 
-provdbconnector.provapi module
-------------------------------
+provdbconnector.provDb module
+-----------------------------
 
-.. automodule:: provdbconnector.provapi
+.. automodule:: provdbconnector.prov_db
     :members:
     :undoc-members:
     :show-inheritance:
-
 
 
 Module contents

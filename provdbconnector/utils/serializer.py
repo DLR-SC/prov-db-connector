@@ -7,11 +7,17 @@ from io import StringIO
 
 import six
 from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTRIBUTES, PROV_MEMBERSHIP, \
-    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI
-from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime, PROV_REC_CLS
+    PROV_ATTR_ENTITY, PROV_ATTRIBUTE_QNAMES, PROV_ATTR_COLLECTION, XSD_ANYURI, PROV_ATTR_ACTIVITY, PROV_ATTR_AGENT, \
+    PROV_ATTR_TRIGGER,PROV_ATTR_INFORMED,PROV_ATTR_INFORMANT,PROV_ATTR_STARTER,PROV_ATTR_ENDER,PROV_ATTR_AGENT \
+    ,PROV_ATTR_PLAN,PROV_ATTR_DELEGATE,PROV_ATTR_RESPONSIBLE,PROV_ATTR_GENERATED_ENTITY,PROV_ATTR_USED_ENTITY, \
+    PROV_ATTR_GENERATION,PROV_ATTR_USAGE,PROV_ATTR_SPECIFIC_ENTITY,PROV_ATTR_GENERAL_ENTITY,PROV_ATTR_ALTERNATE1, \
+    PROV_ATTR_ALTERNATE2,PROV_ATTR_BUNDLE,PROV_ATTR_INFLUENCEE,PROV_ATTR_INFLUENCER
+
+from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime, PROV_REC_CLS, ProvAgent, ProvEntity, ProvActivity
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, \
     METADATA_KEY_TYPE_MAP
 from provdbconnector.exceptions.database import MergeException
+from provdbconnector.exceptions.provapi import InvalidArgumentTypeException
 from provdbconnector.exceptions.utils import SerializerException
 
 log = logging.getLogger(__name__)
@@ -32,6 +38,32 @@ LITERAL_XSDTYPE_MAP = {
 if six.integer_types[-1] not in LITERAL_XSDTYPE_MAP:
     LITERAL_XSDTYPE_MAP[six.integer_types[-1]] = 'xsd:long'
 
+
+PROV_ATTR_BASE_CLS = {
+    PROV_ATTR_ENTITY: ProvEntity,
+    PROV_ATTR_ACTIVITY: ProvActivity,
+    PROV_ATTR_TRIGGER: ProvEntity,
+    PROV_ATTR_INFORMED: ProvActivity,
+    PROV_ATTR_INFORMANT: ProvActivity,
+    PROV_ATTR_STARTER: ProvActivity,
+    PROV_ATTR_ENDER: ProvActivity,
+    PROV_ATTR_AGENT: ProvAgent,
+    PROV_ATTR_PLAN: ProvEntity,
+    PROV_ATTR_DELEGATE: ProvAgent,
+    PROV_ATTR_RESPONSIBLE: ProvAgent,
+    PROV_ATTR_GENERATED_ENTITY: ProvEntity,
+    PROV_ATTR_USED_ENTITY: ProvEntity,
+    PROV_ATTR_GENERATION: None,
+    PROV_ATTR_USAGE:None,
+    PROV_ATTR_SPECIFIC_ENTITY: ProvEntity,
+    PROV_ATTR_GENERAL_ENTITY: ProvEntity,
+    PROV_ATTR_ALTERNATE1: ProvEntity,
+    PROV_ATTR_ALTERNATE2: ProvEntity,
+    PROV_ATTR_BUNDLE:None,
+    PROV_ATTR_INFLUENCEE:None,
+    PROV_ATTR_INFLUENCER:None,
+    PROV_ATTR_COLLECTION: ProvEntity
+}
 
 def encode_dict_values_to_primitive(dict_values):
     """
@@ -104,6 +136,7 @@ def literal_json_representation(literal):
 def encode_json_representation(value):
     """
     Get the type of a value
+
     :param value:
     :return:
     """
@@ -281,7 +314,6 @@ def decode_json_representation(value, type, bundle):
     :param bundle:
     :return:
     """
-
     if isinstance(type, dict):
         # complex type
         datatype = type['type'] if 'type' in type else None
@@ -309,9 +341,8 @@ def split_into_formal_and_other_attributes(attributes, metadata):
     :param attributes:
     :param metadata:
     :return: namedtuple(formal_attributes, other_attributes)
-    :rtype FormalAndOtherAttributes
+    :rtype: FormalAndOtherAttributes
     """
-
     prov_type = metadata[METADATA_KEY_PROV_TYPE]
 
     if str(prov_type) == "prov:Unknown":
@@ -325,18 +356,16 @@ def split_into_formal_and_other_attributes(attributes, metadata):
 
     return FormalAndOtherAttributes(formal_attributes, other_attributes)
 
-
 def merge_record(attributes, metadata, other_attributes, other_metadata):
     """
     Merge 2 records into one
-
 
     :param attributes: The original attributes
     :param metadata: The original metadata
     :param other_attributes: The attributes to merge
     :param other_metadata:  The metadata to merge
     :return: tuple(attributes, metadata)
-    :rtype Tuple(attributes,metadata)
+    :rtype: Tuple(attributes,metadata)
     """
     attributes_merged = attributes.copy()
     attributes_merged.update(other_attributes)
