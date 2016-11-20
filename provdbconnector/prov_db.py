@@ -212,6 +212,22 @@ class ProvDb(object):
     def save_element(self, prov_element, bundle_id=None):
         """
         Saves a activity, entity, agent
+
+        .. code:: python
+
+
+            doc = ProvDocument()
+
+            agent       = doc.agent("ex:yourAgent")
+            activity    = doc.activity("ex:yourActivity")
+            entity      = doc.entity("ex:yourEntity")
+
+            # Save the elements
+            agent_id = prov_db.save_element(agent)
+            activity_id = prov_db.save_element(activity)
+            entity_id = prov_db.save_element(entity)
+
+
         :param prov_element: The ProvElement
         :type prov_element: prov.model.ProvElement
         :param bundle_id:
@@ -230,11 +246,28 @@ class ProvDb(object):
             self._create_bundle_association([prov_element], prov_element.bundle.identifier)
 
         return prov_element.identifier
+
     def get_elements(self, prov_element_cls):
         """
         Return a document that contains the requested type
+
+        .. code:: python
+
+            from prov.model import ProvEntity, ProvAgent, ProvActivity
+
+            document_with_all_entities = prov_db.get_elements(ProvEntity)
+            document_with_all_agents = prov_db.get_elements(ProvAgent)
+            document_with_all_activities = prov_db.get_elements(ProvActivity)
+
+            print(document_with_all_entities)
+            print(document_with_all_agents)
+            print(document_with_all_activities)
+
+
         :param prov_element_cls:
-        :return:
+        :return: Prov document
+        :rtype prov.model.ProvDocument
+
         """
         if prov_element_cls is ProvAgent:
             prov_type = PROV_AGENT
@@ -259,6 +292,16 @@ class ProvDb(object):
     def get_element(self, identifier):
         """
         Get a element (activity, agent, entity) from the database
+
+        .. code:: python
+
+            doc = ProvDocument()
+
+            identifier = QualifiedName(doc, "ex:yourAgent")
+
+            prov_element = prov_db.get_element(identifier)
+
+
         :param identifier:
         :type identifier: prov.model.QualifiedName
         :return: A prov Element class
@@ -290,6 +333,18 @@ class ProvDb(object):
     def save_record(self, prov_record, bundle_id=None):
         """
         Saves a realtion or a element (Entity, Agent or Activity)
+
+        .. code:: python
+
+
+            doc = ProvDocument()
+
+            agent       = doc.agent("ex:Alice")
+            ass_rel     = doc.association("ex:Alice", "ex:Bob")
+
+            # Save the elements
+            agent_id = prov_db.save_record(agent)
+            relation_id = prov_db.save_record(ass_rel)
 
         :param prov_record: The prov record
         :type prov.model.ProvRecord
@@ -365,6 +420,15 @@ class ProvDb(object):
     def get_bundle(self,identifier):
         """
         Returns the whole bundle for the provided identifier
+
+        .. code:: python
+            doc = ProvDocument()
+            bundle_name = doc.valid_qualified_name("ex:YourBundleName")
+            # get the bundle
+            prov_bundle = prov_db.get_bundle(bundle_name)
+            doc.add_bundle(prov_bundle)
+
+
         :param identifier: The identifier
         :type identifier: prov.model.QualifiedName
         :return: The prov bundle instance
@@ -391,6 +455,15 @@ class ProvDb(object):
     def save_bundle(self,prov_bundle):
         """
         Public method to save a bundle
+
+        .. code:: python
+
+            doc = ProvDocument()
+
+            bundle = doc.bundle("ex:bundle1")
+            # Save the bundle
+            prov_db.save_bundle(bundle)
+
         :param prov_bundle:
         :type prov_bundle: prov.model.ProvBundle
         :return:
@@ -434,6 +507,18 @@ class ProvDb(object):
     def save_relation(self, prov_relation, bundle_id=None):
         """
         Saves a relation between 2 nodes that are already in the database.
+
+        .. code:: python
+
+            doc = ProvDocument()
+
+            activity    = doc.activity("ex:yourActivity")
+            entity      = doc.entity("ex:yourEntity")
+            wasGeneratedBy = entity.wasGeneratedBy("ex:yourAgent")
+
+            # Save the elements
+            rel_id = prov_db.save_relation(wasGeneratedBy)
+
 
         :param prov_relation: The ProvRelation instance
         :type prov_relation: ProvRelation
