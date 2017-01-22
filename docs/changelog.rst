@@ -1,5 +1,9 @@
 Changelog
 =========
+Version 0.4
+**Not published yet**
+
+- Upgraded neo4j-driver to 1.1.0  .. #52 https://github.com/DLR-SC/prov-db-connector/pull/52
 
 Version 0.3
 -----------
