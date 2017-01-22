@@ -7,7 +7,7 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, META
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, MergeException
 
-from neo4j.v1 import CypherError, SessionError
+from neo4j.v1.api import CypherError, SessionError
 from neo4j.v1 import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
@@ -56,7 +56,7 @@ class Neo4jAdapter(BaseAdapter):
         except OSError as e:
             raise AuthException(e)
 
-        if not session.healthy:
+        if session.closed():
             raise AuthException()
         return session
 
@@ -294,10 +294,7 @@ class Neo4jAdapter(BaseAdapter):
                                                              set_statement=cypher_set_statement
                                                              )
             with session.begin_transaction() as tx:
-                try:
-                    session.run("This will cause a syntax error").consume()
-                except CypherError:
-                    raise
+
                 result = tx.run(command, dict(db_attributes))
 
                 record_id = None
