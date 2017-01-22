@@ -7,7 +7,7 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, META
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, MergeException
 
-from neo4j.v1.exceptions import ProtocolError
+from neo4j.v1 import CypherError, SessionError
 from neo4j.v1 import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
@@ -82,7 +82,7 @@ class Neo4jAdapter(BaseAdapter):
         try:
             self.driver = GraphDatabase.driver("bolt://{}".format(host), auth=basic_auth(user_name, user_pass))
 
-        except ProtocolError as e:
+        except SessionError as e:
             raise InvalidOptionsException(e)
 
         self._create_session()
@@ -282,36 +282,40 @@ class Neo4jAdapter(BaseAdapter):
         # get db_attributes as dict
         db_attributes = self._parse_to_primitive_attributes(attributes, prefixed_metadata)
 
-        session = self._create_session()
+        with self._create_session() as session:
 
-        relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
+            relationtype = PROV_N_MAP[metadata[METADATA_KEY_PROV_TYPE]]
 
-        command = cypher_commands.NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=str(from_node),
-                                                         to_identifier=str(to_node),
-                                                         relation_type=relationtype,
-                                                         formal_attributes=cypher_merge_relevant_str,
-                                                         merge_check_statement=cypher_merge_check_statement,
-                                                         set_statement=cypher_set_statement
-                                                         )
-        with session.begin_transaction() as tx:
-            result = tx.run(command, dict(db_attributes))
+            command = cypher_commands.NEO4J_CREATE_RELATION_RETURN_ID.format(from_identifier=str(from_node),
+                                                             to_identifier=str(to_node),
+                                                             relation_type=relationtype,
+                                                             formal_attributes=cypher_merge_relevant_str,
+                                                             merge_check_statement=cypher_merge_check_statement,
+                                                             set_statement=cypher_set_statement
+                                                             )
+            with session.begin_transaction() as tx:
+                try:
+                    session.run("This will cause a syntax error").consume()
+                except CypherError:
+                    raise
+                result = tx.run(command, dict(db_attributes))
 
-            record_id = None
-            merge_success = 0
-            for record in result:
-                record_id = record["ID"]
-                merge_success = record["check"]
+                record_id = None
+                merge_success = 0
+                for record in result:
+                    record_id = record["ID"]
+                    merge_success = record["check"]
 
-            if record_id is None:
-                raise CreateRelationException("No ID property returned by database for the command {}".format(command))
-            if merge_success == 0:
-                tx.success = True
-            else:
-                tx.success = False
-                raise MergeException("The attributes {other} could not merged into the existing node ".format(
-                    other=other_db_attribute_keys))
+                if record_id is None:
+                    raise CreateRelationException("No ID property returned by database for the command {}".format(command))
+                if merge_success == 0:
+                    tx.success = True
+                else:
+                    tx.success = False
+                    raise MergeException("The attributes {other} could not merged into the existing node ".format(
+                        other=other_db_attribute_keys))
 
-        return str(record_id)
+            return str(record_id)
 
     @staticmethod
     def _split_attributes_metadata_from_node(db_node):
