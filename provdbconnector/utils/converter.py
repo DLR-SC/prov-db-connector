@@ -23,12 +23,18 @@ def form_string(content):
 
     if type(content) is six.binary_type:
         content_str = content[0:15].decode()
-        if content_str.find("{") > -1:
-            return ProvDocument.deserialize(content=content, format='json')
-        if content_str.find('<?xml') > -1:
-            return ProvDocument.deserialize(content=content, format='xml')
-        elif content_str.find('document') > -1:
-            return ProvDocument.deserialize(content=content, format='provn')
+    elif type (content) is str:
+        content_str = content[0:15]
+    else:
+        raise ParseException("Unsupported input type {}".format(type(content)))
+
+
+    if content_str.find("{") > -1:
+        return ProvDocument.deserialize(content=content, format='json')
+    if content_str.find('<?xml') > -1:
+        return ProvDocument.deserialize(content=content, format='xml')
+    elif content_str.find('document') > -1:
+        return ProvDocument.deserialize(content=content, format='provn')
 
     raise ParseException("Unsupported input type {}".format(type(content)))
 
