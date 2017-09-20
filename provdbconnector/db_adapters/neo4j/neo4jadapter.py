@@ -390,14 +390,15 @@ class Neo4jAdapter(BaseAdapter):
 
         session = self._create_session()
         records = list()
-        result_set = session.run(cypher_commands.NEO4J_GET_RECORDS_BY_PROPERTY_DICT.format(filter_dict=cypher_str), encoded_params)
-        for result in result_set:
-            record = result["re"]
+        with session.begin_transaction() as tx:
+            result_set = tx.run(cypher_commands.NEO4J_GET_RECORDS_BY_PROPERTY_DICT.format(filter_dict=cypher_str), encoded_params)
+            for result in result_set:
+                record = result["re"]
 
-            if record is None:
-                raise DatabaseException("Record response should not be None")
-            relation_record = self._split_attributes_metadata_from_node(record)
-            records.append(relation_record)
+                if record is None:
+                    raise DatabaseException("Record response should not be None")
+                relation_record = self._split_attributes_metadata_from_node(record)
+                records.append(relation_record)
         return records
 
     def get_records_tail(self, attributes_dict=None, metadata_dict=None, depth=None):
@@ -426,16 +427,18 @@ class Neo4jAdapter(BaseAdapter):
             depth_str = "1..{max}".format(max=depth)
 
         session = self._create_session()
-        result_set = session.run(cypher_commands.NEO4J_GET_RECORDS_TAIL_BY_FILTER.format(filter_dict=cypher_str, depth=depth_str),
-                                 encoded_params)
-        records = list()
-        for result in result_set:
-            record = result["re"]
+        with session.begin_transaction() as tx:
 
-            if record is None:
-                raise DatabaseException("Record response should not be None")
-            relation_record = self._split_attributes_metadata_from_node(record)
-            records.append(relation_record)
+            result_set = tx.run(cypher_commands.NEO4J_GET_RECORDS_TAIL_BY_FILTER.format(filter_dict=cypher_str, depth=depth_str),
+                                     encoded_params)
+            records = list()
+            for result in result_set:
+                record = result["re"]
+
+                if record is None:
+                    raise DatabaseException("Record response should not be None")
+                relation_record = self._split_attributes_metadata_from_node(record)
+                records.append(relation_record)
 
         return records
 
@@ -449,16 +452,19 @@ class Neo4jAdapter(BaseAdapter):
         """
 
         session = self._create_session()
-        result_set = session.run(cypher_commands.NEO4J_GET_BUNDLE_RECORDS,
-                                 {'meta:{}'.format(METADATA_KEY_IDENTIFIER): str(bundle_identifier)})
-        records = list()
-        for result in result_set:
-            record = result["re"]
 
-            if record is None:
-                raise DatabaseException("Record response should not be None")
-            relation_record = self._split_attributes_metadata_from_node(record)
-            records.append(relation_record)
+        with session.begin_transaction() as tx:
+
+            result_set = tx.run(cypher_commands.NEO4J_GET_BUNDLE_RECORDS,
+                                     {'meta:{}'.format(METADATA_KEY_IDENTIFIER): str(bundle_identifier)})
+            records = list()
+            for result in result_set:
+                record = result["re"]
+
+                if record is None:
+                    raise DatabaseException("Record response should not be None")
+                relation_record = self._split_attributes_metadata_from_node(record)
+                records.append(relation_record)
 
         return records
 
@@ -472,19 +478,20 @@ class Neo4jAdapter(BaseAdapter):
         """
 
         session = self._create_session()
-        result_set = session.run(cypher_commands.NEO4J_GET_RECORD_RETURN_NODE, {"record_id": int(record_id)})
+        with session.begin_transaction() as tx:
+            result_set = tx.run(cypher_commands.NEO4J_GET_RECORD_RETURN_NODE, {"record_id": int(record_id)})
 
-        node = None
-        for result in result_set:
-            if node is not None:
-                raise DatabaseException(
-                    "get_record should return only one node for the id {}, command {}".format(record_id,
-                                                                                              cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
-            node = result["node"]
+            node = None
+            for result in result_set:
+                if node is not None:
+                    raise DatabaseException(
+                        "get_record should return only one node for the id {}, command {}".format(record_id,
+                                                                                                  cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
+                node = result["node"]
 
-        if node is None:
-            raise NotFoundException("We cant find the node with the id: {}, database command {}".format(record_id,
-                                                                                                        cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
+            if node is None:
+                raise NotFoundException("We cant find the node with the id: {}, database command {}".format(record_id,
+                                                                                                            cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
 
         return self._split_attributes_metadata_from_node(node)
 
@@ -498,19 +505,20 @@ class Neo4jAdapter(BaseAdapter):
         """
 
         session = self._create_session()
-        result_set = session.run(cypher_commands.NEO4J_GET_RELATION_RETURN_NODE, {"relation_id": int(relation_id)})
+        with session.begin_transaction() as tx:
+            result_set = tx.run(cypher_commands.NEO4J_GET_RELATION_RETURN_NODE, {"relation_id": int(relation_id)})
 
-        relation = None
-        for result in result_set:
-            if not isinstance(result["relation"], Relationship):
-                raise DatabaseException(
-                    " should return only relationship {}, command {}".format(relation_id, cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
+            relation = None
+            for result in result_set:
+                if not isinstance(result["relation"], Relationship):
+                    raise DatabaseException(
+                        " should return only relationship {}, command {}".format(relation_id, cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
 
-            relation = result["relation"]
+                relation = result["relation"]
 
-        if relation is None:
-            raise NotFoundException("We cant find the relation with the id: {}, database command {}".format(relation_id,
-                                                                                                            cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
+            if relation is None:
+                raise NotFoundException("We cant find the relation with the id: {}, database command {}".format(relation_id,
+                                                                                                                cypher_commands.NEO4J_GET_RECORD_RETURN_NODE))
 
         return self._split_attributes_metadata_from_node(relation)
 
@@ -532,7 +540,8 @@ class Neo4jAdapter(BaseAdapter):
         (encoded_params, cypher_str) = self._get_cypher_filter_params(attributes_dict, metadata_dict)
         session = self._create_session()
 
-        session.run(cypher_commands.NEO4J_DELETE_NODE_BY_PROPERTIES.format(filter_dict=cypher_str), encoded_params)
+        with session.begin_transaction() as tx:
+            tx.run(cypher_commands.NEO4J_DELETE_NODE_BY_PROPERTIES.format(filter_dict=cypher_str), encoded_params)
 
         return True
 
@@ -545,7 +554,8 @@ class Neo4jAdapter(BaseAdapter):
         :return:
         """
         session = self._create_session()
-        session.run(cypher_commands.NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
+        with session.begin_transaction() as tx:
+            tx.run(cypher_commands.NEO4J_DELETE__NODE_BY_ID, {"node_id": int(record_id)})
         return True
 
     def delete_relation(self, relation_id):
@@ -557,5 +567,6 @@ class Neo4jAdapter(BaseAdapter):
         :return:
         """
         session = self._create_session()
-        session.run(cypher_commands.NEO4J_DELETE_RELATION_BY_ID, {"relation_id": int(relation_id)})
+        with session.begin_transaction() as tx:
+            tx.run(cypher_commands.NEO4J_DELETE_RELATION_BY_ID, {"relation_id": int(relation_id)})
         return True
