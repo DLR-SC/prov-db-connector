@@ -326,9 +326,9 @@ class Neo4jAdapter(BaseAdapter):
         """
         record = namedtuple('Record', 'attributes, metadata')
         # split data
-        metadata = {k.replace(NEO4J_META_PREFIX, ""): v for k, v in db_node.properties.items() if
+        metadata = {k.replace(NEO4J_META_PREFIX, ""): v for k, v in db_node._properties.items() if
                     k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
-        attributes = {k: v for k, v in db_node.properties.items() if
+        attributes = {k: v for k, v in db_node._properties.items() if
                       not k.startswith(NEO4J_META_PREFIX, 0, len(NEO4J_META_PREFIX))}
 
         # convert a list of namespace into a string if it is only one item
