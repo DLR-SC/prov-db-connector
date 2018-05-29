@@ -16,9 +16,6 @@ Introduction
 .. image:: https://pyup.io/repos/github/dlr-sc/prov-db-connector/shield.svg
     :target: https://pyup.io/repos/github/dlr-sc/prov-db-connector/
     :alt: Updates
-.. image:: https://www.quantifiedcode.com/api/v1/project/3ee099c99b0340728ca4d54392caae83/badge.svg
-    :target: https://www.quantifiedcode.com/app/project/3ee099c99b0340728ca4d54392caae83
-    :alt: Code Issues
 
 
 This python module provides a general interface to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into databases.
