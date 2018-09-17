@@ -60,8 +60,35 @@ Source
     # Install dependencies and package into virtual enviroment
     make setup
 
+Testing
+~~~~~~~
+
+.. code:: sh
+
+    #Docker based testing
+    docker rmi provdbconnector_provdbconnector  --force
+    docker-compose run --rm provdbconnector bash start.sh python setup.py test
+
+    #Local testing
+    #First start you neo4j database with user: neo4j password neo4jneo4j or set the env variables
+    python setup.py test
+
 Usage
 -----
+
+Run the examples
+~~~~~~~~~~~~~~~~
+
+.. code:: sh
+
+    #Docker based
+    docker rmi provdbconnector_provdbconnector  --force
+    docker-compose run --rm provdbconnector bash start.sh python python examples/complex_example_with_neo4j.py
+
+    #Local
+    #First start you neo4j database with user: neo4j password neo4jneo4j or set the env variables
+    python examples/complex_example_with_neo4j.py
+
 
 Save and get prov document example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

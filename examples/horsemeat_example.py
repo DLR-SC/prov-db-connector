@@ -21,8 +21,10 @@ auth_info = {"user_name": NEO4J_USER,
 # create the api
 prov_api = ProvDb(adapter=Neo4jAdapter, auth_info=auth_info)
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 # create the prov document from examples
-prov_document_buffer = pkg_resources.resource_stream("examples", "horsemeat_example.json")
+prov_document_buffer = open(dir_path + "/horsemeat_example.json").read()
 
 # Save document
 document_id = prov_api.save_document(prov_document_buffer)
