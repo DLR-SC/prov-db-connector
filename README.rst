@@ -182,6 +182,12 @@ File Buffer example
 
 You find all examples in the `examples <https://github.com/DLR-SC/prov-db-connector/tree/master/examples>`_ folder
 
+
+Release
+-------
+Create a new release on github, please use the semver standard for the version number
+
+
 License
 -------
 
