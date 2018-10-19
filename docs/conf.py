@@ -58,8 +58,7 @@ class Base():
 
 MOCK_MODULES = [
                 'neo4j',
-                'neo4j.v1',
-                'neo4j.v1.exceptions']
+                'neo4j.exceptions']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
