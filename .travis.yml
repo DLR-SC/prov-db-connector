@@ -1,24 +1,26 @@
 language: python
 sudo: required
 python:
-- 3.5
+  - 3.5
+  - 3.6
+  - 3.7-dev
 services:
-- docker
+  - docker
 before_install:
-- docker-compose build
-- docker-compose up -d
+  - docker-compose build
+  - docker-compose up -d
 install:
-- pip install '.[test]'
-- pip install '.[docs]'
+  - pip install '.[test]'
+  - pip install '.[docs]'
 script:
-- docker ps | grep -q 'provdbconnector_neo4j_1'
-- curl --output /dev/null --silent --head --fail http://localhost:7474
-- coverage run --source=provdbconnector setup.py test
-- make docs-travis
-- ". ./.travis_docs.sh"
+  - docker ps | grep -q 'provdbconnector_neo4j_1'
+  - curl --output /dev/null --silent --head --fail http://localhost:7474
+  - coverage run --source=provdbconnector setup.py test
+  - make docs-travis
+  - ". ./.travis_docs.sh"
 after_success:
-- coveralls
-- docker-compose down
+  - coveralls
+  - docker-compose down
 deploy:
   provider: pypi
   user: "DLR-Travis"
