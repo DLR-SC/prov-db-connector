@@ -1,5 +1,17 @@
 Changelog
 =========
+Version 0.3.x
+-----------
+
+- Upgraded neo4j-driver to 1.7.0  .. #70: https://github.com/DLR-SC/prov-db-connector/pull/70
+
+
+Version 0.3.1
+-----------
+
+- Upgraded neo4j-driver to 1.6.2  .. #67: https://github.com/DLR-SC/prov-db-connector/pull/67
+- Enhanced error handling neo4j-adapater
+- Automatic pipi release on git tag
 
 Version 0.3
 -----------

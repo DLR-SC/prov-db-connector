@@ -1,31 +1,31 @@
 language: python
 sudo: required
-
 python:
   - 3.5
   - 3.6
   - 3.7-dev
-
 services:
   - docker
-
 before_install:
   - docker-compose build
   - docker-compose up -d
-
-# Install packages
 install:
   - pip install '.[test]'
   - pip install '.[docs]'
-
-# Run test
 script:
   - docker ps | grep -q 'provdbconnector_neo4j_1'
   - curl --output /dev/null --silent --head --fail http://localhost:7474
   - coverage run --source=provdbconnector setup.py test
   - make docs-travis
-  - . ./.travis_docs.sh
-
+  - ". ./.travis_docs.sh"
 after_success:
   - coveralls
   - docker-compose down
+deploy:
+  provider: pypi
+  user: "DLR-Travis"
+  password:
+    secure: iDDRhcRoxuf5kjnNdTV8oxTIbbPamQ0FxWQG05mmDaAgeZZapBK7MLhdl0tP8uUi7DGgGKO0793zap9WBYyeLrg+64TFXh91VgX83dr6ULHftuELkhIHB6uB0I+lqxSa55KfJy86XKiBFWT6mtgxWCJVsD9b95zIzD73599/utzvg7RVaXs7YwaLVEoiNkpBvqww49dDHgyd+wDS7t4p6fwdLbhuy6RzDmtXkzPp6lxyfFBo7feZ5T+3uRhQ84lVYxV+3zsxzoIv1Yz3ZBX/uYVPY5ZowKgR197kdFnyzMul6ZgQIR/1CI/0EKcReTGh7CYrRoxaFyrosNMyoYN9vqvvI6/Qn3K+ITLBTiSvuCX5UzTKI/rRmyMf6HMyZhELc1OglMzIIv1Ltp3ii115YD5SEWw1Kd43pReMc1MzB77ob4NeAZmFwoJELBPFbJoXxqHrz4mG/Z5ePDoJhkMg6uYcvO+ASvCayPzVZZQXWb11FNqfC99Rq3rlIVtvbaIgy96/VOkkV8yiMfahDa6uY1Uxq0JP4UoGvnBEQk+z1hEe0vDPwRSbI2PAYubKAErPfDSkUpFNHEiJlUqYy1dMjmNeq2alBhKlyGYlRDVoqYoapaXb/aO7s/yy/2yNHW4Ad2rdAXNbzCbYpP6uY3af6BpvsNqCQAG5skiHrYxlO7c=
+  on:
+    tags: true
+

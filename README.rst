@@ -5,7 +5,7 @@ Introduction
 ------------
 
 .. image:: https://badge.fury.io/py/prov-db-connector.svg
-    :target: (http://badge.fury.io/py/prov-db-connector
+    :target: https://pypi.python.org/pypi/prov-db-connector
     :alt: PyPI version
 .. image:: https://travis-ci.org/DLR-SC/prov-db-connector.svg?branch=master
     :target: https://travis-ci.org/DLR-SC/prov-db-connector
@@ -16,9 +16,6 @@ Introduction
 .. image:: https://pyup.io/repos/github/dlr-sc/prov-db-connector/shield.svg
     :target: https://pyup.io/repos/github/dlr-sc/prov-db-connector/
     :alt: Updates
-.. image:: https://www.quantifiedcode.com/api/v1/project/3ee099c99b0340728ca4d54392caae83/badge.svg
-    :target: https://www.quantifiedcode.com/app/project/3ee099c99b0340728ca4d54392caae83
-    :alt: Code Issues
 
 
 This python module provides a general interface to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into databases.
@@ -181,6 +178,12 @@ File Buffer example
 
 
 You find all examples in the `examples <https://github.com/DLR-SC/prov-db-connector/tree/master/examples>`_ folder
+
+
+Release
+-------
+Create a new release on github, please use the semver standard for the version number
+
 
 License
 -------
