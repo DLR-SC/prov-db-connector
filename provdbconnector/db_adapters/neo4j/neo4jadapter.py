@@ -7,8 +7,8 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, META
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, MergeException
 
-from neo4j.v1.api import CypherError, SessionError
-from neo4j.v1 import GraphDatabase, basic_auth, Relationship
+from neo4j import SessionError
+from neo4j import GraphDatabase, basic_auth, Relationship
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive, \
