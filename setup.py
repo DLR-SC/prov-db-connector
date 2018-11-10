@@ -46,7 +46,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "prov==1.5.2",
-        "neo4j-driver==1.7.0"
+        "neo4j-driver==1.7.1"
     ],
     extras_require={
         'test': tests_require,
