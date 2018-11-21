@@ -3,6 +3,7 @@ Changelog
 Version 0.3.x
 -----------
 
+- Upgraded prov to 1.5.3  .. #73: https://github.com/DLR-SC/prov-db-connector/pull/73
 - Upgraded neo4j-driver to 1.7.0  .. #70: https://github.com/DLR-SC/prov-db-connector/pull/70
 
 
