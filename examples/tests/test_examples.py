@@ -35,6 +35,13 @@ class ExamplesTest(unittest.TestCase):
         """
         import examples.simple_example
 
+    def test_simple_example_influence(self):
+        """
+        Test the basic example with influence by relation
+
+        """
+        import examples.simple_example_influence
+
     def test_simple_example_with_neo4j(self):
         """
         Test the basic neo4j example

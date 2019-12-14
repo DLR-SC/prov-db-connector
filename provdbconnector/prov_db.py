@@ -558,7 +558,8 @@ class ProvDb(object):
         to_type_cls = PROV_ATTR_BASE_CLS[to_type]
 
         if from_type_cls is None or to_type_cls is None:
-            log.info("Something went wrong ")
+            raise InvalidArgumentTypeException(
+                "Could not determinate typ for relation from: {}, to: {}, prov_relation was {}, ".format(from_type, to_type, type(prov_relation)))
         #save from and to node
         self.save_element(prov_element=from_type_cls(prov_relation.bundle, identifier=from_qualified_name), bundle_id=bundle_id)
 

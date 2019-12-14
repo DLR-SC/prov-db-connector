@@ -17,6 +17,16 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, MET
     METADATA_KEY_TYPE_MAP, METADATA_KEY_IDENTIFIER
 
 
+def prov_db_unknown_prov_typ_example():
+    doc = ProvDocument()
+    doc.add_namespace("ex", "https://example.com")
+    doc.entity(identifier="ex:Entity1")
+    doc.entity(identifier="ex:Entity2")
+    doc.influence(influencee="ex:Entity1", influencer="ex:Entity2")
+    return doc
+
+
+
 def attributes_dict_example():
     """
     Retuns a example dict with some different attributes
