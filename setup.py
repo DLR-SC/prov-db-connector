@@ -49,7 +49,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "prov==1.5.3",
-        "neo4j-driver==1.7.5"
+        "neo4j-driver==1.7.6"
     ],
     extras_require={
         'test': tests_require,
