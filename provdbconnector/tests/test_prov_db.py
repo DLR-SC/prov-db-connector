@@ -641,6 +641,18 @@ class ProvDbTests(unittest.TestCase):
         with self.assertRaises(InvalidArgumentTypeException):
             self.provapi._get_metadata_and_attributes_for_record(None)
 
+    def test_save_unknown_prov_typ(self):
+        """
+        Test to prefer non unknown prov type
+        """
+        self.clear_database()
+        doc = examples.prov_db_unknown_prov_typ_example()
+        self.provapi.save_document(doc)
+        doc_with_entities = self.provapi.get_elements(ProvEntity)
+        self.assertEqual(len(doc_with_entities.records), 2)
+        self.assertIsInstance(doc_with_entities.records[0], ProvEntity)
+        self.assertIsInstance(doc_with_entities.records[1], ProvEntity)
+
     def test_get_metadata_and_attributes_for_record(self):
         """
         Test the split into metadata / attributes function

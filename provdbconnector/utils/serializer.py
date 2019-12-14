@@ -13,7 +13,8 @@ from prov.constants import PROV_QUALIFIEDNAME, PROV_ATTRIBUTES_ID_MAP, PROV_ATTR
     PROV_ATTR_GENERATION,PROV_ATTR_USAGE,PROV_ATTR_SPECIFIC_ENTITY,PROV_ATTR_GENERAL_ENTITY,PROV_ATTR_ALTERNATE1, \
     PROV_ATTR_ALTERNATE2,PROV_ATTR_BUNDLE,PROV_ATTR_INFLUENCEE,PROV_ATTR_INFLUENCER
 
-from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime, PROV_REC_CLS, ProvAgent, ProvEntity, ProvActivity
+from prov.model import Literal, Identifier, QualifiedName, Namespace, parse_xsd_datetime, PROV_REC_CLS, ProvAgent, \
+    ProvEntity, ProvActivity, ProvElement
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_NAMESPACES, METADATA_KEY_PROV_TYPE, \
     METADATA_KEY_TYPE_MAP
 from provdbconnector.exceptions.database import MergeException
@@ -53,15 +54,15 @@ PROV_ATTR_BASE_CLS = {
     PROV_ATTR_RESPONSIBLE: ProvAgent,
     PROV_ATTR_GENERATED_ENTITY: ProvEntity,
     PROV_ATTR_USED_ENTITY: ProvEntity,
-    PROV_ATTR_GENERATION: None,
-    PROV_ATTR_USAGE:None,
+    PROV_ATTR_GENERATION: ProvElement,
+    PROV_ATTR_USAGE: ProvElement,
     PROV_ATTR_SPECIFIC_ENTITY: ProvEntity,
     PROV_ATTR_GENERAL_ENTITY: ProvEntity,
     PROV_ATTR_ALTERNATE1: ProvEntity,
     PROV_ATTR_ALTERNATE2: ProvEntity,
-    PROV_ATTR_BUNDLE:None,
-    PROV_ATTR_INFLUENCEE:None,
-    PROV_ATTR_INFLUENCER:None,
+    PROV_ATTR_BUNDLE:ProvElement,
+    PROV_ATTR_INFLUENCEE: ProvElement,
+    PROV_ATTR_INFLUENCER: ProvElement,
     PROV_ATTR_COLLECTION: ProvEntity
 }
 
@@ -370,9 +371,27 @@ def merge_record(attributes, metadata, other_attributes, other_metadata):
     attributes_merged = attributes.copy()
     attributes_merged.update(other_attributes)
 
-    if metadata[METADATA_KEY_PROV_TYPE] != other_metadata[METADATA_KEY_PROV_TYPE]:
+    metadata_prov_typ = metadata[METADATA_KEY_PROV_TYPE]
+    other_metadata_prov_typ = other_metadata[METADATA_KEY_PROV_TYPE]
+
+    # Determinate non unknown prov type for merge
+    merged_prov_typ = other_metadata_prov_typ
+    is_one_prov_type_unknown = False
+    # Support unknown typ during the merge process, needed for polymorph nodes
+    if other_metadata_prov_typ.localpart == "Unknown":
+        merged_prov_typ = metadata_prov_typ
+        is_one_prov_type_unknown = True
+
+    if metadata_prov_typ.localpart == "Unknown":
+        merged_prov_typ = other_metadata_prov_typ
+        is_one_prov_type_unknown = True
+
+    if merged_prov_typ.localpart == "Unknown":
+        raise MergeException("Prov type can't be unknown metadata: {}, other metadata: {}".format(metadata_prov_typ, other_metadata_prov_typ))
+
+    if metadata_prov_typ != other_metadata_prov_typ and not is_one_prov_type_unknown:
         raise MergeException(
-            "Prov type should be the same but is: {}:{}".format(METADATA_KEY_PROV_TYPE, METADATA_KEY_PROV_TYPE))
+            "Prov type should be the same but is: {}:{}".format(metadata_prov_typ, other_metadata_prov_typ))
 
     for (key, value) in attributes.items():
         if attributes_merged[key] != value:
@@ -388,6 +407,7 @@ def merge_record(attributes, metadata, other_attributes, other_metadata):
 
     merged_metadata = metadata.copy()
     merged_metadata.update(other_metadata)
+    merged_metadata.update({METADATA_KEY_PROV_TYPE: merged_prov_typ})
     merged_metadata.update({METADATA_KEY_NAMESPACES: merged_metadata_namespaces})
     merged_metadata.update({METADATA_KEY_TYPE_MAP: merged_metadata_type_map})
 
