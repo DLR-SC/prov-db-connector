@@ -4,6 +4,9 @@ PROV Database Connector
 Introduction
 ------------
 
+.. image:: https://zenodo.org/badge/68604048.svg
+    :target: https://zenodo.org/badge/latestdoi/68604048
+    :alt: Latest release
 .. image:: https://badge.fury.io/py/prov-db-connector.svg
     :target: https://pypi.python.org/pypi/prov-db-connector
     :alt: PyPI version
@@ -16,6 +19,7 @@ Introduction
 .. image:: https://pyup.io/repos/github/dlr-sc/prov-db-connector/shield.svg
     :target: https://pyup.io/repos/github/dlr-sc/prov-db-connector/
     :alt: Updates
+
 
 
 This python module provides a general interface to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into databases.
