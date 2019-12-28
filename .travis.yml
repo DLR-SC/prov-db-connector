@@ -21,10 +21,15 @@ script:
 after_success:
 - coveralls
 - docker-compose down
-deploy:
-  provider: pypi
-  user: __token__
-  password:
-    secure: P7X9mQZR/2zOkDShQTSv09rbg4LgmR8ODoTnvE0d6oAOZM+Y6rWGL8u1dLxzw98anNlqbXd/5sjK6PsZ3h5Ola2WJ6KIGJAiP8stDt0BfGjW1Y3B2JocqdOZb+QOquqP3OlNHYgdL54hDjS0HsLqEhNJzBPUUPY0uOy1NZN8uf4DGMuVkNaDo/m5SpGbQPee7xOblGEMRqjyRISYAv1jkxzworzZQMQw6TwwqtZbBi6p3RMMz8SaUClIcTRlXS+O5QaEehHB+xxRMMG/fETAlZmcmByX5Px+YXX25FhlaTm9+GUQIa6/1XzxK03eyin3DwUPkJPUZqQ08NMWU5ZqD6+ITXKC/wF0A3OYqMvQWbwmRZvvebd8VBcSgzHiijXopsoBCpiQrb1wi+YfEzAwDyAjzR1qSavTjtHrkVkJik6QV2KN0Sa/SnIWEPK83b9kfNxnKRhSAzePuUp/bBr0tISvWj4S80sghui992FQEoXJV7aVBQ2SiRG6ynN6W/CbtRpPDL2NSnuM3K2Xt1vysG9iYW1zs9RVGjaVaclbR6JS1DXAdTR1pOTTWVFn67BR9nNMqYZf0M9mll+Iq3nfNbWdAIR/3g9U3syIpr4SiHUJ0YGodL7SX2t/lrbTR/WRPMF6SIE+5i8IDWbuBWF7+bEZbL3OFCwGmWH9y6fA3d8=
-  on:
-    tags: true
+
+jobs:
+  include:
+    - stage: pypi release
+      python: "3.8"
+      deploy:
+        provider: pypi
+        user: __token__
+        password:
+          secure: P7X9mQZR/2zOkDShQTSv09rbg4LgmR8ODoTnvE0d6oAOZM+Y6rWGL8u1dLxzw98anNlqbXd/5sjK6PsZ3h5Ola2WJ6KIGJAiP8stDt0BfGjW1Y3B2JocqdOZb+QOquqP3OlNHYgdL54hDjS0HsLqEhNJzBPUUPY0uOy1NZN8uf4DGMuVkNaDo/m5SpGbQPee7xOblGEMRqjyRISYAv1jkxzworzZQMQw6TwwqtZbBi6p3RMMz8SaUClIcTRlXS+O5QaEehHB+xxRMMG/fETAlZmcmByX5Px+YXX25FhlaTm9+GUQIa6/1XzxK03eyin3DwUPkJPUZqQ08NMWU5ZqD6+ITXKC/wF0A3OYqMvQWbwmRZvvebd8VBcSgzHiijXopsoBCpiQrb1wi+YfEzAwDyAjzR1qSavTjtHrkVkJik6QV2KN0Sa/SnIWEPK83b9kfNxnKRhSAzePuUp/bBr0tISvWj4S80sghui992FQEoXJV7aVBQ2SiRG6ynN6W/CbtRpPDL2NSnuM3K2Xt1vysG9iYW1zs9RVGjaVaclbR6JS1DXAdTR1pOTTWVFn67BR9nNMqYZf0M9mll+Iq3nfNbWdAIR/3g9U3syIpr4SiHUJ0YGodL7SX2t/lrbTR/WRPMF6SIE+5i8IDWbuBWF7+bEZbL3OFCwGmWH9y6fA3d8=
+        on:
+          tags: true
