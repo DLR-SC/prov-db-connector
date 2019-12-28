@@ -1,29 +1,30 @@
 language: python
 sudo: required
-python:
-- 3.5
-- 3.6
-- 3.7
-- 3.8
-services:
-- docker
-before_install:
-- docker-compose build
-- docker-compose up -d
-install:
-- pip install '.[test]'
-- pip install '.[docs]'
-script:
-- curl --output /dev/null --silent --head --fail http://localhost:7474
-- coverage run --source=provdbconnector setup.py test
-- make docs-travis
-- ". ./.travis_docs.sh"
-after_success:
-- coveralls
-- docker-compose down
 
 jobs:
   include:
+    - stage: test
+      python:
+        - 3.5
+        - 3.6
+        - 3.7
+        - 3.8
+      services:
+        - docker
+      before_install:
+        - docker-compose build
+        - docker-compose up -d
+      install:
+        - pip install '.[test]'
+        - pip install '.[docs]'
+      script:
+        - curl --output /dev/null --silent --head --fail http://localhost:7474
+        - coverage run --source=provdbconnector setup.py test
+        - make docs-travis
+        - ". ./.travis_docs.sh"
+      after_success:
+        - coveralls
+        - docker-compose down
     - stage: pypi release
       python: "3.8"
       deploy:
