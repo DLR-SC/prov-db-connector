@@ -49,7 +49,9 @@ setup(
     zip_safe=False,
     install_requires=[
         "prov==1.5.3",
-        "neo4j-driver==1.7.6"
+        "neo4j-driver==1.7.6",
+        "redis==3.3.11",
+        "redisgraph=git+git://github.com/RedisGraph/redisgraph-py"
     ],
     extras_require={
         'test': tests_require,

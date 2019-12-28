@@ -1,5 +1,9 @@
 version: '2'
 services:
+  redis:
+    image: redislabs/redisgraph:edge
+    ports:
+      - "6379:6379"
   neo4j:
     image: neo4j:latest
     environment:
