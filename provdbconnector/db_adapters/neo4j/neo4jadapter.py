@@ -336,7 +336,7 @@ class Neo4jAdapter(BaseAdapter):
         namespaces = metadata[METADATA_KEY_NAMESPACES]
         if isinstance(namespaces, list):
             # If len is 1 return only the raw JSON string
-            if len(namespaces) is 1:
+            if len(namespaces) == 1:
                 metadata.update({METADATA_KEY_NAMESPACES: namespaces.pop()})
 
         # convert a list of namespace into a string if it is only one item
@@ -344,7 +344,7 @@ class Neo4jAdapter(BaseAdapter):
         type_map = metadata[METADATA_KEY_TYPE_MAP]
         if isinstance(type_map, list):
             # If len is 1 return only the raw JSON string
-            if len(type_map) is 1:
+            if len(type_map) == 1:
                 metadata.update({METADATA_KEY_TYPE_MAP: type_map.pop()})
 
         record = record(attributes, metadata)
