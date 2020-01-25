@@ -118,3 +118,5 @@ ENV/
 # Spyder project settings
 .spyderproject
 
+.vscode
+*.code-workspace
