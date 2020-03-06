@@ -64,7 +64,7 @@ class Neo4jAdapter(BaseAdapter):
         """
         The connect method to create a new instance of the db_driver
 
-        :param authentication_options: Username, password and host
+        :param authentication_options: Username, password, host and encrypted option
         :return: None
         :rtype: None
         :raises: InvalidOptionsException
@@ -74,13 +74,16 @@ class Neo4jAdapter(BaseAdapter):
 
         user_name = authentication_options.get("user_name")
         user_pass = authentication_options.get("user_password")
+        encrypted = authentication_options.get("encrypted")
         host = authentication_options.get("host")
 
+        if encrypted is None:
+            encrypted = False
         if user_name is None or user_pass is None or host is None:
             raise InvalidOptionsException()
 
         try:
-            self.driver = GraphDatabase.driver("bolt://{}".format(host), auth=basic_auth(user_name, user_pass))
+            self.driver = GraphDatabase.driver("bolt://{}".format(host), encrypted=encrypted, auth=basic_auth(user_name, user_pass))
 
         except SessionError as e:
             raise InvalidOptionsException(e)
@@ -341,6 +344,7 @@ class Neo4jAdapter(BaseAdapter):
 
         # convert a list of namespace into a string if it is only one item
         # @todo Kind of a hack to pass all test, it is also allowed to return a list of JSON encoded strings
+        # @todo Find out what I hacked here in 2015...
         type_map = metadata[METADATA_KEY_TYPE_MAP]
         if isinstance(type_map, list):
             # If len is 1 return only the raw JSON string
