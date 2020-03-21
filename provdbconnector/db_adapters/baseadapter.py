@@ -6,6 +6,7 @@ log = logging.getLogger(__name__).addHandler(logging.NullHandler())
 METADATA_PARENT_ID = "parent_id"
 METADATA_KEY_PROV_TYPE = "prov_type"
 METADATA_KEY_IDENTIFIER = "identifier"
+METADATA_KEY_IDENTIFIER_ORIGINAL = "identifier_original"
 METADATA_KEY_NAMESPACES = "namespaces"
 METADATA_KEY_TYPE_MAP = "type_map"
 
