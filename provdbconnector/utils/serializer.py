@@ -412,3 +412,10 @@ def merge_record(attributes, metadata, other_attributes, other_metadata):
     merged_metadata.update({METADATA_KEY_TYPE_MAP: merged_metadata_type_map})
 
     return attributes_merged, merged_metadata
+
+def serialize_namespace(namespace: Namespace):
+    prefix = namespace.prefix
+
+    if prefix == "" or prefix is None:
+        prefix = "default"
+    return {str(prefix): str(namespace.uri)}

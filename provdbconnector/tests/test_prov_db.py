@@ -9,7 +9,7 @@ from provdbconnector import ProvDb
 from provdbconnector.exceptions.database import InvalidOptionsException, NotFoundException
 from provdbconnector import Neo4jAdapter, NEO4J_USER, NEO4J_PASS, NEO4J_HOST, NEO4J_BOLT_PORT
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_TYPE_MAP, METADATA_KEY_PROV_TYPE, \
-    METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES
+    METADATA_KEY_IDENTIFIER, METADATA_KEY_NAMESPACES, METADATA_KEY_IDENTIFIER_ORIGINAL
 from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException
 
 
@@ -653,6 +653,18 @@ class ProvDbTests(unittest.TestCase):
         self.assertIsInstance(doc_with_entities.records[0], ProvEntity)
         self.assertIsInstance(doc_with_entities.records[1], ProvEntity)
 
+    def test_save_with_override_default_namespace(self):
+        """
+        Test to support default namespace overrides
+        """
+        self.clear_database()
+        docA = examples.prov_default_namespace_example("docA")
+        docB = examples.prov_default_namespace_example("docB")
+        self.provapi.save_document(docA)
+        self.provapi.save_document(docB)
+        doc_with_entities = self.provapi.get_elements(ProvEntity)
+        self.assertEqual(len(doc_with_entities.records), 2)
+
     def test_get_metadata_and_attributes_for_record(self):
         """
         Test the split into metadata / attributes function
@@ -677,9 +689,11 @@ class ProvDbTests(unittest.TestCase):
 
         # check metadata
         self.assertEqual(example.metadata[METADATA_KEY_PROV_TYPE], metadata_result[METADATA_KEY_PROV_TYPE])
-        self.assertEqual(example.metadata[METADATA_KEY_IDENTIFIER], metadata_result[METADATA_KEY_IDENTIFIER])
+        self.assertEqual(example.metadata[METADATA_KEY_IDENTIFIER], metadata_result[METADATA_KEY_IDENTIFIER_ORIGINAL])
         self.assertEqual(example.metadata[METADATA_KEY_NAMESPACES], metadata_result[METADATA_KEY_NAMESPACES])
         self.assertEqual(example.metadata[METADATA_KEY_TYPE_MAP], metadata_result[METADATA_KEY_TYPE_MAP])
 
+        identifier = example.metadata[METADATA_KEY_IDENTIFIER]
+        self.assertEqual(identifier.namespace.uri + identifier.localpart, metadata_result[METADATA_KEY_IDENTIFIER])
         # check attributes
         self.assertEqual(example.expected_attributes, attributes_result)

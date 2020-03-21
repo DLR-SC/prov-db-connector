@@ -25,6 +25,12 @@ def prov_db_unknown_prov_typ_example():
     doc.influence(influencee="ex:Entity1", influencer="ex:Entity2")
     return doc
 
+def prov_default_namespace_example(ns_postfix: str):
+    doc = ProvDocument()
+    doc.set_default_namespace("https://example.com/{0}".format(ns_postfix))
+    doc.entity(identifier="Entity1")
+    return doc
+
 
 
 def attributes_dict_example():

@@ -10,13 +10,14 @@ from prov.model import ProvDocument, ProvEntity, ProvBundle, ProvRecord, ProvEle
     ProvAssociation, PROV_REC_CLS, ProvActivity, ProvAgent, PROV_AGENT,PROV_ENTITY,PROV_ACTIVITY, PROV_ATTR_AGENT,PROV_ATTR_ACTIVITY, PROV_ATTR_ENTITY,PROV_ATTR_BUNDLE
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_IDENTIFIER, \
     METADATA_KEY_NAMESPACES, \
-    METADATA_KEY_TYPE_MAP
+    METADATA_KEY_TYPE_MAP, METADATA_KEY_IDENTIFIER_ORIGINAL
 from provdbconnector.exceptions.provapi import NoDataBaseAdapterException, InvalidArgumentTypeException, \
     InvalidProvRecordException
 from provdbconnector.exceptions.utils import ParseException
 from provdbconnector.exceptions.database import NotFoundException
 from provdbconnector.utils.converter import form_string, to_json, to_provn, to_xml
-from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record,PROV_ATTR_BASE_CLS
+from provdbconnector.utils.serializer import encode_json_representation, add_namespaces_to_bundle, create_prov_record, \
+    PROV_ATTR_BASE_CLS, serialize_namespace
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', '')
 NUMERIC_LEVEL = getattr(logging, LOG_LEVEL.upper(), None)
@@ -243,7 +244,8 @@ class ProvDb(object):
 
         #Add bundle relation only if the record belongs to a bundle not to document
         if not isinstance(prov_element.bundle, ProvDocument):
-            self._create_bundle_association([prov_element], prov_element.bundle.identifier)
+            bundle_id_qualified = prov_element.bundle.valid_qualified_name(prov_element.bundle.identifier)
+            self._create_bundle_association([prov_element], bundle_id_qualified)
 
         return prov_element.identifier
 
@@ -310,10 +312,12 @@ class ProvDb(object):
         if not isinstance(identifier, QualifiedName):
             raise InvalidArgumentTypeException("Should be {} but was {}".format(QualifiedName, type(identifier)))
 
+        # Include namespace uri into the identifier to support e.g. different default namespaces
+        global_identifier = identifier.namespace.uri + identifier.localpart
 
         # Setup filter
         meta_filter = dict()
-        meta_filter.update({METADATA_KEY_IDENTIFIER: identifier})
+        meta_filter.update({METADATA_KEY_IDENTIFIER: global_identifier})
 
         # Get the result
         results = self._adapter.get_records_by_filter(metadata_dict=meta_filter)
@@ -384,7 +388,7 @@ class ProvDb(object):
         if prov_label is not None and prov_label == "belongsToBundle":
             return
 
-        prov_id = raw_record.metadata[METADATA_KEY_IDENTIFIER]
+        prov_id = raw_record.metadata[METADATA_KEY_IDENTIFIER_ORIGINAL]
         prov_id_qualified = prov_bundle.valid_qualified_name(prov_id)
 
         # skip record if prov:identifier starts with "prov:Unknown"
@@ -417,7 +421,7 @@ class ProvDb(object):
         add_namespaces_to_bundle(prov_bundle, raw_record.metadata)
         return create_prov_record(prov_bundle, prov_type, prov_id, raw_record.attributes, type_map)
 
-    def get_bundle(self,identifier):
+    def get_bundle(self, identifier):
         """
         Returns the whole bundle for the provided identifier
 
@@ -445,7 +449,9 @@ class ProvDb(object):
 
         prov_bundle = doc.bundle(identifier=bundle_entity.identifier)
 
-        bundle_records = self._adapter.get_bundle_records(identifier)
+        # Include namespace uri into the identifier to support e.g. different default namespaces
+        global_identifier = identifier.namespace.uri + identifier.localpart
+        bundle_records = self._adapter.get_bundle_records(global_identifier)
 
         for record in bundle_records:
             self._parse_record(prov_bundle, record)
@@ -582,7 +588,12 @@ class ProvDb(object):
 
         # split metadata and attributes
         (metadata, attributes) = self._get_metadata_and_attributes_for_record(prov_relation)
-        return self._adapter.save_relation(from_qualified_name, to_qualified_name,
+
+        # Include namespace uri into the identifier to support e.g. different default namespaces
+        global_from_qualified_name = from_qualified_name.namespace.uri + from_qualified_name.localpart
+        global_to_qualified_name = to_qualified_name.namespace.uri + to_qualified_name.localpart
+
+        return self._adapter.save_relation(global_from_qualified_name, global_to_qualified_name,
                                            attributes, metadata)
 
     def _create_bundle_association(self, prov_elements, prov_bundle_identifier):
@@ -590,7 +601,7 @@ class ProvDb(object):
         This method saves a relation between the bundle entity and all nodes in the bundle
 
         :param prov_bundle_identifier: The bundle identifier
-        :type prov_bundle_identifier: str
+        :type prov_bundle_identifier: QualifiedName
         :param prov_elements: List of prov elements
         :type prov_elements: list
         """
@@ -608,7 +619,8 @@ class ProvDb(object):
         for record in prov_elements:
             (metadata, attributes) = self._get_metadata_and_attributes_for_record(record)
             from_qualified_name = metadata[METADATA_KEY_IDENTIFIER]
-            self._adapter.save_relation(from_qualified_name, to_qualified_name,
+            global_prov_to_identifier= to_qualified_name.namespace.uri + to_qualified_name.localpart
+            self._adapter.save_relation(from_qualified_name, global_prov_to_identifier,
                                         belong_attributes, belong_metadata)
 
 
@@ -672,11 +684,11 @@ class ProvDb(object):
 
         # add namespace from prov_type
         namespace = prov_type.namespace
-        used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
+        used_namespaces.update(serialize_namespace(namespace))
 
         # add namespace from prov identifier
         namespace = prov_identifier.namespace
-        used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
+        used_namespaces.update(serialize_namespace(namespace))
 
         attributes = dict(prov_record.attributes.copy())
         for key, value in attributes.items():
@@ -684,14 +696,14 @@ class ProvDb(object):
             # ensure key is QualifiedName
             if isinstance(key, QualifiedName):
                 namespace = key.namespace
-                used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
+                used_namespaces.update(serialize_namespace(namespace))
             else:
                 raise InvalidProvRecordException("Not support key type {}".format(type(key)))
 
             # try to add
             if isinstance(value, QualifiedName):
                 namespace = value.namespace
-                used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
+                used_namespaces.update(serialize_namespace(namespace))
             else:
                 qualified_name = bundle.valid_qualified_name(value)
                 if qualified_name is not None:
@@ -701,7 +713,7 @@ class ProvDb(object):
                     # attributes[key] = qualified_name # update attribute
 
                     namespace = qualified_name.namespace
-                    used_namespaces.update({str(namespace.prefix): str(namespace.uri)})
+                    used_namespaces.update(serialize_namespace(namespace))
 
         # create type dict
         types_dict = dict()
@@ -711,9 +723,13 @@ class ProvDb(object):
                 if return_type is not None:
                     types_dict.update({str(key): return_type})
 
+        # Include namespace uri into the identifier to support e.g. different default namespaces
+        global_prov_identifier = prov_identifier.namespace.uri + prov_identifier.localpart
+
         metadata = {
             METADATA_KEY_PROV_TYPE: prov_type,
-            METADATA_KEY_IDENTIFIER: prov_identifier,
+            METADATA_KEY_IDENTIFIER: global_prov_identifier,
+            METADATA_KEY_IDENTIFIER_ORIGINAL: prov_identifier,
             METADATA_KEY_NAMESPACES: used_namespaces,
             METADATA_KEY_TYPE_MAP: types_dict
         }
