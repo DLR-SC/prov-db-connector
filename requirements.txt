@@ -1,2 +1,2 @@
 prov==1.5.3
-neo4j-driver==1.7.6
+neo4j-driver==4.1.1
