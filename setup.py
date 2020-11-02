@@ -48,7 +48,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "prov==1.5.3",
+        "prov==2.0.0",
         "neo4j-driver==1.7.6"
     ],
     extras_require={
