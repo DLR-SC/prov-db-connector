@@ -59,8 +59,6 @@ class Neo4jAdapter(BaseAdapter):
         except OSError as e:
             raise AuthException(e)
 
-        if session.closed():
-            raise AuthException()
         return session
 
     def connect(self, authentication_options):
