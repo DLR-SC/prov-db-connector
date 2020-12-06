@@ -1,4 +1,8 @@
 import os
+
+from neo4j.exceptions import ConfigurationError
+from neo4j.graph import Relationship
+
 import provdbconnector.db_adapters.neo4j.cypher_commands as cypher_commands
 from provdbconnector.db_adapters.baseadapter import BaseAdapter
 from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, METADATA_KEY_TYPE_MAP, \
@@ -7,8 +11,7 @@ from provdbconnector.db_adapters.baseadapter import METADATA_KEY_PROV_TYPE, META
 from provdbconnector.exceptions.database import InvalidOptionsException, AuthException, \
     DatabaseException, CreateRecordException, NotFoundException, CreateRelationException, MergeException
 
-from neo4j import SessionError
-from neo4j import GraphDatabase, basic_auth, Relationship
+from neo4j import GraphDatabase, basic_auth
 from prov.constants import PROV_N_MAP
 from collections import namedtuple
 from provdbconnector.utils.serializer import encode_string_value_to_primitive, encode_dict_values_to_primitive, \
@@ -85,7 +88,7 @@ class Neo4jAdapter(BaseAdapter):
         try:
             self.driver = GraphDatabase.driver("bolt://{}".format(host), encrypted=encrypted, auth=basic_auth(user_name, user_pass))
 
-        except SessionError as e:
+        except ConfigurationError as e:
             raise InvalidOptionsException(e)
 
         self._create_session()
