@@ -20,7 +20,7 @@ docs_require = [
 
 setup(
     name='prov-db-connector',
-    version='0.4.0',
+    version='0.5.0',
     description='PROV Database Connector',
     keywords=[
         'provenance', 'graph', 'model', 'PROV', 'PROV-DM', 'PROV-JSON', 'JSON',
