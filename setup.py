@@ -48,7 +48,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "prov==2.0.0",
-        "neo4j==4.4.1"
+        "neo4j==5.0.1"
     ],
     extras_require={
         'test': tests_require,
