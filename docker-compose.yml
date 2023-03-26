@@ -1,7 +1,7 @@
 version: '2'
 services:
   neo4j:
-    image: neo4j:3.5.34
+    image: neo4j:3.4
     environment:
       - NEO4J_AUTH=none
     ports:
