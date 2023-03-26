@@ -19,7 +19,7 @@ from provdbconnector.utils.serializer import encode_string_value_to_primitive, e
 
 import logging
 
-logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
+logging.getLogger("neo4j.bolt").setLevel(logging.DEBUG)
 log = logging.getLogger(__name__)
 
 NEO4J_USER = os.environ.get('NEO4J_USERNAME', 'neo4j')
@@ -210,6 +210,7 @@ class Neo4jAdapter(BaseAdapter):
                                                      merge_check_statement=cypher_merge_check_statement)
         with session.begin_transaction() as tx:
 
+            log.log(command)
             result = tx.run(command, dict(db_attributes))
 
             record_id = None
@@ -299,6 +300,7 @@ class Neo4jAdapter(BaseAdapter):
                                                              )
             with session.begin_transaction() as tx:
 
+                log.log(command)
                 result = tx.run(command, dict(db_attributes))
 
                 record_id = None
