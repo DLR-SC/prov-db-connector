@@ -31,6 +31,6 @@ jobs:
         run: |
           docker-compose build
           docker-compose up -d
-          curl --output /dev/null --silent --head --fail http://localhost:7474
+          curl --output /dev/null --silent --head --fail https://localhost:7474
           coverage run --source=provdbconnector setup.py test
 
