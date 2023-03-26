@@ -27,11 +27,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install '.[test]'
           pip install '.[docs]'
-      - name: Start database
+      - name: Test with pytest
         run: |
           docker-compose build
           docker-compose up -d
-      - name: Test with pytest
-        run: |
+          curl --output /dev/null --silent --head --fail http://localhost:7474
           coverage run --source=provdbconnector setup.py test
 
