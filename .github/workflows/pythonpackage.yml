@@ -31,6 +31,6 @@ jobs:
         run: |
           docker-compose build
           docker-compose up -d
-          sleep 60s
+          sleep 20s
           coverage run --source=provdbconnector setup.py test
 
