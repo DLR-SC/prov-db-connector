@@ -28,5 +28,5 @@ jobs:
           pip install '.[test]'
       - name: Test with pytest
         run: |
-          - coverage run --source=provdbconnector setup.py test
+          - python setup.py test
 
