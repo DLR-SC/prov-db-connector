@@ -33,6 +33,5 @@ jobs:
           docker-compose up -d
       - name: Test with pytest
         run: |
-          curl --output /dev/null --silent --head --fail http://localhost:7474
           coverage run --source=provdbconnector setup.py test
 
