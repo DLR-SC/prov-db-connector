@@ -210,7 +210,7 @@ class Neo4jAdapter(BaseAdapter):
                                                      merge_check_statement=cypher_merge_check_statement)
         with session.begin_transaction() as tx:
 
-            log.log(command)
+            log.log(msg=command)
             result = tx.run(command, dict(db_attributes))
 
             record_id = None
@@ -300,7 +300,7 @@ class Neo4jAdapter(BaseAdapter):
                                                              )
             with session.begin_transaction() as tx:
 
-                log.log(command)
+                log.log(msg=command)
                 result = tx.run(command, dict(db_attributes))
 
                 record_id = None
