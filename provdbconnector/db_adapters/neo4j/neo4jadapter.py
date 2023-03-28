@@ -19,7 +19,7 @@ from provdbconnector.utils.serializer import encode_string_value_to_primitive, e
 
 import logging
 
-logging.getLogger("neo4j.bolt").setLevel(logging.WARN)
+logging.getLogger("neo4j.bolt").setLevel(logging.DEBUG)
 log = logging.getLogger(__name__)
 
 NEO4J_USER = os.environ.get('NEO4J_USERNAME', 'neo4j')
